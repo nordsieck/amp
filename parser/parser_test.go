@@ -52,6 +52,16 @@ func TestIdentifierList(t *testing.T) {
 	})
 }
 
+func TestQualifiedIdent(t *testing.T) {
+	consumes(t, QualifiedIdent, map[string]bool{
+		`1`:   false,
+		`a`:   false,
+		`a.a`: true,
+		`_.a`: false,
+		`a._`: true,
+	})
+}
+
 func TestPackageName(t *testing.T) {
 	consumes(t, PackageName, map[string]bool{
 		`a`: true,

@@ -23,6 +23,10 @@ func IdentifierList(t []*Token) []*Token {
 			Basic(token.COMMA), Basic(token.IDENT))))(t)
 }
 
+func QualifiedIdent(t []*Token) []*Token {
+	return And(PackageName, Basic(token.PERIOD), Basic(token.IDENT))(t)
+}
+
 func PackageName(t []*Token) []*Token {
 	if p := pop(&t); p == nil || p.tok != token.IDENT || p.lit == "_" {
 		return nil
