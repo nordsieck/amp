@@ -52,6 +52,14 @@ func TestIdentifierList(t *testing.T) {
 	})
 }
 
+func TestPackageName(t *testing.T) {
+	consumes(t, PackageName, map[string]bool{
+		`a`: true,
+		`1`: false,
+		`_`: false,
+	})
+}
+
 func TestKlein(t *testing.T) {
 	for raw, left := range map[string][]*Token{
 		`1`:     semicolonSlice,

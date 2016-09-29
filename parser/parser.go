@@ -33,6 +33,13 @@ func IdentifierList(t []*Token) []*Token {
 	return Klein(extra)(t)
 }
 
+func PackageName(t []*Token) []*Token {
+	if p := pop(&t); p == nil || p.tok != token.IDENT || p.lit == "_" {
+		return nil
+	}
+	return t
+}
+
 func Klein(p Parser) Parser {
 	return func(t []*Token) []*Token {
 		for newT := p(t); newT != nil; newT = p(t) {
