@@ -5,11 +5,32 @@ import "go/token"
 type Parser func([]*Token) []*Token
 
 func BasicLit(t []*Token) []*Token {
-	switch pop(&t).tok {
+	p := pop(&t)
+	if p == nil {
+		return nil
+	}
+	switch p.tok {
 	case token.INT, token.FLOAT, token.IMAG, token.CHAR, token.STRING:
 		return t
 	}
 	return nil
+}
+
+func IdentifierList(t []*Token) []*Token {
+	if p := pop(&t); p == nil || p.tok != token.IDENT {
+		return nil
+	}
+
+	extra := func(t []*Token) []*Token {
+		if p := pop(&t); p == nil || p.tok != token.COMMA {
+			return nil
+		} else if p = pop(&t); p == nil || p.tok != token.IDENT {
+			return nil
+		}
+		return t
+	}
+
+	return Klein(extra)(t)
 }
 
 func Klein(p Parser) Parser {

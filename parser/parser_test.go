@@ -33,21 +33,23 @@ func Scan(s *scanner.Scanner) []*Token {
 }
 
 func TestBasicLit(t *testing.T) {
-	for raw, match := range map[string]bool{
+	consumes(t, BasicLit, map[string]bool{
+		``:    false,
 		`1`:   true,
 		`1.1`: true,
 		`1i`:  true,
 		`'a'`: true,
 		`"a"`: true,
 		`a`:   false,
-	} {
-		toks := Scan(newScanner(raw))
-		if match {
-			defect.DeepEqual(t, BasicLit(toks), semicolonSlice)
-		} else {
-			defect.DeepEqual(t, BasicLit(toks), fail)
-		}
-	}
+	})
+}
+
+func TestIdentifierList(t *testing.T) {
+	consumes(t, IdentifierList, map[string]bool{
+		`a`:   true,
+		`a,a`: true,
+		`1`:   false,
+	})
 }
 
 func TestKlein(t *testing.T) {
@@ -70,5 +72,16 @@ func TestAnd(t *testing.T) {
 	} {
 		toks := Scan(newScanner(raw))
 		defect.DeepEqual(t, And(BasicLit, BasicLit)(toks), left)
+	}
+}
+
+func consumes(t *testing.T, p Parser, m map[string]bool) {
+	for raw, match := range m {
+		toks := Scan(newScanner(raw))
+		if match {
+			defect.DeepEqual(t, p(toks), semicolonSlice)
+		} else {
+			defect.DeepEqual(t, p(toks), fail)
+		}
 	}
 }
