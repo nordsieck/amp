@@ -17,20 +17,10 @@ func BasicLit(t []*Token) []*Token {
 }
 
 func IdentifierList(t []*Token) []*Token {
-	if p := pop(&t); p == nil || p.tok != token.IDENT {
-		return nil
-	}
-
-	extra := func(t []*Token) []*Token {
-		if p := pop(&t); p == nil || p.tok != token.COMMA {
-			return nil
-		} else if p = pop(&t); p == nil || p.tok != token.IDENT {
-			return nil
-		}
-		return t
-	}
-
-	return Klein(extra)(t)
+	return And(
+		Basic(token.IDENT),
+		Klein(And(
+			Basic(token.COMMA), Basic(token.IDENT))))(t)
 }
 
 func PackageName(t []*Token) []*Token {
