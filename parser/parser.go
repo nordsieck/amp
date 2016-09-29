@@ -70,3 +70,12 @@ func Maybe(p Parser) Parser {
 		return t
 	}
 }
+
+func Basic(tok token.Token) Parser {
+	return func(t []*Token) []*Token {
+		if p := pop(&t); p == nil || p.tok != tok {
+			return nil
+		}
+		return t
+	}
+}

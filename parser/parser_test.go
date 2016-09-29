@@ -94,6 +94,14 @@ func TestMaybe(t *testing.T) {
 	}
 }
 
+func TestBasic(t *testing.T) {
+	consumes(t, Basic(token.INT), map[string]bool{
+		`1`:   true,
+		`a`:   false,
+		`1.1`: false,
+	})
+}
+
 func consumes(t *testing.T, p Parser, m map[string]bool) {
 	for raw, match := range m {
 		toks := Scan(newScanner(raw))
