@@ -65,6 +65,17 @@ func Maybe(p Parser) Parser {
 	}
 }
 
+func Or(ps ...Parser) Parser {
+	return func(t []*Token) []*Token {
+		for _, p := range ps {
+			if newT := p(t); newT != nil {
+				return newT
+			}
+		}
+		return nil
+	}
+}
+
 func Basic(tok token.Token) Parser {
 	return func(t []*Token) []*Token {
 		if p := pop(&t); p == nil || p.tok != tok {

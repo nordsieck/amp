@@ -104,6 +104,14 @@ func TestMaybe(t *testing.T) {
 	}
 }
 
+func TestOr(t *testing.T) {
+	consumes(t, Or(Basic(token.IDENT), Basic(token.INT)), map[string]bool{
+		`a`:   true,
+		`1`:   true,
+		`1.1`: false,
+	})
+}
+
 func TestBasic(t *testing.T) {
 	consumes(t, Basic(token.INT), map[string]bool{
 		`1`:   true,
