@@ -83,6 +83,17 @@ func TestAnd(t *testing.T) {
 	}
 }
 
+func TestMaybe(t *testing.T) {
+	for raw, left := range map[string][]*Token{
+		`1`:   semicolonSlice,
+		`1 1`: []*Token{semicolon, {tok: token.INT, lit: `1`}},
+		`a`:   []*Token{semicolon, {tok: token.IDENT, lit: `a`}},
+	} {
+		toks := Scan(newScanner(raw))
+		defect.DeepEqual(t, Maybe(BasicLit)(toks), left)
+	}
+}
+
 func consumes(t *testing.T, p Parser, m map[string]bool) {
 	for raw, match := range m {
 		toks := Scan(newScanner(raw))

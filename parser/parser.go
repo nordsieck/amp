@@ -61,3 +61,12 @@ func And(ps ...Parser) Parser {
 		return t
 	}
 }
+
+func Maybe(p Parser) Parser {
+	return func(t []*Token) []*Token {
+		if newT := p(t); newT != nil {
+			return newT
+		}
+		return t
+	}
+}
