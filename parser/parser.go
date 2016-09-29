@@ -20,3 +20,16 @@ func Klein(p Parser) Parser {
 		return t
 	}
 }
+
+func And(ps ...Parser) Parser {
+	return func(t []*Token) []*Token {
+		for _, p := range ps {
+			newT := p(t)
+			if newT == nil {
+				return nil
+			}
+			t = newT
+		}
+		return t
+	}
+}

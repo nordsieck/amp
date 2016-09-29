@@ -61,3 +61,14 @@ func TestKlein(t *testing.T) {
 		defect.DeepEqual(t, Klein(BasicLit)(toks), left)
 	}
 }
+
+func TestAnd(t *testing.T) {
+	for raw, left := range map[string][]*Token{
+		`1`:     fail,
+		`1 1`:   semicolonSlice,
+		`1 1 1`: []*Token{semicolon, {tok: token.INT, lit: `1`}},
+	} {
+		toks := Scan(newScanner(raw))
+		defect.DeepEqual(t, And(BasicLit, BasicLit)(toks), left)
+	}
+}
