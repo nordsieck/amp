@@ -9,8 +9,9 @@ import (
 )
 
 var (
-	semicolon = []*Token{{tok: token.SEMICOLON, lit: "\n"}}
-	fail      = []*Token(nil)
+	semicolon      = &Token{tok: token.SEMICOLON, lit: "\n"}
+	semicolonSlice = []*Token{semicolon}
+	fail           = []*Token(nil)
 )
 
 func newScanner(src string) *scanner.Scanner {
@@ -33,18 +34,30 @@ func Scan(s *scanner.Scanner) []*Token {
 
 func TestBasicLit(t *testing.T) {
 	for raw, match := range map[string]bool{
-		"1":   true,
-		"1.1": true,
-		"1i":  true,
-		"'a'": true,
+		`1`:   true,
+		`1.1`: true,
+		`1i`:  true,
+		`'a'`: true,
 		`"a"`: true,
-		"a":   false,
+		`a`:   false,
 	} {
 		toks := Scan(newScanner(raw))
 		if match {
-			defect.DeepEqual(t, BasicLit(toks), semicolon)
+			defect.DeepEqual(t, BasicLit(toks), semicolonSlice)
 		} else {
 			defect.DeepEqual(t, BasicLit(toks), fail)
 		}
+	}
+}
+
+func TestKlein(t *testing.T) {
+	for raw, left := range map[string][]*Token{
+		`1`:     semicolonSlice,
+		`1 1 1`: semicolonSlice,
+		`1 a`:   []*Token{semicolon, {tok: token.IDENT, lit: `a`}},
+		`1 a 1`: []*Token{semicolon, {tok: token.INT, lit: `1`}, {tok: token.IDENT, lit: `a`}},
+	} {
+		toks := Scan(newScanner(raw))
+		defect.DeepEqual(t, Klein(BasicLit)(toks), left)
 	}
 }

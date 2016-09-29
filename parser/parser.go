@@ -11,3 +11,12 @@ func BasicLit(t []*Token) []*Token {
 	}
 	return nil
 }
+
+func Klein(p Parser) Parser {
+	return func(t []*Token) []*Token {
+		for newT := p(t); newT != nil; newT = p(t) {
+			t = newT
+		}
+		return t
+	}
+}
