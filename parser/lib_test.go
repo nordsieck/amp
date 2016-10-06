@@ -9,9 +9,10 @@ import (
 )
 
 var (
-	semicolon      = &Token{tok: token.SEMICOLON, lit: "\n"}
-	semicolonSlice = []*Token{semicolon}
-	fail           = []*Token(nil)
+	semicolon       = &Token{tok: token.SEMICOLON, lit: "\n"}
+	semicolonSlice  = []*Token{semicolon}
+	semicolonSlice2 = [][]*Token{semicolonSlice}
+	fail            = []*Token(nil)
 )
 
 func newScanner(src string) *scanner.Scanner {
@@ -34,8 +35,8 @@ func Scan(s *scanner.Scanner) []*Token {
 
 func TestKlein(t *testing.T) {
 	for raw, left := range map[string][][]*Token{
-		`1`:     [][]*Token{semicolonSlice},
-		`1 1 1`: [][]*Token{semicolonSlice},
+		`1`:     semicolonSlice2,
+		`1 1 1`: semicolonSlice2,
 		`1 a`:   [][]*Token{{semicolon, {tok: token.IDENT, lit: `a`}}},
 		`1 a 1`: [][]*Token{{semicolon, {tok: token.INT, lit: `1`}, {tok: token.IDENT, lit: `a`}}},
 	} {
@@ -77,7 +78,7 @@ func Testand(t *testing.T) {
 
 func TestMaybe(t *testing.T) {
 	for raw, left := range map[string][][]*Token{
-		`1`:   [][]*Token{semicolonSlice},
+		`1`:   semicolonSlice2,
 		`a`:   [][]*Token{{semicolon, {tok: token.IDENT, lit: `a`}}},
 		`_`:   [][]*Token{{semicolon, {tok: token.IDENT, lit: `_`}}},
 		`1 1`: [][]*Token{{semicolon, {tok: token.INT, lit: `1`}}},
@@ -111,8 +112,8 @@ func Testmaybe(t *testing.T) {
 
 func TestOr(t *testing.T) {
 	remaining(t, Or(Each(Basic(token.IDENT)), Each(Basic(token.INT))), map[string][][]*Token{
-		`a`:   [][]*Token{semicolonSlice},
-		`1`:   [][]*Token{semicolonSlice},
+		`a`:   semicolonSlice2,
+		`1`:   semicolonSlice2,
 		`a.a`: [][]*Token{{semicolon, {tok: token.IDENT, lit: "a"}, {tok: token.PERIOD}}},
 	})
 
@@ -129,7 +130,7 @@ func TestOr(t *testing.T) {
 
 func TestEach(t *testing.T) {
 	remaining(t, Each(Basic(token.INT)), map[string][][]*Token{
-		`1`: [][]*Token{semicolonSlice},
+		`1`: semicolonSlice2,
 		`a`: [][]*Token(nil),
 		`_`: [][]*Token(nil),
 	})

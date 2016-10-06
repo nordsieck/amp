@@ -29,10 +29,10 @@ func TestIdentifierList(t *testing.T) {
 
 func TestTypeName(t *testing.T) {
 	remaining(t, TypeName, map[string][][]*Token{
-		`a`:   [][]*Token{semicolonSlice},
+		`a`:   semicolonSlice2,
 		`a.a`: [][]*Token{semicolonSlice, {semicolon, {tok: token.IDENT, lit: "a"}, {tok: token.PERIOD}}},
 		`1`:   [][]*Token(nil),
-		`_`:   [][]*Token{semicolonSlice},
+		`_`:   semicolonSlice2,
 	})
 }
 
