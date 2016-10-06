@@ -11,6 +11,7 @@ func TestBasicLit(t *testing.T) {
 		`'a'`: true,
 		`"a"`: true,
 		`a`:   false,
+		`_`:   false,
 	})
 }
 
@@ -19,6 +20,7 @@ func TestIdentifierList(t *testing.T) {
 		`a`:   true,
 		`a,a`: true,
 		`1`:   false,
+		`_`:   true,
 	})
 }
 
@@ -27,6 +29,7 @@ func TestTypeName(t *testing.T) {
 		`a`:   true,
 		`a.a`: true,
 		`1`:   false,
+		`_`:   true,
 	})
 }
 
@@ -37,6 +40,7 @@ func TestQualifiedIdent(t *testing.T) {
 		`a.a`: true,
 		`_.a`: false,
 		`a._`: true,
+		`_._`: false,
 	})
 }
 
