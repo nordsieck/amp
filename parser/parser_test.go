@@ -1,6 +1,9 @@
 package parser
 
-import "testing"
+import (
+	"go/token"
+	"testing"
+)
 
 func TestBasicLit(t *testing.T) {
 	consumes(t, BasicLit, map[string]bool{
@@ -24,14 +27,14 @@ func TestIdentifierList(t *testing.T) {
 	})
 }
 
-// func TestTypeName(t *testing.T) {
-// 	consumes(t, TypeName, map[string]bool{
-// 		`a`:   true,
-// 		`a.a`: true,
-// 		`1`:   false,
-// 		`_`:   true,
-// 	})
-// }
+func TestTypeName(t *testing.T) {
+	remaining(t, TypeName, map[string][][]*Token{
+		`a`:   [][]*Token{semicolonSlice},
+		`a.a`: [][]*Token{semicolonSlice, {semicolon, {tok: token.IDENT, lit: "a"}, {tok: token.PERIOD}}},
+		`1`:   [][]*Token(nil),
+		`_`:   [][]*Token{semicolonSlice},
+	})
+}
 
 func TestQualifiedIdent(t *testing.T) {
 	consumes(t, QualifiedIdent, map[string]bool{

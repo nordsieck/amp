@@ -67,16 +67,13 @@ func TestMaybe(t *testing.T) {
 }
 
 func TestOr(t *testing.T) {
-	for raw, left := range map[string][][]*Token{
+	remaining(t, Or(Basic(token.IDENT), Basic(token.INT)), map[string][][]*Token{
 		`a`:   [][]*Token{semicolonSlice},
 		`1`:   [][]*Token{semicolonSlice},
 		`a.a`: [][]*Token{{semicolon, {tok: token.IDENT, lit: "a"}, {tok: token.PERIOD}}},
-	} {
-		toks := [][]*Token{Scan(newScanner(raw))}
-		defect.DeepEqual(t, Or(Basic(token.IDENT), Basic(token.INT))(toks), left)
-	}
+	})
 
-	for raw, left := range map[string][][]*Token{
+	remaining(t, Or(And(Basic(token.IDENT), Basic(token.PERIOD), Basic(token.IDENT)), Basic(token.IDENT)), map[string][][]*Token{
 		`a`:   [][]*Token{semicolonSlice},
 		`a.a`: [][]*Token{semicolonSlice, {semicolon, {tok: token.IDENT, lit: "a"}, {tok: token.PERIOD}}},
 		`a.a.a`: [][]*Token{
@@ -84,21 +81,15 @@ func TestOr(t *testing.T) {
 			{semicolon, {tok: token.IDENT, lit: "a"}, {tok: token.PERIOD}, {tok: token.IDENT, lit: "a"}, {tok: token.PERIOD}},
 		},
 		`1`: [][]*Token(nil),
-	} {
-		toks := [][]*Token{Scan(newScanner(raw))}
-		defect.DeepEqual(t, Or(And(Basic(token.IDENT), Basic(token.PERIOD), Basic(token.IDENT)), Basic(token.IDENT))(toks), left)
-	}
+	})
 }
 
 func TestEach(t *testing.T) {
-	for raw, left := range map[string][][]*Token{
+	remaining(t, Each(Basic(token.INT)), map[string][][]*Token{
 		`1`: [][]*Token{semicolonSlice},
 		`a`: [][]*Token(nil),
 		`_`: [][]*Token(nil),
-	} {
-		toks := [][]*Token{Scan(newScanner(raw))}
-		defect.DeepEqual(t, Each(Basic(token.INT))(toks), left)
-	}
+	})
 }
 
 func TestBasic(t *testing.T) {
@@ -117,5 +108,12 @@ func consumes(t *testing.T, p Parser, m map[string]bool) {
 		} else {
 			defect.DeepEqual(t, p(toks), fail)
 		}
+	}
+}
+
+func remaining(t *testing.T, m Multi, mp map[string][][]*Token) {
+	for raw, left := range mp {
+		toks := [][]*Token{Scan(newScanner(raw))}
+		defect.DeepEqual(t, m(toks), left)
 	}
 }
