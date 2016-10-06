@@ -67,13 +67,13 @@ func TestMaybe(t *testing.T) {
 }
 
 func TestOr(t *testing.T) {
-	remaining(t, Or(Basic(token.IDENT), Basic(token.INT)), map[string][][]*Token{
+	remaining(t, Or(Each(Basic(token.IDENT)), Each(Basic(token.INT))), map[string][][]*Token{
 		`a`:   [][]*Token{semicolonSlice},
 		`1`:   [][]*Token{semicolonSlice},
 		`a.a`: [][]*Token{{semicolon, {tok: token.IDENT, lit: "a"}, {tok: token.PERIOD}}},
 	})
 
-	remaining(t, Or(And(Basic(token.IDENT), Basic(token.PERIOD), Basic(token.IDENT)), Basic(token.IDENT)), map[string][][]*Token{
+	remaining(t, Or(Each(And(Basic(token.IDENT), Basic(token.PERIOD), Basic(token.IDENT))), Each(Basic(token.IDENT))), map[string][][]*Token{
 		`a`:   [][]*Token{semicolonSlice},
 		`a.a`: [][]*Token{semicolonSlice, {semicolon, {tok: token.IDENT, lit: "a"}, {tok: token.PERIOD}}},
 		`a.a.a`: [][]*Token{

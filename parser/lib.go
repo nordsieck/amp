@@ -33,15 +33,11 @@ func Maybe(p Parser) Parser {
 	}
 }
 
-func Or(ps ...Parser) Multi {
+func Or(ms ...Multi) Multi {
 	return func(ts [][]*Token) [][]*Token {
 		var results [][]*Token
-		for _, t := range ts {
-			for _, p := range ps {
-				if newT := p(t); newT != nil {
-					results = append(results, newT)
-				}
-			}
+		for _, m := range ms {
+			results = append(results, m(ts)...)
 		}
 		return results
 	}

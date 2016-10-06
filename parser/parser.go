@@ -26,7 +26,7 @@ func IdentifierList(t []*Token) []*Token {
 }
 
 func TypeName(ts [][]*Token) [][]*Token {
-	return Or(QualifiedIdent, Basic(token.IDENT))(ts)
+	return Or(Each(QualifiedIdent), Each(Basic(token.IDENT)))(ts)
 }
 
 func QualifiedIdent(t []*Token) []*Token {
