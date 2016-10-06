@@ -90,6 +90,17 @@ func TestOr(t *testing.T) {
 	}
 }
 
+func TestEach(t *testing.T) {
+	for raw, left := range map[string][][]*Token{
+		`1`: [][]*Token{semicolonSlice},
+		`a`: [][]*Token(nil),
+		`_`: [][]*Token(nil),
+	} {
+		toks := [][]*Token{Scan(newScanner(raw))}
+		defect.DeepEqual(t, Each(Basic(token.INT))(toks), left)
+	}
+}
+
 func TestBasic(t *testing.T) {
 	consumes(t, Basic(token.INT), map[string]bool{
 		`1`:   true,
