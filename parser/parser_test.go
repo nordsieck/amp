@@ -6,7 +6,7 @@ import (
 )
 
 func TestBasicLit(t *testing.T) {
-	consumes(t, BasicLit, map[string]bool{
+	consumes(t, basicLit, map[string]bool{
 		``:    false,
 		`1`:   true,
 		`1.1`: true,
@@ -19,7 +19,7 @@ func TestBasicLit(t *testing.T) {
 }
 
 func TestIdentifierList(t *testing.T) {
-	consumes(t, IdentifierList, map[string]bool{
+	consumes(t, identifierList, map[string]bool{
 		`a`:   true,
 		`a,a`: true,
 		`1`:   false,
@@ -37,7 +37,7 @@ func TestTypeName(t *testing.T) {
 }
 
 func TestQualifiedIdent(t *testing.T) {
-	consumes(t, QualifiedIdent, map[string]bool{
+	consumes(t, qualifiedIdent, map[string]bool{
 		`1`:   false,
 		`a`:   false,
 		`a.a`: true,
@@ -48,7 +48,7 @@ func TestQualifiedIdent(t *testing.T) {
 }
 
 func TestPackageName(t *testing.T) {
-	consumes(t, PackageName, map[string]bool{
+	consumes(t, packageName, map[string]bool{
 		`a`: true,
 		`1`: false,
 		`_`: false,

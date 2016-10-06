@@ -6,19 +6,20 @@ type Parser func([]*Token) []*Token
 
 type Multi func([][]*Token) [][]*Token
 
-func BasicLit(t []*Token) []*Token {
-	p := pop(&t)
-	if p == nil {
+func BasicLit(t [][]*Token) [][]*Token { return Each(basicLit)(t) }
+func basicLit(t []*Token) []*Token {
+	switch p := pop(&t); true {
+	case p == nil:
 		return nil
-	}
-	switch p.tok {
-	case token.INT, token.FLOAT, token.IMAG, token.CHAR, token.STRING:
+	case p.tok == token.INT, p.tok == token.FLOAT, p.tok == token.IMAG,
+		p.tok == token.CHAR, p.tok == token.STRING:
 		return t
 	}
 	return nil
 }
 
-func IdentifierList(t []*Token) []*Token {
+func IdentifierList(t [][]*Token) [][]*Token { return Each(identifierList)(t) }
+func identifierList(t []*Token) []*Token {
 	return And(
 		Basic(token.IDENT),
 		Klein(And(
@@ -26,14 +27,16 @@ func IdentifierList(t []*Token) []*Token {
 }
 
 func TypeName(ts [][]*Token) [][]*Token {
-	return Or(Each(QualifiedIdent), Each(Basic(token.IDENT)))(ts)
+	return Or(QualifiedIdent, Each(Basic(token.IDENT)))(ts)
 }
 
-func QualifiedIdent(t []*Token) []*Token {
-	return And(PackageName, Basic(token.PERIOD), Basic(token.IDENT))(t)
+func QualifiedIdent(t [][]*Token) [][]*Token { return Each(qualifiedIdent)(t) }
+func qualifiedIdent(t []*Token) []*Token {
+	return And(packageName, Basic(token.PERIOD), Basic(token.IDENT))(t)
 }
 
-func PackageName(t []*Token) []*Token {
+func PackageName(t [][]*Token) [][]*Token { return Each(packageName)(t) }
+func packageName(t []*Token) []*Token {
 	if p := pop(&t); p == nil || p.tok != token.IDENT || p.lit == "_" {
 		return nil
 	}

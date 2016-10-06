@@ -40,7 +40,7 @@ func TestKlein(t *testing.T) {
 		`1 a 1`: []*Token{semicolon, {tok: token.INT, lit: `1`}, {tok: token.IDENT, lit: `a`}},
 	} {
 		toks := Scan(newScanner(raw))
-		defect.DeepEqual(t, Klein(BasicLit)(toks), left)
+		defect.DeepEqual(t, Klein(basicLit)(toks), left)
 	}
 }
 
@@ -51,7 +51,7 @@ func TestAnd(t *testing.T) {
 		`1 1 1`: []*Token{semicolon, {tok: token.INT, lit: `1`}},
 	} {
 		toks := Scan(newScanner(raw))
-		defect.DeepEqual(t, And(BasicLit, BasicLit)(toks), left)
+		defect.DeepEqual(t, And(basicLit, basicLit)(toks), left)
 	}
 }
 
@@ -62,7 +62,7 @@ func TestMaybe(t *testing.T) {
 		`a`:   []*Token{semicolon, {tok: token.IDENT, lit: `a`}},
 	} {
 		toks := Scan(newScanner(raw))
-		defect.DeepEqual(t, Maybe(BasicLit)(toks), left)
+		defect.DeepEqual(t, Maybe(basicLit)(toks), left)
 	}
 }
 
