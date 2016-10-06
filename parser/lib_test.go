@@ -33,6 +33,26 @@ func Scan(s *scanner.Scanner) []*Token {
 }
 
 func TestKlein(t *testing.T) {
+	for raw, left := range map[string][][]*Token{
+		`1`:     [][]*Token{semicolonSlice},
+		`1 1 1`: [][]*Token{semicolonSlice},
+		`1 a`:   [][]*Token{{semicolon, {tok: token.IDENT, lit: `a`}}},
+		`1 a 1`: [][]*Token{{semicolon, {tok: token.INT, lit: `1`}, {tok: token.IDENT, lit: `a`}}},
+	} {
+		toks := [][]*Token{Scan(newScanner(raw))}
+		defect.DeepEqual(t, Klein(BasicLit)(toks), left)
+	}
+
+	toks := [][]*Token{
+		{semicolon, {tok: token.INT, lit: `1`}, {tok: token.INT, lit: `1`}},
+		{semicolon, {tok: token.INT, lit: `1`}},
+		{semicolon, {tok: token.IDENT, lit: `a`}},
+	}
+	defect.DeepEqual(t, Klein(BasicLit)(toks), [][]*Token{semicolonSlice, semicolonSlice,
+		{semicolon, {tok: token.IDENT, lit: `a`}}})
+}
+
+func Testklein(t *testing.T) {
 	for raw, left := range map[string][]*Token{
 		`1`:     semicolonSlice,
 		`1 1 1`: semicolonSlice,
@@ -40,29 +60,52 @@ func TestKlein(t *testing.T) {
 		`1 a 1`: []*Token{semicolon, {tok: token.INT, lit: `1`}, {tok: token.IDENT, lit: `a`}},
 	} {
 		toks := Scan(newScanner(raw))
-		defect.DeepEqual(t, Klein(basicLit)(toks), left)
+		defect.DeepEqual(t, klein(basicLit)(toks), left)
 	}
 }
 
-func TestAnd(t *testing.T) {
+func Testand(t *testing.T) {
 	for raw, left := range map[string][]*Token{
 		`1`:     fail,
 		`1 1`:   semicolonSlice,
 		`1 1 1`: []*Token{semicolon, {tok: token.INT, lit: `1`}},
 	} {
 		toks := Scan(newScanner(raw))
-		defect.DeepEqual(t, And(basicLit, basicLit)(toks), left)
+		defect.DeepEqual(t, and(basicLit, basicLit)(toks), left)
 	}
 }
 
 func TestMaybe(t *testing.T) {
+	for raw, left := range map[string][][]*Token{
+		`1`:   [][]*Token{semicolonSlice},
+		`a`:   [][]*Token{{semicolon, {tok: token.IDENT, lit: `a`}}},
+		`_`:   [][]*Token{{semicolon, {tok: token.IDENT, lit: `_`}}},
+		`1 1`: [][]*Token{{semicolon, {tok: token.INT, lit: `1`}}},
+	} {
+		toks := [][]*Token{Scan(newScanner(raw))}
+		defect.DeepEqual(t, Maybe(Each(Basic(token.INT)))(toks), left)
+	}
+
+	toks := [][]*Token{
+		{semicolon, {tok: token.INT, lit: `1`}, {tok: token.INT, lit: `2`}},
+		{semicolon, {tok: token.INT, lit: `3`}},
+		{semicolon, {tok: token.IDENT, lit: `_`}},
+	}
+	defect.DeepEqual(t, Maybe(Each(Basic(token.INT)))(toks), [][]*Token{
+		{semicolon, {tok: token.INT, lit: `1`}},
+		semicolonSlice,
+		{semicolon, {tok: token.IDENT, lit: `_`}},
+	})
+}
+
+func Testmaybe(t *testing.T) {
 	for raw, left := range map[string][]*Token{
 		`1`:   semicolonSlice,
 		`1 1`: []*Token{semicolon, {tok: token.INT, lit: `1`}},
 		`a`:   []*Token{semicolon, {tok: token.IDENT, lit: `a`}},
 	} {
 		toks := Scan(newScanner(raw))
-		defect.DeepEqual(t, Maybe(basicLit)(toks), left)
+		defect.DeepEqual(t, maybe(basicLit)(toks), left)
 	}
 }
 
@@ -73,7 +116,7 @@ func TestOr(t *testing.T) {
 		`a.a`: [][]*Token{{semicolon, {tok: token.IDENT, lit: "a"}, {tok: token.PERIOD}}},
 	})
 
-	remaining(t, Or(Each(And(Basic(token.IDENT), Basic(token.PERIOD), Basic(token.IDENT))), Each(Basic(token.IDENT))), map[string][][]*Token{
+	remaining(t, Or(Each(and(Basic(token.IDENT), Basic(token.PERIOD), Basic(token.IDENT))), Each(Basic(token.IDENT))), map[string][][]*Token{
 		`a`:   [][]*Token{semicolonSlice},
 		`a.a`: [][]*Token{semicolonSlice, {semicolon, {tok: token.IDENT, lit: "a"}, {tok: token.PERIOD}}},
 		`a.a.a`: [][]*Token{

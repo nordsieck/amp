@@ -20,9 +20,9 @@ func basicLit(t []*Token) []*Token {
 
 func IdentifierList(t [][]*Token) [][]*Token { return Each(identifierList)(t) }
 func identifierList(t []*Token) []*Token {
-	return And(
+	return and(
 		Basic(token.IDENT),
-		Klein(And(
+		klein(and(
 			Basic(token.COMMA), Basic(token.IDENT))))(t)
 }
 
@@ -32,7 +32,7 @@ func TypeName(ts [][]*Token) [][]*Token {
 
 func QualifiedIdent(t [][]*Token) [][]*Token { return Each(qualifiedIdent)(t) }
 func qualifiedIdent(t []*Token) []*Token {
-	return And(packageName, Basic(token.PERIOD), Basic(token.IDENT))(t)
+	return and(packageName, Basic(token.PERIOD), Basic(token.IDENT))(t)
 }
 
 func PackageName(t [][]*Token) [][]*Token { return Each(packageName)(t) }
