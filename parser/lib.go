@@ -33,14 +33,17 @@ func Maybe(p Parser) Parser {
 	}
 }
 
-func Or(ps ...Parser) Parser {
-	return func(t []*Token) []*Token {
-		for _, p := range ps {
-			if newT := p(t); newT != nil {
-				return newT
+func Or(ps ...Parser) Multi {
+	return func(ts [][]*Token) [][]*Token {
+		var results [][]*Token
+		for _, t := range ts {
+			for _, p := range ps {
+				if newT := p(t); newT != nil {
+					results = append(results, newT)
+				}
 			}
 		}
-		return nil
+		return results
 	}
 }
 

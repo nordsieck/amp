@@ -24,14 +24,14 @@ func TestIdentifierList(t *testing.T) {
 	})
 }
 
-func TestTypeName(t *testing.T) {
-	consumes(t, TypeName, map[string]bool{
-		`a`:   true,
-		`a.a`: true,
-		`1`:   false,
-		`_`:   true,
-	})
-}
+// func TestTypeName(t *testing.T) {
+// 	consumes(t, TypeName, map[string]bool{
+// 		`a`:   true,
+// 		`a.a`: true,
+// 		`1`:   false,
+// 		`_`:   true,
+// 	})
+// }
 
 func TestQualifiedIdent(t *testing.T) {
 	consumes(t, QualifiedIdent, map[string]bool{
