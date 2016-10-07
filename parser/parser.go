@@ -107,6 +107,19 @@ func AddOp(ts [][]*Token) [][]*Token {
 	return result
 }
 
+func RelOp(ts [][]*Token) [][]*Token {
+	var result [][]*Token
+	for _, t := range ts {
+		switch p := pop(&t); true {
+		case p == nil:
+		case p.tok == token.EQL, p.tok == token.NEQ, p.tok == token.LSS,
+			p.tok == token.LEQ, p.tok == token.GTR, p.tok == token.GEQ:
+			result = append(result, t)
+		}
+	}
+	return result
+}
+
 func tokenParser(ts [][]*Token, tok token.Token) [][]*Token {
 	var result [][]*Token
 	var p *Token

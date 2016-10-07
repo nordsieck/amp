@@ -110,6 +110,18 @@ func TestAddOp(t *testing.T) {
 	})
 }
 
+func TestRelOp(t *testing.T) {
+	remaining(t, RelOp, map[string][][]*Token{
+		`==`: [][]*Token{{}},
+		`!=`: [][]*Token{{}},
+		`>`:  [][]*Token{{}},
+		`>=`: [][]*Token{{}},
+		`<`:  [][]*Token{{}},
+		`<=`: [][]*Token{{}},
+		`1`:  empty,
+	})
+}
+
 func TestTokenParser(t *testing.T) {
 	toks := [][]*Token{
 		{semi, {tok: token.RPAREN}},
