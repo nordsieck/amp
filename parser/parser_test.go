@@ -87,6 +87,19 @@ func TestUnaryOp(t *testing.T) {
 	})
 }
 
+func TestMulOp(t *testing.T) {
+	remaining(t, MulOp, map[string][][]*Token{
+		`*`:  [][]*Token{{}},
+		`/`:  [][]*Token{{}},
+		`%`:  [][]*Token{{}},
+		`<<`: [][]*Token{{}},
+		`>>`: [][]*Token{{}},
+		`&`:  [][]*Token{{}},
+		`&^`: [][]*Token{{}},
+		`1`:  empty,
+	})
+}
+
 func TestTokenParser(t *testing.T) {
 	toks := [][]*Token{
 		{semi, {tok: token.RPAREN}},

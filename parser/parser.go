@@ -82,6 +82,19 @@ func UnaryOp(ts [][]*Token) [][]*Token {
 	return result
 }
 
+func MulOp(ts [][]*Token) [][]*Token {
+	var result [][]*Token
+	for _, t := range ts {
+		switch p := pop(&t); true {
+		case p == nil:
+		case p.tok == token.MUL, p.tok == token.QUO, p.tok == token.REM, p.tok == token.SHL,
+			p.tok == token.SHR, p.tok == token.AND, p.tok == token.AND_NOT:
+			result = append(result, t)
+		}
+	}
+	return result
+}
+
 func tokenParser(ts [][]*Token, tok token.Token) [][]*Token {
 	var result [][]*Token
 	var p *Token
