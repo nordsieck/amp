@@ -33,8 +33,9 @@ func TestPrimaryExpr(t *testing.T) {
 
 func TestOperand(t *testing.T) {
 	remaining(t, Operand, map[string][][]*Token{
-		`1`:   semiSlice,
-		`a.a`: [][]*Token{{semi, {tok: token.IDENT, lit: `a`}, {tok: token.PERIOD}}, {semi}},
+		`1`:     semiSlice,
+		`a.a`:   [][]*Token{{semi, {tok: token.IDENT, lit: `a`}, {tok: token.PERIOD}}, {semi}},
+		`(a.a)`: semiSlice,
 	})
 }
 

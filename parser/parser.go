@@ -25,9 +25,17 @@ func PrimaryExpr(ts [][]*Token) [][]*Token {
 }
 
 func Operand(ts [][]*Token) [][]*Token {
-	return append(Literal(ts), OperandName(ts)...)
+	xp := tokenParser(ts, token.LPAREN)
+	if len(xp) > 0 {
+		xp = Expression(xp)
+	}
+	xp = tokenParser(xp, token.RPAREN)
+
+	return append(
+		append(Literal(ts), OperandName(ts)...),
+		xp...)
 	// MethodExpr
-	// "(" Expression ")"
+
 }
 
 func OperandName(ts [][]*Token) [][]*Token {
