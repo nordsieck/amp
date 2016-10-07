@@ -13,6 +13,38 @@ var (
 	semiSlice = [][]*Token{{semi}}
 )
 
+func TestExpression(t *testing.T) {
+	remaining(t, Expression, map[string][][]*Token{
+		`1`: semiSlice,
+	})
+}
+
+func TestUnaryExpr(t *testing.T) {
+	remaining(t, UnaryExpr, map[string][][]*Token{
+		`1`: semiSlice,
+	})
+}
+
+func TestPrimaryExpr(t *testing.T) {
+	remaining(t, PrimaryExpr, map[string][][]*Token{
+		`1`: semiSlice,
+	})
+}
+
+func TestOperand(t *testing.T) {
+	remaining(t, Operand, map[string][][]*Token{
+		`1`: semiSlice,
+	})
+}
+
+func TestLiteral(t *testing.T) {
+	remaining(t, Literal, map[string][][]*Token{
+		`1`: semiSlice,
+		`a`: empty,
+		`_`: empty,
+	})
+}
+
 func TestBasicLit(t *testing.T) {
 	remaining(t, BasicLit, map[string][][]*Token{
 		``:    empty,

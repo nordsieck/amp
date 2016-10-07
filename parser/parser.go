@@ -4,6 +4,39 @@ import "go/token"
 
 type Parser func([][]*Token) [][]*Token
 
+func Expression(ts [][]*Token) [][]*Token {
+	return UnaryExpr(ts)
+	// Expression binary_op Expression
+}
+
+func UnaryExpr(ts [][]*Token) [][]*Token {
+	return PrimaryExpr(ts)
+	// unary_op UnaryExpr
+}
+
+func PrimaryExpr(ts [][]*Token) [][]*Token {
+	return Operand(ts)
+	// Conversion
+	// PrimaryExpr Selector
+	// PrimaryExpr Index
+	// PrimaryExpr Slice
+	// PrimaryExpr TypeAssertion
+	// PrimaryExpr Arguments
+}
+
+func Operand(ts [][]*Token) [][]*Token {
+	return Literal(ts)
+	// OperandName
+	// MethodExpr
+	// "(" Expression ")"
+}
+
+func Literal(ts [][]*Token) [][]*Token {
+	return BasicLit(ts)
+	// CompositeLit
+	// FunctionLit
+}
+
 func BasicLit(ts [][]*Token) [][]*Token {
 	var result [][]*Token
 	for _, t := range ts {
