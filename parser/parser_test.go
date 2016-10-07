@@ -100,6 +100,16 @@ func TestMulOp(t *testing.T) {
 	})
 }
 
+func TestAddOp(t *testing.T) {
+	remaining(t, AddOp, map[string][][]*Token{
+		`+`: [][]*Token{{}},
+		`-`: [][]*Token{{}},
+		`|`: [][]*Token{{}},
+		`&`: [][]*Token{{}},
+		`1`: empty,
+	})
+}
+
 func TestTokenParser(t *testing.T) {
 	toks := [][]*Token{
 		{semi, {tok: token.RPAREN}},
