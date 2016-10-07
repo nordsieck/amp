@@ -25,10 +25,13 @@ func PrimaryExpr(ts [][]*Token) [][]*Token {
 }
 
 func Operand(ts [][]*Token) [][]*Token {
-	return Literal(ts)
-	// OperandName
+	return append(Literal(ts), OperandName(ts)...)
 	// MethodExpr
 	// "(" Expression ")"
+}
+
+func OperandName(ts [][]*Token) [][]*Token {
+	return append(tokenParser(ts, token.IDENT), QualifiedIdent(ts)...)
 }
 
 func Literal(ts [][]*Token) [][]*Token {
