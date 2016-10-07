@@ -39,33 +39,30 @@ func IdentifierList(ts [][]*Token) [][]*Token {
 
 func TypeName(ts [][]*Token) [][]*Token {
 	result := QualifiedIdent(ts)
-	for _, t := range ts {
-		if p := pop(&t); p != nil && p.tok == token.IDENT {
-			result = append(result, t)
-		}
-	}
-	return result
+	return append(result, tokenParser(ts, token.IDENT)...)
 }
 
 func QualifiedIdent(ts [][]*Token) [][]*Token {
 	ts = PackageName(ts)
-	var result [][]*Token
-	for _, t := range ts {
-		if p := pop(&t); p == nil || p.tok != token.PERIOD {
-			continue
-		} else if p = pop(&t); p == nil || p.tok != token.IDENT {
-			continue
-		} else {
-			result = append(result, t)
-		}
-	}
-	return result
+	ts = tokenParser(ts, token.PERIOD)
+	return tokenParser(ts, token.IDENT)
 }
 
 func PackageName(ts [][]*Token) [][]*Token {
 	var result [][]*Token
 	for _, t := range ts {
 		if p := pop(&t); p != nil && p.tok == token.IDENT && p.lit != "_" {
+			result = append(result, t)
+		}
+	}
+	return result
+}
+
+func tokenParser(ts [][]*Token, tok token.Token) [][]*Token {
+	var result [][]*Token
+	var p *Token
+	for _, t := range ts {
+		if p = pop(&t); p != nil && p.tok == tok {
 			result = append(result, t)
 		}
 	}
