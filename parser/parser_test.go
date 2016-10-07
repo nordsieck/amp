@@ -122,6 +122,17 @@ func TestRelOp(t *testing.T) {
 	})
 }
 
+func TestBinaryOp(t *testing.T) {
+	remaining(t, BinaryOp, map[string][][]*Token{
+		`==`: [][]*Token{{}},
+		`+`:  [][]*Token{{}},
+		`*`:  [][]*Token{{}},
+		`||`: [][]*Token{{}},
+		`&&`: [][]*Token{{}},
+		`1`:  empty,
+	})
+}
+
 func TestTokenParser(t *testing.T) {
 	toks := [][]*Token{
 		{semi, {tok: token.RPAREN}},

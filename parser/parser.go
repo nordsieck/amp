@@ -120,6 +120,20 @@ func RelOp(ts [][]*Token) [][]*Token {
 	return result
 }
 
+func BinaryOp(ts [][]*Token) [][]*Token {
+	var result [][]*Token
+	for _, t := range ts {
+		switch p := pop(&t); true {
+		case p == nil:
+		case p.tok == token.LAND, p.tok == token.LOR:
+			result = append(result, t)
+		}
+	}
+	result = append(result, RelOp(ts)...)
+	result = append(result, AddOp(ts)...)
+	return append(result, MulOp(ts)...)
+}
+
 func tokenParser(ts [][]*Token, tok token.Token) [][]*Token {
 	var result [][]*Token
 	var p *Token
