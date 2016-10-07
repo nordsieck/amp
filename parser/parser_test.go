@@ -6,24 +6,24 @@ import (
 )
 
 func TestBasicLit(t *testing.T) {
-	consumes(t, basicLit, map[string]bool{
-		``:    false,
-		`1`:   true,
-		`1.1`: true,
-		`1i`:  true,
-		`'a'`: true,
-		`"a"`: true,
-		`a`:   false,
-		`_`:   false,
+	remaining(t, BasicLit, map[string][][]*Token{
+		``:    [][]*Token(nil),
+		`1`:   semicolonSlice2,
+		`1.1`: semicolonSlice2,
+		`1i`:  semicolonSlice2,
+		`'a'`: semicolonSlice2,
+		`"a"`: semicolonSlice2,
+		`a`:   [][]*Token(nil),
+		`_`:   [][]*Token(nil),
 	})
 }
 
 func TestIdentifierList(t *testing.T) {
-	consumes(t, identifierList, map[string]bool{
-		`a`:   true,
-		`a,a`: true,
-		`1`:   false,
-		`_`:   true,
+	remaining(t, IdentifierList, map[string][][]*Token{
+		`a`:   semicolonSlice2,
+		`a,a`: semicolonSlice2,
+		`1`:   [][]*Token(nil),
+		`_`:   semicolonSlice2,
 	})
 }
 
@@ -37,20 +37,20 @@ func TestTypeName(t *testing.T) {
 }
 
 func TestQualifiedIdent(t *testing.T) {
-	consumes(t, qualifiedIdent, map[string]bool{
-		`1`:   false,
-		`a`:   false,
-		`a.a`: true,
-		`_.a`: false,
-		`a._`: true,
-		`_._`: false,
+	remaining(t, QualifiedIdent, map[string][][]*Token{
+		`1`:   [][]*Token(nil),
+		`a`:   [][]*Token(nil),
+		`a.a`: semicolonSlice2,
+		`_.a`: [][]*Token(nil),
+		`a._`: semicolonSlice2,
+		`_._`: [][]*Token(nil),
 	})
 }
 
 func TestPackageName(t *testing.T) {
-	consumes(t, packageName, map[string]bool{
-		`a`: true,
-		`1`: false,
-		`_`: false,
+	remaining(t, PackageName, map[string][][]*Token{
+		`a`: semicolonSlice2,
+		`1`: [][]*Token(nil),
+		`_`: [][]*Token(nil),
 	})
 }

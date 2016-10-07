@@ -2,43 +2,72 @@ package parser
 
 import "go/token"
 
-type Parser func([]*Token) []*Token
+type Parser func([][]*Token) [][]*Token
 
-type Multi func([][]*Token) [][]*Token
-
-func BasicLit(t [][]*Token) [][]*Token { return Each(basicLit)(t) }
-func basicLit(t []*Token) []*Token {
-	switch p := pop(&t); true {
-	case p == nil:
-		return nil
-	case p.tok == token.INT, p.tok == token.FLOAT, p.tok == token.IMAG,
-		p.tok == token.CHAR, p.tok == token.STRING:
-		return t
+func BasicLit(ts [][]*Token) [][]*Token {
+	var result [][]*Token
+	for _, t := range ts {
+		switch p := pop(&t); true {
+		case p == nil:
+		case p.tok == token.INT, p.tok == token.FLOAT, p.tok == token.IMAG,
+			p.tok == token.CHAR, p.tok == token.STRING:
+			result = append(result, t)
+		}
 	}
-	return nil
+	return result
 }
 
-func IdentifierList(t [][]*Token) [][]*Token { return Each(identifierList)(t) }
-func identifierList(t []*Token) []*Token {
-	return and(
-		Basic(token.IDENT),
-		klein(and(
-			Basic(token.COMMA), Basic(token.IDENT))))(t)
+func IdentifierList(ts [][]*Token) [][]*Token {
+	var result [][]*Token
+	for _, t := range ts {
+		if p := pop(&t); p == nil || p.tok != token.IDENT {
+			continue
+		}
+		for {
+			newT, p := t, (*Token)(nil)
+			if p = pop(&newT); p == nil || p.tok != token.COMMA {
+				break
+			} else if p = pop(&newT); p == nil || p.tok != token.IDENT {
+				break
+			}
+			t = newT
+		}
+		result = append(result, t)
+	}
+	return result
 }
 
 func TypeName(ts [][]*Token) [][]*Token {
-	return Or(QualifiedIdent, Each(Basic(token.IDENT)))(ts)
-}
-
-func QualifiedIdent(t [][]*Token) [][]*Token { return Each(qualifiedIdent)(t) }
-func qualifiedIdent(t []*Token) []*Token {
-	return and(packageName, Basic(token.PERIOD), Basic(token.IDENT))(t)
-}
-
-func PackageName(t [][]*Token) [][]*Token { return Each(packageName)(t) }
-func packageName(t []*Token) []*Token {
-	if p := pop(&t); p == nil || p.tok != token.IDENT || p.lit == "_" {
-		return nil
+	result := QualifiedIdent(ts)
+	for _, t := range ts {
+		if p := pop(&t); p != nil && p.tok == token.IDENT {
+			result = append(result, t)
+		}
 	}
-	return t
+	return result
+}
+
+func QualifiedIdent(ts [][]*Token) [][]*Token {
+	ts = PackageName(ts)
+	var result [][]*Token
+	for _, t := range ts {
+		if p := pop(&t); p == nil || p.tok != token.PERIOD {
+			continue
+		} else if p = pop(&t); p == nil || p.tok != token.IDENT {
+			continue
+		} else {
+			result = append(result, t)
+		}
+	}
+	return result
+}
+
+func PackageName(ts [][]*Token) [][]*Token {
+	var result [][]*Token
+	for _, t := range ts {
+		if p := pop(&t); p != nil && p.tok == token.IDENT && p.lit != "_" {
+			result = append(result, t)
+		}
+	}
+	return result
 }
