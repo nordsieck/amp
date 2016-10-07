@@ -69,6 +69,19 @@ func PackageName(ts [][]*Token) [][]*Token {
 	return result
 }
 
+func UnaryOp(ts [][]*Token) [][]*Token {
+	var result [][]*Token
+	for _, t := range ts {
+		switch p := pop(&t); true {
+		case p == nil:
+		case p.tok == token.ADD, p.tok == token.SUB, p.tok == token.NOT, p.tok == token.XOR,
+			p.tok == token.MUL, p.tok == token.AND, p.tok == token.ARROW:
+			result = append(result, t)
+		}
+	}
+	return result
+}
+
 func tokenParser(ts [][]*Token, tok token.Token) [][]*Token {
 	var result [][]*Token
 	var p *Token
