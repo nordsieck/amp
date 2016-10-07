@@ -3,6 +3,8 @@ package parser
 import (
 	"go/token"
 	"testing"
+
+	"github.com/nordsieck/defect"
 )
 
 var (
@@ -33,6 +35,17 @@ func TestIdentifierList(t *testing.T) {
 	})
 }
 
+func TestType(t *testing.T) {
+	remaining(t, Type, map[string][][]*Token{
+		`a`:       semiSlice,
+		`a.a`:     [][]*Token{{semi}, {semi, {tok: token.IDENT, lit: "a"}, {tok: token.PERIOD}}},
+		`1`:       empty,
+		`_`:       semiSlice,
+		`(a.a)`:   semiSlice,
+		`(((_)))`: semiSlice,
+	})
+}
+
 func TestTypeName(t *testing.T) {
 	remaining(t, TypeName, map[string][][]*Token{
 		`a`:   semiSlice,
@@ -59,4 +72,12 @@ func TestPackageName(t *testing.T) {
 		`1`: empty,
 		`_`: empty,
 	})
+}
+
+func TestTokenParser(t *testing.T) {
+	toks := [][]*Token{
+		{semi, {tok: token.RPAREN}},
+		{semi, {tok: token.RPAREN}, {tok: token.IDENT, lit: `a`}, {tok: token.PERIOD}},
+	}
+	defect.DeepEqual(t, tokenParser(toks, token.RPAREN), semiSlice)
 }

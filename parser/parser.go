@@ -37,6 +37,17 @@ func IdentifierList(ts [][]*Token) [][]*Token {
 	return result
 }
 
+func Type(ts [][]*Token) [][]*Token {
+	a := TypeName(ts)
+	// TypeLit
+	b := tokenParser(ts, token.LPAREN)
+	if len(b) != 0 {
+		b = Type(b)
+	}
+	b = tokenParser(b, token.RPAREN)
+	return append(a, b...)
+}
+
 func TypeName(ts [][]*Token) [][]*Token {
 	result := QualifiedIdent(ts)
 	return append(result, tokenParser(ts, token.IDENT)...)
