@@ -170,6 +170,14 @@ func TestRelOp(t *testing.T) {
 	})
 }
 
+func TestSelector(t *testing.T) {
+	remaining(t, Selector, map[string][][]*Token{
+		`1`:  empty,
+		`a`:  empty,
+		`.a`: semiSlice,
+	})
+}
+
 func TestType(t *testing.T) {
 	remaining(t, Type, map[string][][]*Token{
 		`a`:       semiSlice,

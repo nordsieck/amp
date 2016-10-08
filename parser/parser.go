@@ -182,6 +182,11 @@ func RelOp(ts [][]*Token) [][]*Token {
 	return result
 }
 
+func Selector(ts [][]*Token) [][]*Token {
+	ts = tokenParser(ts, token.PERIOD)
+	return tokenParser(ts, token.IDENT)
+}
+
 func Type(ts [][]*Token) [][]*Token {
 	a := TypeName(ts)
 	// TypeLit
