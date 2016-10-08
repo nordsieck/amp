@@ -13,9 +13,60 @@ var (
 	semiSlice = [][]*Token{{semi}}
 )
 
+func TestAddOp(t *testing.T) {
+	remaining(t, AddOp, map[string][][]*Token{
+		`+`: [][]*Token{{}},
+		`-`: [][]*Token{{}},
+		`|`: [][]*Token{{}},
+		`&`: [][]*Token{{}},
+		`1`: empty,
+	})
+}
+
+func TestBasicLit(t *testing.T) {
+	remaining(t, BasicLit, map[string][][]*Token{
+		``:    empty,
+		`1`:   semiSlice,
+		`1.1`: semiSlice,
+		`1i`:  semiSlice,
+		`'a'`: semiSlice,
+		`"a"`: semiSlice,
+		`a`:   empty,
+		`_`:   empty,
+	})
+}
+
+func TestBinaryOp(t *testing.T) {
+	remaining(t, BinaryOp, map[string][][]*Token{
+		`==`: [][]*Token{{}},
+		`+`:  [][]*Token{{}},
+		`*`:  [][]*Token{{}},
+		`||`: [][]*Token{{}},
+		`&&`: [][]*Token{{}},
+		`1`:  empty,
+	})
+}
+
 func TestExpression(t *testing.T) {
 	remaining(t, Expression, map[string][][]*Token{
 		`1`: semiSlice,
+	})
+}
+
+func TestIdentifierList(t *testing.T) {
+	remaining(t, IdentifierList, map[string][][]*Token{
+		`a`:   semiSlice,
+		`a,a`: semiSlice,
+		`1`:   empty,
+		`_`:   semiSlice,
+	})
+}
+
+func TestLiteral(t *testing.T) {
+	remaining(t, Literal, map[string][][]*Token{
+		`1`: semiSlice,
+		`a`: empty,
+		`_`: empty,
 	})
 }
 
@@ -30,17 +81,16 @@ func TestMethodExpr(t *testing.T) {
 	})
 }
 
-func TestUnaryExpr(t *testing.T) {
-	remaining(t, UnaryExpr, map[string][][]*Token{
-		`1`:  semiSlice,
-		`-1`: semiSlice,
-		`!a`: semiSlice,
-	})
-}
-
-func TestPrimaryExpr(t *testing.T) {
-	remaining(t, PrimaryExpr, map[string][][]*Token{
-		`1`: semiSlice,
+func TestMulOp(t *testing.T) {
+	remaining(t, MulOp, map[string][][]*Token{
+		`*`:  [][]*Token{{}},
+		`/`:  [][]*Token{{}},
+		`%`:  [][]*Token{{}},
+		`<<`: [][]*Token{{}},
+		`>>`: [][]*Token{{}},
+		`&`:  [][]*Token{{}},
+		`&^`: [][]*Token{{}},
+		`1`:  empty,
 	})
 }
 
@@ -61,62 +111,17 @@ func TestOperandName(t *testing.T) {
 	})
 }
 
-func TestLiteral(t *testing.T) {
-	remaining(t, Literal, map[string][][]*Token{
-		`1`: semiSlice,
-		`a`: empty,
+func TestPackageName(t *testing.T) {
+	remaining(t, PackageName, map[string][][]*Token{
+		`a`: semiSlice,
+		`1`: empty,
 		`_`: empty,
 	})
 }
 
-func TestBasicLit(t *testing.T) {
-	remaining(t, BasicLit, map[string][][]*Token{
-		``:    empty,
-		`1`:   semiSlice,
-		`1.1`: semiSlice,
-		`1i`:  semiSlice,
-		`'a'`: semiSlice,
-		`"a"`: semiSlice,
-		`a`:   empty,
-		`_`:   empty,
-	})
-}
-
-func TestIdentifierList(t *testing.T) {
-	remaining(t, IdentifierList, map[string][][]*Token{
-		`a`:   semiSlice,
-		`a,a`: semiSlice,
-		`1`:   empty,
-		`_`:   semiSlice,
-	})
-}
-
-func TestType(t *testing.T) {
-	remaining(t, Type, map[string][][]*Token{
-		`a`:       semiSlice,
-		`a.a`:     [][]*Token{{semi}, {semi, {tok: token.IDENT, lit: "a"}, {tok: token.PERIOD}}},
-		`1`:       empty,
-		`_`:       semiSlice,
-		`(a.a)`:   semiSlice,
-		`(((_)))`: semiSlice,
-	})
-}
-
-func TestReceiverType(t *testing.T) {
-	remaining(t, ReceiverType, map[string][][]*Token{
-		`1`:      empty,
-		`a.a`:    [][]*Token{{semi}, {semi, {tok: token.IDENT, lit: `a`}, {tok: token.PERIOD}}},
-		`(a.a)`:  semiSlice,
-		`(*a.a)`: semiSlice,
-	})
-}
-
-func TestTypeName(t *testing.T) {
-	remaining(t, TypeName, map[string][][]*Token{
-		`a`:   semiSlice,
-		`a.a`: [][]*Token{{semi}, {semi, {tok: token.IDENT, lit: "a"}, {tok: token.PERIOD}}},
-		`1`:   empty,
-		`_`:   semiSlice,
+func TestPrimaryExpr(t *testing.T) {
+	remaining(t, PrimaryExpr, map[string][][]*Token{
+		`1`: semiSlice,
 	})
 }
 
@@ -131,47 +136,12 @@ func TestQualifiedIdent(t *testing.T) {
 	})
 }
 
-func TestPackageName(t *testing.T) {
-	remaining(t, PackageName, map[string][][]*Token{
-		`a`: semiSlice,
-		`1`: empty,
-		`_`: empty,
-	})
-}
-
-func TestUnaryOp(t *testing.T) {
-	remaining(t, UnaryOp, map[string][][]*Token{
-		`+`:  [][]*Token{{}},
-		`-`:  [][]*Token{{}},
-		`!`:  [][]*Token{{}},
-		`^`:  [][]*Token{{}},
-		`*`:  [][]*Token{{}},
-		`&`:  [][]*Token{{}},
-		`<-`: [][]*Token{{}},
-		`1`:  empty,
-	})
-}
-
-func TestMulOp(t *testing.T) {
-	remaining(t, MulOp, map[string][][]*Token{
-		`*`:  [][]*Token{{}},
-		`/`:  [][]*Token{{}},
-		`%`:  [][]*Token{{}},
-		`<<`: [][]*Token{{}},
-		`>>`: [][]*Token{{}},
-		`&`:  [][]*Token{{}},
-		`&^`: [][]*Token{{}},
-		`1`:  empty,
-	})
-}
-
-func TestAddOp(t *testing.T) {
-	remaining(t, AddOp, map[string][][]*Token{
-		`+`: [][]*Token{{}},
-		`-`: [][]*Token{{}},
-		`|`: [][]*Token{{}},
-		`&`: [][]*Token{{}},
-		`1`: empty,
+func TestReceiverType(t *testing.T) {
+	remaining(t, ReceiverType, map[string][][]*Token{
+		`1`:      empty,
+		`a.a`:    [][]*Token{{semi}, {semi, {tok: token.IDENT, lit: `a`}, {tok: token.PERIOD}}},
+		`(a.a)`:  semiSlice,
+		`(*a.a)`: semiSlice,
 	})
 }
 
@@ -187,13 +157,43 @@ func TestRelOp(t *testing.T) {
 	})
 }
 
-func TestBinaryOp(t *testing.T) {
-	remaining(t, BinaryOp, map[string][][]*Token{
-		`==`: [][]*Token{{}},
+func TestType(t *testing.T) {
+	remaining(t, Type, map[string][][]*Token{
+		`a`:       semiSlice,
+		`a.a`:     [][]*Token{{semi}, {semi, {tok: token.IDENT, lit: "a"}, {tok: token.PERIOD}}},
+		`1`:       empty,
+		`_`:       semiSlice,
+		`(a.a)`:   semiSlice,
+		`(((_)))`: semiSlice,
+	})
+}
+
+func TestTypeName(t *testing.T) {
+	remaining(t, TypeName, map[string][][]*Token{
+		`a`:   semiSlice,
+		`a.a`: [][]*Token{{semi}, {semi, {tok: token.IDENT, lit: "a"}, {tok: token.PERIOD}}},
+		`1`:   empty,
+		`_`:   semiSlice,
+	})
+}
+
+func TestUnaryExpr(t *testing.T) {
+	remaining(t, UnaryExpr, map[string][][]*Token{
+		`1`:  semiSlice,
+		`-1`: semiSlice,
+		`!a`: semiSlice,
+	})
+}
+
+func TestUnaryOp(t *testing.T) {
+	remaining(t, UnaryOp, map[string][][]*Token{
 		`+`:  [][]*Token{{}},
+		`-`:  [][]*Token{{}},
+		`!`:  [][]*Token{{}},
+		`^`:  [][]*Token{{}},
 		`*`:  [][]*Token{{}},
-		`||`: [][]*Token{{}},
-		`&&`: [][]*Token{{}},
+		`&`:  [][]*Token{{}},
+		`<-`: [][]*Token{{}},
 		`1`:  empty,
 	})
 }

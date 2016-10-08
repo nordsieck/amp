@@ -4,9 +4,74 @@ import "go/token"
 
 type Parser func([][]*Token) [][]*Token
 
+func AddOp(ts [][]*Token) [][]*Token {
+	var result [][]*Token
+	for _, t := range ts {
+		switch p := pop(&t); true {
+		case p == nil:
+		case p.tok == token.ADD, p.tok == token.SUB, p.tok == token.OR, p.tok == token.AND:
+			result = append(result, t)
+		}
+	}
+	return result
+}
+
+func BasicLit(ts [][]*Token) [][]*Token {
+	var result [][]*Token
+	for _, t := range ts {
+		switch p := pop(&t); true {
+		case p == nil:
+		case p.tok == token.INT, p.tok == token.FLOAT, p.tok == token.IMAG,
+			p.tok == token.CHAR, p.tok == token.STRING:
+			result = append(result, t)
+		}
+	}
+	return result
+}
+
+func BinaryOp(ts [][]*Token) [][]*Token {
+	var result [][]*Token
+	for _, t := range ts {
+		switch p := pop(&t); true {
+		case p == nil:
+		case p.tok == token.LAND, p.tok == token.LOR:
+			result = append(result, t)
+		}
+	}
+	result = append(result, RelOp(ts)...)
+	result = append(result, AddOp(ts)...)
+	return append(result, MulOp(ts)...)
+}
+
 func Expression(ts [][]*Token) [][]*Token {
 	return UnaryExpr(ts)
 	// Expression binary_op Expression
+}
+
+func IdentifierList(ts [][]*Token) [][]*Token {
+	var result [][]*Token
+	for _, t := range ts {
+		if p := pop(&t); p == nil || p.tok != token.IDENT {
+			continue
+		}
+		for {
+			newT, p := t, (*Token)(nil)
+			if p = pop(&newT); p == nil || p.tok != token.COMMA {
+				break
+			} else if p = pop(&newT); p == nil || p.tok != token.IDENT {
+				break
+			}
+			t = newT
+		}
+		result = append(result, t)
+	}
+	return result
+}
+
+func Literal(ts [][]*Token) [][]*Token {
+	return BasicLit(ts)
+	// CompositeLit
+	// FunctionLit
 }
 
 func MethodExpr(ts [][]*Token) [][]*Token {
@@ -15,12 +80,17 @@ func MethodExpr(ts [][]*Token) [][]*Token {
 	return tokenParser(ts, token.IDENT)
 }
 
-func UnaryExpr(ts [][]*Token) [][]*Token {
-	uo := UnaryOp(ts)
-	if len(uo) != 0 {
-		uo = UnaryExpr(uo)
+func MulOp(ts [][]*Token) [][]*Token {
+	var result [][]*Token
+	for _, t := range ts {
+		switch p := pop(&t); true {
+		case p == nil:
+		case p.tok == token.MUL, p.tok == token.QUO, p.tok == token.REM, p.tok == token.SHL,
+			p.tok == token.SHR, p.tok == token.AND, p.tok == token.AND_NOT:
+			result = append(result, t)
+		}
 	}
-	return append(PrimaryExpr(ts), uo...)
+	return result
 }
 
 func PrimaryExpr(ts [][]*Token) [][]*Token {
@@ -49,54 +119,20 @@ func OperandName(ts [][]*Token) [][]*Token {
 	return append(tokenParser(ts, token.IDENT), QualifiedIdent(ts)...)
 }
 
-func Literal(ts [][]*Token) [][]*Token {
-	return BasicLit(ts)
-	// CompositeLit
-	// FunctionLit
-}
-
-func BasicLit(ts [][]*Token) [][]*Token {
+func PackageName(ts [][]*Token) [][]*Token {
 	var result [][]*Token
 	for _, t := range ts {
-		switch p := pop(&t); true {
-		case p == nil:
-		case p.tok == token.INT, p.tok == token.FLOAT, p.tok == token.IMAG,
-			p.tok == token.CHAR, p.tok == token.STRING:
+		if p := pop(&t); p != nil && p.tok == token.IDENT && p.lit != "_" {
 			result = append(result, t)
 		}
 	}
 	return result
 }
 
-func IdentifierList(ts [][]*Token) [][]*Token {
-	var result [][]*Token
-	for _, t := range ts {
-		if p := pop(&t); p == nil || p.tok != token.IDENT {
-			continue
-		}
-		for {
-			newT, p := t, (*Token)(nil)
-			if p = pop(&newT); p == nil || p.tok != token.COMMA {
-				break
-			} else if p = pop(&newT); p == nil || p.tok != token.IDENT {
-				break
-			}
-			t = newT
-		}
-		result = append(result, t)
-	}
-	return result
-}
-
-func Type(ts [][]*Token) [][]*Token {
-	a := TypeName(ts)
-	// TypeLit
-	b := tokenParser(ts, token.LPAREN)
-	if len(b) != 0 {
-		b = Type(b)
-	}
-	b = tokenParser(b, token.RPAREN)
-	return append(a, b...)
+func QualifiedIdent(ts [][]*Token) [][]*Token {
+	ts = PackageName(ts)
+	ts = tokenParser(ts, token.PERIOD)
+	return tokenParser(ts, token.IDENT)
 }
 
 func ReceiverType(ts [][]*Token) [][]*Token {
@@ -114,65 +150,6 @@ func ReceiverType(ts [][]*Token) [][]*Token {
 	return append(append(ptr, par...), TypeName(ts)...)
 }
 
-func TypeName(ts [][]*Token) [][]*Token {
-	result := QualifiedIdent(ts)
-	return append(result, tokenParser(ts, token.IDENT)...)
-}
-
-func QualifiedIdent(ts [][]*Token) [][]*Token {
-	ts = PackageName(ts)
-	ts = tokenParser(ts, token.PERIOD)
-	return tokenParser(ts, token.IDENT)
-}
-
-func PackageName(ts [][]*Token) [][]*Token {
-	var result [][]*Token
-	for _, t := range ts {
-		if p := pop(&t); p != nil && p.tok == token.IDENT && p.lit != "_" {
-			result = append(result, t)
-		}
-	}
-	return result
-}
-
-func UnaryOp(ts [][]*Token) [][]*Token {
-	var result [][]*Token
-	for _, t := range ts {
-		switch p := pop(&t); true {
-		case p == nil:
-		case p.tok == token.ADD, p.tok == token.SUB, p.tok == token.NOT, p.tok == token.XOR,
-			p.tok == token.MUL, p.tok == token.AND, p.tok == token.ARROW:
-			result = append(result, t)
-		}
-	}
-	return result
-}
-
-func MulOp(ts [][]*Token) [][]*Token {
-	var result [][]*Token
-	for _, t := range ts {
-		switch p := pop(&t); true {
-		case p == nil:
-		case p.tok == token.MUL, p.tok == token.QUO, p.tok == token.REM, p.tok == token.SHL,
-			p.tok == token.SHR, p.tok == token.AND, p.tok == token.AND_NOT:
-			result = append(result, t)
-		}
-	}
-	return result
-}
-
-func AddOp(ts [][]*Token) [][]*Token {
-	var result [][]*Token
-	for _, t := range ts {
-		switch p := pop(&t); true {
-		case p == nil:
-		case p.tok == token.ADD, p.tok == token.SUB, p.tok == token.OR, p.tok == token.AND:
-			result = append(result, t)
-		}
-	}
-	return result
-}
-
 func RelOp(ts [][]*Token) [][]*Token {
 	var result [][]*Token
 	for _, t := range ts {
@@ -186,18 +163,41 @@ func RelOp(ts [][]*Token) [][]*Token {
 	return result
 }
 
-func BinaryOp(ts [][]*Token) [][]*Token {
+func Type(ts [][]*Token) [][]*Token {
+	a := TypeName(ts)
+	// TypeLit
+	b := tokenParser(ts, token.LPAREN)
+	if len(b) != 0 {
+		b = Type(b)
+	}
+	b = tokenParser(b, token.RPAREN)
+	return append(a, b...)
+}
+
+func TypeName(ts [][]*Token) [][]*Token {
+	result := QualifiedIdent(ts)
+	return append(result, tokenParser(ts, token.IDENT)...)
+}
+
+func UnaryExpr(ts [][]*Token) [][]*Token {
+	uo := UnaryOp(ts)
+	if len(uo) != 0 {
+		uo = UnaryExpr(uo)
+	}
+	return append(PrimaryExpr(ts), uo...)
+}
+
+func UnaryOp(ts [][]*Token) [][]*Token {
 	var result [][]*Token
 	for _, t := range ts {
 		switch p := pop(&t); true {
 		case p == nil:
-		case p.tok == token.LAND, p.tok == token.LOR:
+		case p.tok == token.ADD, p.tok == token.SUB, p.tok == token.NOT, p.tok == token.XOR,
+			p.tok == token.MUL, p.tok == token.AND, p.tok == token.ARROW:
 			result = append(result, t)
 		}
 	}
-	result = append(result, RelOp(ts)...)
-	result = append(result, AddOp(ts)...)
-	return append(result, MulOp(ts)...)
+	return result
 }
 
 func tokenParser(ts [][]*Token, tok token.Token) [][]*Token {
