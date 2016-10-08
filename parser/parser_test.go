@@ -89,6 +89,15 @@ func TestType(t *testing.T) {
 	})
 }
 
+func TestReceiverType(t *testing.T) {
+	remaining(t, ReceiverType, map[string][][]*Token{
+		`1`:      empty,
+		`a.a`:    [][]*Token{{semi}, {semi, {tok: token.IDENT, lit: `a`}, {tok: token.PERIOD}}},
+		`(a.a)`:  semiSlice,
+		`(*a.a)`: semiSlice,
+	})
+}
+
 func TestTypeName(t *testing.T) {
 	remaining(t, TypeName, map[string][][]*Token{
 		`a`:   semiSlice,

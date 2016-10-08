@@ -92,6 +92,21 @@ func Type(ts [][]*Token) [][]*Token {
 	return append(a, b...)
 }
 
+func ReceiverType(ts [][]*Token) [][]*Token {
+	ptr := tokenParser(ts, token.LPAREN)
+	ptr = tokenParser(ptr, token.MUL)
+	ptr = TypeName(ptr)
+	ptr = tokenParser(ptr, token.RPAREN)
+
+	par := tokenParser(ts, token.LPAREN)
+	if len(par) != 0 {
+		par = ReceiverType(par)
+	}
+	par = tokenParser(par, token.RPAREN)
+
+	return append(append(ptr, par...), TypeName(ts)...)
+}
+
 func TypeName(ts [][]*Token) [][]*Token {
 	result := QualifiedIdent(ts)
 	return append(result, tokenParser(ts, token.IDENT)...)
