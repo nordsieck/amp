@@ -70,6 +70,13 @@ func TestIdentifierList(t *testing.T) {
 	})
 }
 
+func TestIndex(t *testing.T) {
+	remaining(t, Index, map[string][][]*Token{
+		`[a]`: semiSlice,
+		`[1]`: semiSlice,
+	})
+}
+
 func TestLiteral(t *testing.T) {
 	remaining(t, Literal, map[string][][]*Token{
 		`1`: semiSlice,

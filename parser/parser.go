@@ -88,6 +88,14 @@ func IdentifierList(ts [][]*Token) [][]*Token {
 	return result
 }
 
+func Index(ts [][]*Token) [][]*Token {
+	ts = tokenParser(ts, token.LBRACK)
+	if len(ts) != 0 {
+		ts = Expression(ts)
+	}
+	return tokenParser(ts, token.RBRACK)
+}
+
 func Literal(ts [][]*Token) [][]*Token {
 	return BasicLit(ts)
 	// CompositeLit
