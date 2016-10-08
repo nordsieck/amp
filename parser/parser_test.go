@@ -47,6 +47,14 @@ func TestBinaryOp(t *testing.T) {
 	})
 }
 
+func TestConversion(t *testing.T) {
+	remaining(t, Conversion, map[string][][]*Token{
+		`float(1)`:   semiSlice,
+		`(int)(5,)`:  semiSlice,
+		`a.a("foo")`: semiSlice,
+	})
+}
+
 func TestExpression(t *testing.T) {
 	remaining(t, Expression, map[string][][]*Token{
 		`1`: semiSlice,
@@ -122,6 +130,11 @@ func TestPackageName(t *testing.T) {
 func TestPrimaryExpr(t *testing.T) {
 	remaining(t, PrimaryExpr, map[string][][]*Token{
 		`1`: semiSlice,
+		`(a.a)("foo")`: [][]*Token{
+			{semi, {tok: token.RPAREN}, {tok: token.STRING, lit: `"foo"`}, {tok: token.LPAREN}},
+			{semi, {tok: token.RPAREN}, {tok: token.STRING, lit: `"foo"`}, {tok: token.LPAREN}},
+			{semi},
+		},
 	})
 }
 

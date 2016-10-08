@@ -1,6 +1,9 @@
 package parser
 
-import "go/token"
+import (
+	"fmt"
+	"go/token"
+)
 
 type Parser func([][]*Token) [][]*Token
 
@@ -41,6 +44,23 @@ func BinaryOp(ts [][]*Token) [][]*Token {
 	result = append(result, RelOp(ts)...)
 	result = append(result, AddOp(ts)...)
 	return append(result, MulOp(ts)...)
+}
+
+func Conversion(ts [][]*Token) [][]*Token {
+	ts = Type(ts)
+	ts = tokenParser(ts, token.LPAREN)
+	if len(ts) != 0 {
+		ts = Expression(ts)
+	}
+	temp := make([][]*Token, len(ts))
+	for i, t := range ts {
+		if p := pop(&t); p != nil && p.tok == token.COMMA {
+			temp[i] = t
+		} else {
+			temp[i] = ts[i]
+		}
+	}
+	return tokenParser(temp, token.RPAREN)
 }
 
 func Expression(ts [][]*Token) [][]*Token {
@@ -94,8 +114,7 @@ func MulOp(ts [][]*Token) [][]*Token {
 }
 
 func PrimaryExpr(ts [][]*Token) [][]*Token {
-	return Operand(ts)
-	// Conversion
+	return append(Operand(ts), Conversion(ts)...)
 	// PrimaryExpr Selector
 	// PrimaryExpr Index
 	// PrimaryExpr Slice
@@ -209,4 +228,11 @@ func tokenParser(ts [][]*Token, tok token.Token) [][]*Token {
 		}
 	}
 	return result
+}
+
+func print(ts [][]*Token) {
+	for _, t := range ts {
+		fmt.Println(t)
+	}
+	fmt.Println("-----")
 }
