@@ -9,6 +9,12 @@ func Expression(ts [][]*Token) [][]*Token {
 	// Expression binary_op Expression
 }
 
+func MethodExpr(ts [][]*Token) [][]*Token {
+	ts = ReceiverType(ts)
+	ts = tokenParser(ts, token.PERIOD)
+	return tokenParser(ts, token.IDENT)
+}
+
 func UnaryExpr(ts [][]*Token) [][]*Token {
 	return PrimaryExpr(ts)
 	// unary_op UnaryExpr
@@ -33,9 +39,7 @@ func Operand(ts [][]*Token) [][]*Token {
 
 	return append(
 		append(Literal(ts), OperandName(ts)...),
-		xp...)
-	// MethodExpr
-
+		append(MethodExpr(ts), xp...)...)
 }
 
 func OperandName(ts [][]*Token) [][]*Token {

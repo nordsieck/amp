@@ -19,6 +19,17 @@ func TestExpression(t *testing.T) {
 	})
 }
 
+func TestMethodExpr(t *testing.T) {
+	remaining(t, MethodExpr, map[string][][]*Token{
+		`1`:        empty,
+		`a.a`:      semiSlice,
+		`a.a.a`:    [][]*Token{{semi}, {semi, {tok: token.IDENT, lit: `a`}, {tok: token.PERIOD}}},
+		`(a).a`:    semiSlice,
+		`(a.a).a`:  semiSlice,
+		`(*a.a).a`: semiSlice,
+	})
+}
+
 func TestUnaryExpr(t *testing.T) {
 	remaining(t, UnaryExpr, map[string][][]*Token{
 		`1`: semiSlice,
@@ -34,8 +45,8 @@ func TestPrimaryExpr(t *testing.T) {
 func TestOperand(t *testing.T) {
 	remaining(t, Operand, map[string][][]*Token{
 		`1`:     semiSlice,
-		`a.a`:   [][]*Token{{semi, {tok: token.IDENT, lit: `a`}, {tok: token.PERIOD}}, {semi}},
-		`(a.a)`: semiSlice,
+		`a.a`:   [][]*Token{{semi, {tok: token.IDENT, lit: `a`}, {tok: token.PERIOD}}, {semi}, {semi}},
+		`(a.a)`: [][]*Token{{semi}, {semi}},
 	})
 }
 
