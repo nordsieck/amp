@@ -16,8 +16,11 @@ func MethodExpr(ts [][]*Token) [][]*Token {
 }
 
 func UnaryExpr(ts [][]*Token) [][]*Token {
-	return PrimaryExpr(ts)
-	// unary_op UnaryExpr
+	uo := UnaryOp(ts)
+	if len(uo) != 0 {
+		uo = UnaryExpr(uo)
+	}
+	return append(PrimaryExpr(ts), uo...)
 }
 
 func PrimaryExpr(ts [][]*Token) [][]*Token {

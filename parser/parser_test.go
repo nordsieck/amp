@@ -32,7 +32,9 @@ func TestMethodExpr(t *testing.T) {
 
 func TestUnaryExpr(t *testing.T) {
 	remaining(t, UnaryExpr, map[string][][]*Token{
-		`1`: semiSlice,
+		`1`:  semiSlice,
+		`-1`: semiSlice,
+		`!a`: semiSlice,
 	})
 }
 
