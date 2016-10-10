@@ -121,6 +121,21 @@ func ExpressionList(ts [][]*Token) [][]*Token {
 	return ts
 }
 
+func FieldDecl(ts [][]*Token) [][]*Token {
+	a := IdentifierList(ts)
+	if len(a) != 0 {
+		a = Type(a)
+	}
+	ts = append(AnonymouseField(ts), a...)
+	var withTag [][]*Token
+	for _, t := range ts {
+		if newT := tokenParser([][]*Token{t}, token.STRING); len(newT) != 0 {
+			withTag = append(withTag, newT...)
+		}
+	}
+	return append(ts, withTag...)
+}
+
 func IdentifierList(ts [][]*Token) [][]*Token {
 	var result [][]*Token
 	for _, t := range ts {

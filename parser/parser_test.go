@@ -93,6 +93,14 @@ func TestExpressionList(t *testing.T) {
 	})
 }
 
+func TestFieldDecl(t *testing.T) {
+	remaining(t, FieldDecl, map[string][][]*Token{
+		`a,a int`:    [][]*Token{{semi, {tok: token.IDENT, lit: `int`}, {tok: token.IDENT, lit: `a`}, {tok: token.COMMA}}, {semi}},
+		`*int`:       semiSlice,
+		`*int "foo"`: [][]*Token{{semi, {tok: token.STRING, lit: `"foo"`}}, {semi}},
+	})
+}
+
 func TestIdentifierList(t *testing.T) {
 	remaining(t, IdentifierList, map[string][][]*Token{
 		`a`:   semiSlice,
