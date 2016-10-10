@@ -195,6 +195,46 @@ func Selector(ts [][]*Token) [][]*Token {
 	return tokenParser(ts, token.IDENT)
 }
 
+func Slice(ts [][]*Token) [][]*Token {
+	ts = tokenParser(ts, token.LBRACK)
+	temp := make([][]*Token, len(ts))
+	if len(ts) != 0 {
+		for i, t := range ts {
+			if newT := Expression([][]*Token{t}); len(newT) == 0 {
+				temp[i] = t
+			} else {
+				temp[i] = newT[0]
+			}
+		}
+	}
+	ts = tokenParser(temp, token.COLON)
+
+	// [:]
+	if len(ts) != 0 {
+		for i, t := range ts {
+			if newT := Expression([][]*Token{t}); len(newT) == 0 {
+				temp[i] = t
+			} else {
+				temp[i] = newT[0]
+			}
+		}
+	}
+	a := tokenParser(temp, token.RBRACK)
+
+	// [::]
+	var b [][]*Token
+	if len(ts) != 0 {
+		b = Expression(ts)
+	}
+	b = tokenParser(b, token.COLON)
+	if len(b) != 0 {
+		b = Expression(b)
+	}
+	b = tokenParser(b, token.RBRACK)
+
+	return append(a, b...)
+}
+
 func Type(ts [][]*Token) [][]*Token {
 	a := TypeName(ts)
 	// TypeLit

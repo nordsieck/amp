@@ -185,6 +185,17 @@ func TestSelector(t *testing.T) {
 	})
 }
 
+func TestSlice(t *testing.T) {
+	remaining(t, Slice, map[string][][]*Token{
+		`[:]`:     semiSlice,
+		`[1:]`:    semiSlice,
+		`[:1]`:    semiSlice,
+		`[1:1]`:   semiSlice,
+		`[:1:1]`:  semiSlice,
+		`[1:1:1]`: semiSlice,
+	})
+}
+
 func TestType(t *testing.T) {
 	remaining(t, Type, map[string][][]*Token{
 		`a`:       semiSlice,
