@@ -23,8 +23,8 @@ func TestAddOp(t *testing.T) {
 	})
 }
 
-func TestAnonymouseField(t *testing.T) {
-	remaining(t, AnonymouseField, map[string][][]*Token{
+func TestAnonymousField(t *testing.T) {
+	remaining(t, AnonymousField, map[string][][]*Token{
 		`a.a`:  [][]*Token{{semi}, {semi, {tok: token.IDENT, lit: `a`}, {tok: token.PERIOD}}},
 		`*a.a`: [][]*Token{{semi}, {semi, {tok: token.IDENT, lit: `a`}, {tok: token.PERIOD}}},
 	})

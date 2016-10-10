@@ -19,7 +19,7 @@ func AddOp(ts [][]*Token) [][]*Token {
 	return result
 }
 
-func AnonymouseField(ts [][]*Token) [][]*Token {
+func AnonymousField(ts [][]*Token) [][]*Token {
 	maybe := make([][]*Token, len(ts))
 	for i, t := range ts {
 		if p := pop(&t); p == nil || p.tok != token.MUL {
@@ -126,7 +126,7 @@ func FieldDecl(ts [][]*Token) [][]*Token {
 	if len(a) != 0 {
 		a = Type(a)
 	}
-	ts = append(AnonymouseField(ts), a...)
+	ts = append(AnonymousField(ts), a...)
 	var withTag [][]*Token
 	for _, t := range ts {
 		if newT := tokenParser([][]*Token{t}, token.STRING); len(newT) != 0 {
