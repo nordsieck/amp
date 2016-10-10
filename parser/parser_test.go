@@ -67,7 +67,15 @@ func TestConversion(t *testing.T) {
 
 func TestExpression(t *testing.T) {
 	remaining(t, Expression, map[string][][]*Token{
-		`1`: semiSlice,
+		//		`1`: semiSlice,
+		`1+1`: [][]*Token{
+			{semi, {tok: token.INT, lit: `1`}, {tok: token.ADD}},
+			{semi},
+		},
+		`1+-1`: [][]*Token{
+			{semi, {tok: token.INT, lit: `1`}, {tok: token.SUB}, {tok: token.ADD}},
+			{semi},
+		},
 	})
 }
 

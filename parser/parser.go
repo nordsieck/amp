@@ -88,8 +88,12 @@ func Conversion(ts [][]*Token) [][]*Token {
 }
 
 func Expression(ts [][]*Token) [][]*Token {
-	return UnaryExpr(ts)
-	// Expression binary_op Expression
+	base := UnaryExpr(ts)
+	comp := BinaryOp(base)
+	if len(comp) != 0 {
+		comp = Expression(comp)
+	}
+	return append(base, comp...)
 }
 
 func ExpressionList(ts [][]*Token) [][]*Token {
