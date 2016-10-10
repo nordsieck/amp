@@ -23,6 +23,13 @@ func TestAddOp(t *testing.T) {
 	})
 }
 
+func TestAnonymouseField(t *testing.T) {
+	remaining(t, AnonymouseField, map[string][][]*Token{
+		`a.a`:  [][]*Token{{semi}, {semi, {tok: token.IDENT, lit: `a`}, {tok: token.PERIOD}}},
+		`*a.a`: [][]*Token{{semi}, {semi, {tok: token.IDENT, lit: `a`}, {tok: token.PERIOD}}},
+	})
+}
+
 func TestArguments(t *testing.T) {
 	remaining(t, Arguments, map[string][][]*Token{
 		`()`:        semiSlice,

@@ -19,6 +19,18 @@ func AddOp(ts [][]*Token) [][]*Token {
 	return result
 }
 
+func AnonymouseField(ts [][]*Token) [][]*Token {
+	maybe := make([][]*Token, len(ts))
+	for i, t := range ts {
+		if p := pop(&t); p == nil || p.tok != token.MUL {
+			maybe[i] = ts[i]
+		} else {
+			maybe[i] = t
+		}
+	}
+	return TypeName(maybe)
+}
+
 func Arguments(ts [][]*Token) [][]*Token {
 	ts = tokenParser(ts, token.LPAREN)
 	newTs := ExpressionList(ts) // validate that you understand https://golang.org/ref/spec#Arguments
