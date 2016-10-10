@@ -19,6 +19,30 @@ func AddOp(ts [][]*Token) [][]*Token {
 	return result
 }
 
+func Arguments(ts [][]*Token) [][]*Token {
+	ts = tokenParser(ts, token.LPAREN)
+	newTs := ExpressionList(ts) // validate that you understand https://golang.org/ref/spec#Arguments
+	temp := make([][]*Token, len(newTs))
+	for i, t := range newTs {
+		if p := pop(&t); p == nil || p.tok != token.ELLIPSIS {
+			temp[i] = newTs[i]
+		} else {
+			temp[i] = t
+		}
+	}
+	newTs = temp
+	temp = make([][]*Token, len(newTs))
+	for i, t := range newTs {
+		if p := pop(&t); p == nil || p.tok != token.COMMA {
+			temp[i] = newTs[i]
+		} else {
+			temp[i] = t
+		}
+	}
+	ts = append(ts, temp...)
+	return tokenParser(ts, token.RPAREN)
+}
+
 func BasicLit(ts [][]*Token) [][]*Token {
 	var result [][]*Token
 	for _, t := range ts {

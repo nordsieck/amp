@@ -23,6 +23,16 @@ func TestAddOp(t *testing.T) {
 	})
 }
 
+func TestArguments(t *testing.T) {
+	remaining(t, Arguments, map[string][][]*Token{
+		`()`:        semiSlice,
+		`(a)`:       semiSlice,
+		`(a,a)`:     semiSlice,
+		`(a,a,)`:    semiSlice,
+		`(a,a...,)`: semiSlice,
+	})
+}
+
 func TestBasicLit(t *testing.T) {
 	remaining(t, BasicLit, map[string][][]*Token{
 		``:    empty,
