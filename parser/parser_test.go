@@ -110,6 +110,12 @@ func TestLiteral(t *testing.T) {
 	})
 }
 
+func TestLiteralType(t *testing.T) {
+	remaining(t, LiteralType, map[string][][]*Token{
+		`a.a`: [][]*Token{{semi}, {semi, {tok: token.IDENT, lit: `a`}, {tok: token.PERIOD}}},
+	})
+}
+
 func TestMethodExpr(t *testing.T) {
 	remaining(t, MethodExpr, map[string][][]*Token{
 		`1`:        empty,

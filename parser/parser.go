@@ -143,6 +143,15 @@ func Literal(ts [][]*Token) [][]*Token {
 	// FunctionLit
 }
 
+func LiteralType(ts [][]*Token) [][]*Token {
+	// StructType
+	// ArrayType
+	// [...] ElementType
+	// SliceType
+	// MapType
+	return TypeName(ts)
+}
+
 func MethodExpr(ts [][]*Token) [][]*Token {
 	ts = ReceiverType(ts)
 	ts = tokenParser(ts, token.PERIOD)
