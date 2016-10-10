@@ -68,6 +68,19 @@ func Expression(ts [][]*Token) [][]*Token {
 	// Expression binary_op Expression
 }
 
+func ExpressionList(ts [][]*Token) [][]*Token {
+	ts = Expression(ts)
+	for {
+		newTs := tokenParser(ts, token.COMMA)
+		newTs = Expression(newTs)
+		if len(newTs) == 0 {
+			break
+		}
+		ts = newTs
+	}
+	return ts
+}
+
 func IdentifierList(ts [][]*Token) [][]*Token {
 	var result [][]*Token
 	for _, t := range ts {

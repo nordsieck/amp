@@ -61,6 +61,13 @@ func TestExpression(t *testing.T) {
 	})
 }
 
+func TestExpressionList(t *testing.T) {
+	remaining(t, ExpressionList, map[string][][]*Token{
+		`1`:   semiSlice,
+		`1,1`: semiSlice,
+	})
+}
+
 func TestIdentifierList(t *testing.T) {
 	remaining(t, IdentifierList, map[string][][]*Token{
 		`a`:   semiSlice,
