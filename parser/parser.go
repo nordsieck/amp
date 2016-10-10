@@ -159,12 +159,18 @@ func MulOp(ts [][]*Token) [][]*Token {
 }
 
 func PrimaryExpr(ts [][]*Token) [][]*Token {
-	return append(Operand(ts), Conversion(ts)...)
-	// PrimaryExpr Selector
-	// PrimaryExpr Index
-	// PrimaryExpr Slice
-	// PrimaryExpr TypeAssertion
-	// PrimaryExpr Arguments
+	base := append(Operand(ts), Conversion(ts)...)
+	newBase := base
+	for len(newBase) != 0 {
+		additions := Selector(newBase)
+		additions = append(additions, Index(newBase)...)
+		additions = append(additions, Slice(newBase)...)
+		additions = append(additions, TypeAssertion(newBase)...)
+		additions = append(additions, Arguments(newBase)...)
+		base = append(base, additions...)
+		newBase = additions
+	}
+	return base
 }
 
 func Operand(ts [][]*Token) [][]*Token {

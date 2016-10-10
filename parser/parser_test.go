@@ -130,7 +130,7 @@ func TestOperand(t *testing.T) {
 	remaining(t, Operand, map[string][][]*Token{
 		`1`:     semiSlice,
 		`a.a`:   [][]*Token{{semi, {tok: token.IDENT, lit: `a`}, {tok: token.PERIOD}}, {semi}, {semi}},
-		`(a.a)`: [][]*Token{{semi}, {semi}},
+		`(a.a)`: [][]*Token{{semi}, {semi}, {semi}},
 	})
 }
 
@@ -157,6 +157,33 @@ func TestPrimaryExpr(t *testing.T) {
 		`(a.a)("foo")`: [][]*Token{
 			{semi, {tok: token.RPAREN}, {tok: token.STRING, lit: `"foo"`}, {tok: token.LPAREN}},
 			{semi, {tok: token.RPAREN}, {tok: token.STRING, lit: `"foo"`}, {tok: token.LPAREN}},
+			{semi, {tok: token.RPAREN}, {tok: token.STRING, lit: `"foo"`}, {tok: token.LPAREN}},
+			{semi}, {semi}, {semi}, {semi},
+		},
+		`a.a`: [][]*Token{
+			{semi, {tok: token.IDENT, lit: `a`}, {tok: token.PERIOD}},
+			{semi}, {semi}, {semi},
+		},
+		`a[1]`: [][]*Token{
+			{semi, {tok: token.RBRACK}, {tok: token.INT, lit: `1`}, {tok: token.LBRACK}},
+			{semi}, {semi},
+		},
+		`a[:]`: [][]*Token{
+			{semi, {tok: token.RBRACK}, {tok: token.COLON}, {tok: token.LBRACK}},
+			{semi},
+		},
+		`a.(int)`: [][]*Token{
+			{semi, {tok: token.RPAREN}, {tok: token.IDENT, lit: `int`}, {tok: token.LPAREN}, {tok: token.PERIOD}},
+			{semi},
+		},
+		`a(b...)`: [][]*Token{
+			{semi, {tok: token.RPAREN}, {tok: token.ELLIPSIS}, {tok: token.IDENT, lit: `b`}, {tok: token.LPAREN}},
+			{semi},
+		},
+		`a(b...)[:]`: [][]*Token{
+			{semi, {tok: token.RBRACK}, {tok: token.COLON}, {tok: token.LBRACK},
+				{tok: token.RPAREN}, {tok: token.ELLIPSIS}, {tok: token.IDENT, lit: `b`}, {tok: token.LPAREN}},
+			{semi, {tok: token.RBRACK}, {tok: token.COLON}, {tok: token.LBRACK}},
 			{semi},
 		},
 	})
