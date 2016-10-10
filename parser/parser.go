@@ -246,6 +246,15 @@ func Type(ts [][]*Token) [][]*Token {
 	return append(a, b...)
 }
 
+func TypeAssertion(ts [][]*Token) [][]*Token {
+	ts = tokenParser(ts, token.PERIOD)
+	ts = tokenParser(ts, token.LPAREN)
+	if len(ts) != 0 {
+		ts = Expression(ts)
+	}
+	return tokenParser(ts, token.RPAREN)
+}
+
 func TypeName(ts [][]*Token) [][]*Token {
 	result := QualifiedIdent(ts)
 	return append(result, tokenParser(ts, token.IDENT)...)

@@ -207,6 +207,13 @@ func TestType(t *testing.T) {
 	})
 }
 
+func TestTypeAssertion(t *testing.T) {
+	remaining(t, TypeAssertion, map[string][][]*Token{
+		`.(int)`: semiSlice,
+		`1`:      empty,
+	})
+}
+
 func TestTypeName(t *testing.T) {
 	remaining(t, TypeName, map[string][][]*Token{
 		`a`:   semiSlice,
