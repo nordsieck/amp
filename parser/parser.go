@@ -108,6 +108,16 @@ func Conversion(ts [][]*Token) [][]*Token {
 	return tokenParser(temp, token.RPAREN)
 }
 
+func EllipsisArrayType(ts [][]*Token) [][]*Token {
+	ts = tokenParser(ts, token.LBRACK)
+	ts = tokenParser(ts, token.ELLIPSIS)
+	ts = tokenParser(ts, token.RBRACK)
+	if len(ts) == 0 {
+		return nil
+	}
+	return Type(ts)
+}
+
 func Expression(ts [][]*Token) [][]*Token {
 	base := UnaryExpr(ts)
 	comp := BinaryOp(base)
@@ -341,8 +351,7 @@ func SliceType(ts [][]*Token) [][]*Token {
 	ts = tokenParser(ts, token.LBRACK)
 	ts = tokenParser(ts, token.RBRACK)
 	if len(ts) == 0 {
-		return [][]*Token(nil)
-
+		return nil
 	}
 	return Type(ts)
 }

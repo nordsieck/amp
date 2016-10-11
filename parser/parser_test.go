@@ -79,6 +79,10 @@ func TestConversion(t *testing.T) {
 	})
 }
 
+func TestEllipsisArrayType(t *testing.T) {
+	remaining(t, EllipsisArrayType, map[string][][]*Token{`[...]int`: semiSlice})
+}
+
 func TestExpression(t *testing.T) {
 	remaining(t, Expression, map[string][][]*Token{
 		//		`1`: semiSlice,
