@@ -55,6 +55,15 @@ func Arguments(ts [][]*Token) [][]*Token {
 	return tokenParser(ts, token.RPAREN)
 }
 
+func ArrayType(ts [][]*Token) [][]*Token {
+	ts = tokenParser(ts, token.LBRACK)
+	if len(ts) != 0 {
+		ts = Expression(ts)
+	}
+	ts = tokenParser(ts, token.RBRACK)
+	return Type(ts)
+}
+
 func BasicLit(ts [][]*Token) [][]*Token {
 	var result [][]*Token
 	for _, t := range ts {

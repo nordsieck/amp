@@ -40,6 +40,13 @@ func TestArguments(t *testing.T) {
 	})
 }
 
+func TestArrayType(t *testing.T) {
+	remaining(t, ArrayType, map[string][][]*Token{
+		`[1]int`: semiSlice,
+		`[a]int`: semiSlice,
+	})
+}
+
 func TestBasicLit(t *testing.T) {
 	remaining(t, BasicLit, map[string][][]*Token{
 		``:    empty,
