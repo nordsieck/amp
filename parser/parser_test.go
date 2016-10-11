@@ -269,6 +269,19 @@ func TestSlice(t *testing.T) {
 	})
 }
 
+func TestStructType(t *testing.T) {
+	remaining(t, StructType, map[string][][]*Token{
+		`struct{}`:                      semiSlice,
+		`struct{int}`:                   semiSlice,
+		`struct{int;}`:                  semiSlice,
+		`struct{int;float64;}`:          semiSlice,
+		`struct{a int}`:                 semiSlice,
+		`struct{a, b int}`:              semiSlice,
+		`struct{a, b int;}`:             semiSlice,
+		`struct{a, b int; c, d string}`: semiSlice,
+	})
+}
+
 func TestType(t *testing.T) {
 	remaining(t, Type, map[string][][]*Token{
 		`a`:       semiSlice,

@@ -318,6 +318,22 @@ func Slice(ts [][]*Token) [][]*Token {
 	return append(a, b...)
 }
 
+// spec is wrong here - optional trailing semicolon
+func StructType(ts [][]*Token) [][]*Token {
+	ts = tokenParser(ts, token.STRUCT)
+	ts = tokenParser(ts, token.LBRACE)
+	fields := FieldDecl(ts)
+	next := fields
+	for len(next) != 0 {
+		field := tokenParser(next, token.SEMICOLON)
+		field = FieldDecl(field)
+		fields = append(fields, field...)
+		next = field
+	}
+	fields = append(fields, tokenParser(fields, token.SEMICOLON)...)
+	return tokenParser(append(ts, fields...), token.RBRACE)
+}
+
 func Type(ts [][]*Token) [][]*Token {
 	a := TypeName(ts)
 	// TypeLit
