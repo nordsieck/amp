@@ -190,12 +190,11 @@ func Literal(ts [][]*Token) [][]*Token {
 }
 
 func LiteralType(ts [][]*Token) [][]*Token {
-	// StructType
-	// ArrayType
-	// [...] ElementType
-	// SliceType
-	// MapType
-	return TypeName(ts)
+	return append(
+		append(
+			append(StructType(ts), ArrayType(ts)...),
+			append(EllipsisArrayType(ts), SliceType(ts)...)...),
+		append(MapType(ts), TypeName(ts)...)...)
 }
 
 func MapType(ts [][]*Token) [][]*Token {

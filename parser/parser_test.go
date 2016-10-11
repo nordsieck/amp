@@ -138,7 +138,12 @@ func TestLiteral(t *testing.T) {
 
 func TestLiteralType(t *testing.T) {
 	remaining(t, LiteralType, map[string][][]*Token{
-		`a.a`: [][]*Token{{semi}, {semi, {tok: token.IDENT, lit: `a`}, {tok: token.PERIOD}}},
+		`struct{}`:    semiSlice,
+		`[1]int`:      semiSlice,
+		`[...]int`:    semiSlice,
+		`[]int`:       semiSlice,
+		`map[int]int`: semiSlice,
+		`a.a`:         [][]*Token{{semi}, {semi, {tok: token.IDENT, lit: `a`}, {tok: token.PERIOD}}},
 	})
 }
 
