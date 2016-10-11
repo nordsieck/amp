@@ -188,6 +188,16 @@ func LiteralType(ts [][]*Token) [][]*Token {
 	return TypeName(ts)
 }
 
+func MapType(ts [][]*Token) [][]*Token {
+	ts = tokenParser(ts, token.MAP)
+	ts = tokenParser(ts, token.LBRACK)
+	if len(ts) != 0 {
+		ts = Type(ts)
+	}
+	ts = tokenParser(ts, token.RBRACK)
+	return Type(ts)
+}
+
 func MethodExpr(ts [][]*Token) [][]*Token {
 	ts = ReceiverType(ts)
 	ts = tokenParser(ts, token.PERIOD)

@@ -138,6 +138,10 @@ func TestLiteralType(t *testing.T) {
 	})
 }
 
+func TestMapType(t *testing.T) {
+	remaining(t, MapType, map[string][][]*Token{`map[int]int`: semiSlice})
+}
+
 func TestMethodExpr(t *testing.T) {
 	remaining(t, MethodExpr, map[string][][]*Token{
 		`1`:        empty,
