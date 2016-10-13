@@ -108,6 +108,11 @@ func Conversion(ts [][]*Token) [][]*Token {
 	return tokenParser(temp, token.RPAREN)
 }
 
+func Element(ts [][]*Token) [][]*Token {
+	// LiteralValue
+	return Expression(ts)
+}
+
 func EllipsisArrayType(ts [][]*Token) [][]*Token {
 	ts = tokenParser(ts, token.LBRACK)
 	ts = tokenParser(ts, token.ELLIPSIS)
