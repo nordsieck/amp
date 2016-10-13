@@ -109,8 +109,7 @@ func Conversion(ts [][]*Token) [][]*Token {
 }
 
 func Element(ts [][]*Token) [][]*Token {
-	// LiteralValue
-	return Expression(ts)
+	return append(Expression(ts), LiteralValue(ts)...)
 }
 
 func ElementList(ts [][]*Token) [][]*Token {
