@@ -367,6 +367,8 @@ func RelOp(ts [][]*Token) [][]*Token {
 	return result
 }
 
+func Result(ts [][]*Token) [][]*Token { return append(Parameters(ts), Type(ts)...) }
+
 func Selector(ts [][]*Token) [][]*Token {
 	ts = tokenParser(ts, token.PERIOD)
 	return tokenParser(ts, token.IDENT)
