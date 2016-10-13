@@ -248,6 +248,15 @@ func TestPackageName(t *testing.T) {
 	})
 }
 
+func TestParameterDecl(t *testing.T) {
+	remaining(t, ParameterDecl, map[string][][]*Token{
+		`int`:      semiSlice,
+		`...int`:   semiSlice,
+		`a, b int`: [][]*Token{{semi, {tok: token.IDENT, lit: `int`}, {tok: token.IDENT, lit: `b`}, {tok: token.COMMA}}, {semi}},
+		`b... int`: [][]*Token{{semi, {tok: token.IDENT, lit: `int`}, {tok: token.ELLIPSIS}}, {semi}},
+	})
+}
+
 func TestPrimaryExpr(t *testing.T) {
 	remaining(t, PrimaryExpr, map[string][][]*Token{
 		`1`: semiSlice,

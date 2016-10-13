@@ -307,6 +307,12 @@ func PackageName(ts [][]*Token) [][]*Token {
 	return result
 }
 
+func ParameterDecl(ts [][]*Token) [][]*Token {
+	ts = append(ts, IdentifierList(ts)...)
+	ts = append(ts, tokenParser(ts, token.ELLIPSIS)...)
+	return Type(ts)
+}
+
 func QualifiedIdent(ts [][]*Token) [][]*Token {
 	ts = PackageName(ts)
 	ts = tokenParser(ts, token.PERIOD)
