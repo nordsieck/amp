@@ -91,7 +91,7 @@ func BinaryOp(ts [][]*Token) [][]*Token {
 	return append(result, MulOp(ts)...)
 }
 
-func CompositeLiteral(ts [][]*Token) [][]*Token {
+func CompositeLit(ts [][]*Token) [][]*Token {
 	ts = LiteralType(ts)
 	return LiteralValue(ts)
 }
@@ -215,8 +215,7 @@ func KeyedElement(ts [][]*Token) [][]*Token {
 }
 
 func Literal(ts [][]*Token) [][]*Token {
-	return BasicLit(ts)
-	// CompositeLit
+	return append(BasicLit(ts), CompositeLit(ts)...)
 	// FunctionLit
 }
 

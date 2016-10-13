@@ -71,8 +71,8 @@ func TestBinaryOp(t *testing.T) {
 	})
 }
 
-func TestCompositeLiteral(t *testing.T) {
-	remaining(t, CompositeLiteral, map[string][][]*Token{
+func TestCompositeLit(t *testing.T) {
+	remaining(t, CompositeLit, map[string][][]*Token{
 		`T{1}`: semiSlice,
 		`T{foo: "bar", baz: "quux",}`: [][]*Token{{semi}, {semi}, {semi}, {semi}},
 	})
@@ -170,9 +170,10 @@ func TestKeyedElement(t *testing.T) {
 
 func TestLiteral(t *testing.T) {
 	remaining(t, Literal, map[string][][]*Token{
-		`1`: semiSlice,
-		`a`: empty,
-		`_`: empty,
+		`1`:    semiSlice,
+		`T{1}`: semiSlice,
+		`a`:    empty,
+		`_`:    empty,
 	})
 }
 
