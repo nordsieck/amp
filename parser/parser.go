@@ -325,6 +325,14 @@ func ParameterList(ts [][]*Token) [][]*Token {
 	return ts
 }
 
+func Parameters(ts [][]*Token) [][]*Token {
+	ts = tokenParser(ts, token.LPAREN)
+	params := ParameterList(ts)
+	params = append(params, tokenParser(params, token.COMMA)...)
+	ts = append(ts, params...)
+	return tokenParser(ts, token.RPAREN)
+}
+
 func QualifiedIdent(ts [][]*Token) [][]*Token {
 	ts = PackageName(ts)
 	ts = tokenParser(ts, token.PERIOD)

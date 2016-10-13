@@ -276,6 +276,16 @@ func TestParameterList(t *testing.T) {
 	})
 }
 
+func TestParameters(t *testing.T) {
+	remaining(t, Parameters, map[string][][]*Token{
+		`(int)`:                semiSlice,
+		`(int, int)`:           semiSlice,
+		`(int, int,)`:          semiSlice,
+		`(a, b int)`:           [][]*Token{{semi}, {semi}},
+		`(a, b int, c, d int)`: [][]*Token{{semi}, {semi}, {semi}, {semi}},
+	})
+}
+
 func TestPrimaryExpr(t *testing.T) {
 	remaining(t, PrimaryExpr, map[string][][]*Token{
 		`1`: semiSlice,
