@@ -179,6 +179,13 @@ func TestLiteralType(t *testing.T) {
 	})
 }
 
+func TestLiteralValue(t *testing.T) {
+	remaining(t, LiteralValue, map[string][][]*Token{
+		`{1}`:           semiSlice,
+		`{0: 1, 1: 2,}`: semiSlice,
+	})
+}
+
 func TestMapType(t *testing.T) {
 	remaining(t, MapType, map[string][][]*Token{`map[int]int`: semiSlice})
 }

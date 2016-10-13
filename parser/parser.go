@@ -224,6 +224,16 @@ func LiteralType(ts [][]*Token) [][]*Token {
 		append(MapType(ts), TypeName(ts)...)...)
 }
 
+func LiteralValue(ts [][]*Token) [][]*Token {
+	ts = tokenParser(ts, token.LBRACE)
+	if len(ts) != 0 {
+		list := ElementList(ts)
+		list = append(list, tokenParser(list, token.COMMA)...)
+		ts = append(ts, list...)
+	}
+	return tokenParser(ts, token.RBRACE)
+}
+
 func MapType(ts [][]*Token) [][]*Token {
 	ts = tokenParser(ts, token.MAP)
 	ts = tokenParser(ts, token.LBRACK)
