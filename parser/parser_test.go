@@ -257,6 +257,25 @@ func TestParameterDecl(t *testing.T) {
 	})
 }
 
+func TestParameterList(t *testing.T) {
+	remaining(t, ParameterList, map[string][][]*Token{
+		`int`:      semiSlice,
+		`int, int`: [][]*Token{{semi, {tok: token.IDENT, lit: `int`}, {tok: token.COMMA}}, {semi}},
+		`a, b int, c, d int`: [][]*Token{
+			{semi, {tok: token.IDENT, lit: `int`}, {tok: token.IDENT, lit: `d`}, {tok: token.COMMA}, {tok: token.IDENT, lit: `c`}, {tok: token.COMMA},
+				{tok: token.IDENT, lit: `int`}, {tok: token.IDENT, lit: `b`}, {tok: token.COMMA}},
+			{semi, {tok: token.IDENT, lit: `int`}, {tok: token.IDENT, lit: `d`}, {tok: token.COMMA}, {tok: token.IDENT, lit: `c`}, {tok: token.COMMA}},
+			{semi, {tok: token.IDENT, lit: `int`}, {tok: token.IDENT, lit: `d`}, {tok: token.COMMA}, {tok: token.IDENT, lit: `c`}, {tok: token.COMMA},
+				{tok: token.IDENT, lit: `int`}},
+			{semi, {tok: token.IDENT, lit: `int`}, {tok: token.IDENT, lit: `d`}, {tok: token.COMMA}},
+			{semi, {tok: token.IDENT, lit: `int`}, {tok: token.IDENT, lit: `d`}, {tok: token.COMMA}, {tok: token.IDENT, lit: `c`}, {tok: token.COMMA}},
+			{semi}, {semi, {tok: token.IDENT, lit: `int`}},
+			{semi, {tok: token.IDENT, lit: `int`}, {tok: token.IDENT, lit: `d`}, {tok: token.COMMA}},
+			{semi}, {semi}, {semi, {tok: token.IDENT, lit: `int`}}, {semi},
+		},
+	})
+}
+
 func TestPrimaryExpr(t *testing.T) {
 	remaining(t, PrimaryExpr, map[string][][]*Token{
 		`1`: semiSlice,

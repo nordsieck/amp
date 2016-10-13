@@ -313,6 +313,18 @@ func ParameterDecl(ts [][]*Token) [][]*Token {
 	return Type(ts)
 }
 
+func ParameterList(ts [][]*Token) [][]*Token {
+	ts = ParameterDecl(ts)
+	next := ts
+	for len(next) != 0 {
+		decl := tokenParser(next, token.COMMA)
+		decl = ParameterDecl(decl)
+		ts = append(ts, decl...)
+		next = decl
+	}
+	return ts
+}
+
 func QualifiedIdent(ts [][]*Token) [][]*Token {
 	ts = PackageName(ts)
 	ts = tokenParser(ts, token.PERIOD)
