@@ -85,6 +85,17 @@ func TestElement(t *testing.T) {
 	})
 }
 
+func TestElementList(t *testing.T) {
+	remaining(t, ElementList, map[string][][]*Token{
+		`1:1`: [][]*Token{{semi, {tok: token.INT, lit: `1`}, {tok: token.COLON}}, {semi}},
+		`1:1, 1:1`: [][]*Token{{semi, {tok: token.INT, lit: `1`}, {tok: token.COLON}, {tok: token.INT, lit: `1`},
+			{tok: token.COMMA}, {tok: token.INT, lit: `1`}, {tok: token.COLON}},
+			{semi, {tok: token.INT, lit: `1`}, {tok: token.COLON}, {tok: token.INT, lit: `1`}, {tok: token.COMMA}},
+			{semi, {tok: token.INT, lit: `1`}, {tok: token.COLON}},
+			{semi}},
+	})
+}
+
 func TestEllipsisArrayType(t *testing.T) {
 	remaining(t, EllipsisArrayType, map[string][][]*Token{`[...]int`: semiSlice})
 }

@@ -113,6 +113,18 @@ func Element(ts [][]*Token) [][]*Token {
 	return Expression(ts)
 }
 
+func ElementList(ts [][]*Token) [][]*Token {
+	ts = KeyedElement(ts)
+	base := ts
+	for len(base) != 0 {
+		next := tokenParser(base, token.COMMA)
+		next = KeyedElement(next)
+		ts = append(ts, next...)
+		base = next
+	}
+	return ts
+}
+
 func EllipsisArrayType(ts [][]*Token) [][]*Token {
 	ts = tokenParser(ts, token.LBRACK)
 	ts = tokenParser(ts, token.ELLIPSIS)
