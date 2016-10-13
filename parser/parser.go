@@ -192,6 +192,12 @@ func Key(ts [][]*Token) [][]*Token {
 	return append(tokenParser(ts, token.IDENT), Expression(ts)...)
 }
 
+func KeyedElement(ts [][]*Token) [][]*Token {
+	with := Key(ts)
+	with = tokenParser(with, token.COLON)
+	return append(Element(ts), Element(with)...)
+}
+
 func Literal(ts [][]*Token) [][]*Token {
 	return BasicLit(ts)
 	// CompositeLit

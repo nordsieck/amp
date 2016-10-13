@@ -142,6 +142,13 @@ func TestKey(t *testing.T) {
 	})
 }
 
+func TestKeyedElement(t *testing.T) {
+	remaining(t, KeyedElement, map[string][][]*Token{
+		`1`:   semiSlice,
+		`1:1`: [][]*Token{{semi, {tok: token.INT, lit: `1`}, {tok: token.COLON}}, {semi}},
+	})
+}
+
 func TestLiteral(t *testing.T) {
 	remaining(t, Literal, map[string][][]*Token{
 		`1`: semiSlice,
