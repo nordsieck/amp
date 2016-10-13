@@ -71,6 +71,13 @@ func TestBinaryOp(t *testing.T) {
 	})
 }
 
+func TestCompositeLiteral(t *testing.T) {
+	remaining(t, CompositeLiteral, map[string][][]*Token{
+		`T{1}`: semiSlice,
+		`T{foo: "bar", baz: "quux",}`: [][]*Token{{semi}, {semi}, {semi}, {semi}},
+	})
+}
+
 func TestConversion(t *testing.T) {
 	remaining(t, Conversion, map[string][][]*Token{
 		`float(1)`:   semiSlice,

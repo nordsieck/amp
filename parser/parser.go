@@ -91,6 +91,11 @@ func BinaryOp(ts [][]*Token) [][]*Token {
 	return append(result, MulOp(ts)...)
 }
 
+func CompositeLiteral(ts [][]*Token) [][]*Token {
+	ts = LiteralType(ts)
+	return LiteralValue(ts)
+}
+
 func Conversion(ts [][]*Token) [][]*Token {
 	ts = Type(ts)
 	ts = tokenParser(ts, token.LPAREN)
