@@ -371,6 +371,14 @@ func TestSelector(t *testing.T) {
 	})
 }
 
+func TestSignature(t *testing.T) {
+	remaining(t, Signature, map[string][][]*Token{
+		`()`:             semiSlice,
+		`()()`:           [][]*Token{{semi, {tok: token.RPAREN}, {tok: token.LPAREN}}, {semi}},
+		`(int, int) int`: [][]*Token{{semi, {tok: token.IDENT, lit: `int`}}, {semi}},
+	})
+}
+
 func TestSlice(t *testing.T) {
 	remaining(t, Slice, map[string][][]*Token{
 		`[:]`:     semiSlice,

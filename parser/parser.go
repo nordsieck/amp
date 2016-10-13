@@ -374,6 +374,11 @@ func Selector(ts [][]*Token) [][]*Token {
 	return tokenParser(ts, token.IDENT)
 }
 
+func Signature(ts [][]*Token) [][]*Token {
+	ts = Parameters(ts)
+	return append(ts, Result(ts)...)
+}
+
 func Slice(ts [][]*Token) [][]*Token {
 	ts = tokenParser(ts, token.LBRACK)
 	temp := make([][]*Token, len(ts))
