@@ -183,6 +183,10 @@ func Index(ts [][]*Token) [][]*Token {
 	return tokenParser(ts, token.RBRACK)
 }
 
+func Key(ts [][]*Token) [][]*Token {
+	return append(tokenParser(ts, token.IDENT), Expression(ts)...)
+}
+
 func Literal(ts [][]*Token) [][]*Token {
 	return BasicLit(ts)
 	// CompositeLit
