@@ -176,6 +176,11 @@ func FieldDecl(ts [][]*Token) [][]*Token {
 	return append(ts, withTag...)
 }
 
+func FunctionType(ts [][]*Token) [][]*Token {
+	ts = tokenParser(ts, token.FUNC)
+	return Signature(ts)
+}
+
 func IdentifierList(ts [][]*Token) [][]*Token {
 	var result [][]*Token
 	for _, t := range ts {

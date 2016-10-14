@@ -137,6 +137,14 @@ func TestFieldDecl(t *testing.T) {
 	})
 }
 
+func TestFunctionType(t *testing.T) {
+	remaining(t, FunctionType, map[string][][]*Token{
+		`func()`:             semiSlice,
+		`func()()`:           [][]*Token{{semi, {tok: token.RPAREN}, {tok: token.LPAREN}}, {semi}},
+		`func(int, int) int`: [][]*Token{{semi, {tok: token.IDENT, lit: `int`}}, {semi}},
+	})
+}
+
 func TestIdentifierList(t *testing.T) {
 	remaining(t, IdentifierList, map[string][][]*Token{
 		`a`:   semiSlice,
