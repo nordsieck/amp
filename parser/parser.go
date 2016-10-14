@@ -338,6 +338,11 @@ func Parameters(ts [][]*Token) [][]*Token {
 	return tokenParser(ts, token.RPAREN)
 }
 
+func PointerType(ts [][]*Token) [][]*Token {
+	ts = tokenParser(ts, token.MUL)
+	return Type(ts)
+}
+
 func QualifiedIdent(ts [][]*Token) [][]*Token {
 	ts = PackageName(ts)
 	ts = tokenParser(ts, token.PERIOD)

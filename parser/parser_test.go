@@ -294,6 +294,13 @@ func TestParameters(t *testing.T) {
 	})
 }
 
+func TestPointerType(t *testing.T) {
+	remaining(t, PointerType, map[string][][]*Token{
+		`*int`: semiSlice,
+		`int`:  empty,
+	})
+}
+
 func TestPrimaryExpr(t *testing.T) {
 	remaining(t, PrimaryExpr, map[string][][]*Token{
 		`1`: semiSlice,
