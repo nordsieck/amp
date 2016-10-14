@@ -258,6 +258,17 @@ func MethodExpr(ts [][]*Token) [][]*Token {
 	return tokenParser(ts, token.IDENT)
 }
 
+func MethodSpec(ts [][]*Token) [][]*Token {
+	var sig [][]*Token
+	for _, t := range ts {
+		if p := pop(&t); p != nil && p.tok == token.IDENT && p.lit != `_` {
+			sig = append(sig, t)
+		}
+	}
+	sig = Signature(sig)
+	return append(sig, TypeName(ts)...)
+}
+
 func MulOp(ts [][]*Token) [][]*Token {
 	var result [][]*Token
 	for _, t := range ts {
@@ -269,21 +280,6 @@ func MulOp(ts [][]*Token) [][]*Token {
 		}
 	}
 	return result
-}
-
-func PrimaryExpr(ts [][]*Token) [][]*Token {
-	base := append(Operand(ts), Conversion(ts)...)
-	newBase := base
-	for len(newBase) != 0 {
-		additions := Selector(newBase)
-		additions = append(additions, Index(newBase)...)
-		additions = append(additions, Slice(newBase)...)
-		additions = append(additions, TypeAssertion(newBase)...)
-		additions = append(additions, Arguments(newBase)...)
-		base = append(base, additions...)
-		newBase = additions
-	}
-	return base
 }
 
 func Operand(ts [][]*Token) [][]*Token {
@@ -341,6 +337,21 @@ func Parameters(ts [][]*Token) [][]*Token {
 func PointerType(ts [][]*Token) [][]*Token {
 	ts = tokenParser(ts, token.MUL)
 	return Type(ts)
+}
+
+func PrimaryExpr(ts [][]*Token) [][]*Token {
+	base := append(Operand(ts), Conversion(ts)...)
+	newBase := base
+	for len(newBase) != 0 {
+		additions := Selector(newBase)
+		additions = append(additions, Index(newBase)...)
+		additions = append(additions, Slice(newBase)...)
+		additions = append(additions, TypeAssertion(newBase)...)
+		additions = append(additions, Arguments(newBase)...)
+		base = append(base, additions...)
+		newBase = additions
+	}
+	return base
 }
 
 func QualifiedIdent(ts [][]*Token) [][]*Token {

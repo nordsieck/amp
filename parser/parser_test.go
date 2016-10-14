@@ -218,6 +218,15 @@ func TestMethodExpr(t *testing.T) {
 	})
 }
 
+func TestMethodSpec(t *testing.T) {
+	remaining(t, MethodSpec, map[string][][]*Token{
+		`a()`: [][]*Token{{semi}, {semi, {tok: token.RPAREN}, {tok: token.LPAREN}}},
+		`a`:   semiSlice,
+		`a.a()`: [][]*Token{{semi, {tok: token.RPAREN}, {tok: token.LPAREN}},
+			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `a`}, {tok: token.PERIOD}}},
+	})
+}
+
 func TestMulOp(t *testing.T) {
 	remaining(t, MulOp, map[string][][]*Token{
 		`*`:  [][]*Token{{}},
