@@ -511,6 +511,14 @@ func TypeAssertion(ts [][]*Token) [][]*Token {
 	return tokenParser(ts, token.RPAREN)
 }
 
+func TypeLit(ts [][]*Token) [][]*Token {
+	return append(
+		append(append(ArrayType(ts), StructType(ts)...),
+			append(PointerType(ts), FunctionType(ts)...)...),
+		append(append(InterfaceType(ts), SliceType(ts)...),
+			append(MapType(ts), ChannelType(ts)...)...)...)
+}
+
 func TypeName(ts [][]*Token) [][]*Token {
 	result := QualifiedIdent(ts)
 	return append(result, tokenParser(ts, token.IDENT)...)
