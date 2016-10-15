@@ -71,6 +71,15 @@ func TestBinaryOp(t *testing.T) {
 	})
 }
 
+func TestChannelType(t *testing.T) {
+	remaining(t, ChannelType, map[string][][]*Token{
+		`chan int`:   semiSlice,
+		`<-chan int`: semiSlice,
+		`chan<- int`: semiSlice,
+		`int`:        empty,
+	})
+}
+
 func TestCompositeLit(t *testing.T) {
 	remaining(t, CompositeLit, map[string][][]*Token{
 		`T{1}`: semiSlice,

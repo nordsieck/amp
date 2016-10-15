@@ -91,6 +91,15 @@ func BinaryOp(ts [][]*Token) [][]*Token {
 	return append(result, MulOp(ts)...)
 }
 
+func ChannelType(ts [][]*Token) [][]*Token {
+	plain := tokenParser(ts, token.CHAN)
+	after := tokenParser(plain, token.ARROW)
+	before := tokenParser(ts, token.ARROW)
+	before = tokenParser(before, token.CHAN)
+	together := append(append(plain, after...), before...)
+	return Type(together)
+}
+
 func CompositeLit(ts [][]*Token) [][]*Token {
 	ts = LiteralType(ts)
 	return LiteralValue(ts)
