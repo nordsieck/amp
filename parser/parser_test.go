@@ -87,6 +87,22 @@ func TestCompositeLit(t *testing.T) {
 	})
 }
 
+func TestConstSpec(t *testing.T) {
+	remaining(t, ConstSpec, map[string][][]*Token{
+		`a`:         semiSlice,
+		`a,b`:       [][]*Token{{semi, {tok: token.IDENT, lit: `b`}, {tok: token.COMMA}}, {semi}},
+		`a = 1`:     [][]*Token{{semi, {tok: token.INT, lit: `1`}, {tok: token.ASSIGN}}, {semi}},
+		`a int = 1`: [][]*Token{{semi, {tok: token.INT, lit: `1`}, {tok: token.ASSIGN}, {tok: token.IDENT, lit: `int`}}, {semi}},
+		`a, b int = 1, 2`: [][]*Token{
+			{semi, {tok: token.INT, lit: `2`}, {tok: token.COMMA}, {tok: token.INT, lit: `1`}, {tok: token.ASSIGN}, {tok: token.IDENT, lit: `int`},
+				{tok: token.IDENT, lit: `b`}, {tok: token.COMMA}},
+			{semi, {tok: token.INT, lit: `2`}, {tok: token.COMMA}, {tok: token.INT, lit: `1`}, {tok: token.ASSIGN}, {tok: token.IDENT, lit: `int`}},
+			{semi, {tok: token.INT, lit: `2`}, {tok: token.COMMA}},
+			{semi},
+		},
+	})
+}
+
 func TestConversion(t *testing.T) {
 	remaining(t, Conversion, map[string][][]*Token{
 		`float(1)`:   semiSlice,

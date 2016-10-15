@@ -76,6 +76,14 @@ func CompositeLit(ts [][]*Token) [][]*Token {
 	return LiteralValue(ts)
 }
 
+func ConstSpec(ts [][]*Token) [][]*Token {
+	ts = IdentifierList(ts)
+	opt := append(ts, Type(ts)...)
+	opt = tokenParser(opt, token.ASSIGN)
+	opt = ExpressionList(opt)
+	return append(ts, opt...)
+}
+
 func Conversion(ts [][]*Token) [][]*Token {
 	ts = Type(ts)
 	ts = tokenParser(ts, token.LPAREN)
