@@ -123,13 +123,12 @@ func Expression(ts [][]*Token) [][]*Token {
 
 func ExpressionList(ts [][]*Token) [][]*Token {
 	ts = Expression(ts)
-	for {
-		newTs := tokenParser(ts, token.COMMA)
-		newTs = Expression(newTs)
-		if len(newTs) == 0 {
-			break
-		}
-		ts = newTs
+	next := ts
+	for len(next) != 0 {
+		current := tokenParser(next, token.COMMA)
+		current = Expression(current)
+		ts = append(ts, current...)
+		next = current
 	}
 	return ts
 }

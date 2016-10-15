@@ -134,7 +134,7 @@ func TestExpression(t *testing.T) {
 func TestExpressionList(t *testing.T) {
 	remaining(t, ExpressionList, map[string][][]*Token{
 		`1`:   semiSlice,
-		`1,1`: semiSlice,
+		`1,1`: [][]*Token{{semi, {tok: token.INT, lit: `1`}, {tok: token.COMMA}}, {semi}},
 	})
 }
 
