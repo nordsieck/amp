@@ -20,39 +20,17 @@ func AddOp(ts [][]*Token) [][]*Token {
 }
 
 func AnonymousField(ts [][]*Token) [][]*Token {
-	maybe := make([][]*Token, len(ts))
-	for i, t := range ts {
-		if p := pop(&t); p == nil || p.tok != token.MUL {
-			maybe[i] = ts[i]
-		} else {
-			maybe[i] = t
-		}
-	}
-	return TypeName(maybe)
+	ts = append(ts, tokenParser(ts, token.MUL)...)
+	return TypeName(ts)
 }
 
+// spec is wrong, maybe
 func Arguments(ts [][]*Token) [][]*Token {
 	ts = tokenParser(ts, token.LPAREN)
-	newTs := ExpressionList(ts) // validate that you understand https://golang.org/ref/spec#Arguments
-	temp := make([][]*Token, len(newTs))
-	for i, t := range newTs {
-		if p := pop(&t); p == nil || p.tok != token.ELLIPSIS {
-			temp[i] = newTs[i]
-		} else {
-			temp[i] = t
-		}
-	}
-	newTs = temp
-	temp = make([][]*Token, len(newTs))
-	for i, t := range newTs {
-		if p := pop(&t); p == nil || p.tok != token.COMMA {
-			temp[i] = newTs[i]
-		} else {
-			temp[i] = t
-		}
-	}
-	ts = append(ts, temp...)
-	return tokenParser(ts, token.RPAREN)
+	newTs := ExpressionList(ts)
+	newTs = append(newTs, tokenParser(newTs, token.ELLIPSIS)...)
+	newTs = append(newTs, tokenParser(newTs, token.COMMA)...)
+	return tokenParser(append(ts, newTs...), token.RPAREN)
 }
 
 func ArrayType(ts [][]*Token) [][]*Token {
@@ -68,30 +46,17 @@ func ArrayType(ts [][]*Token) [][]*Token {
 }
 
 func BasicLit(ts [][]*Token) [][]*Token {
-	var result [][]*Token
-	for _, t := range ts {
-		switch p := pop(&t); true {
-		case p == nil:
-		case p.tok == token.INT, p.tok == token.FLOAT, p.tok == token.IMAG,
-			p.tok == token.CHAR, p.tok == token.STRING:
-			result = append(result, t)
-		}
-	}
-	return result
+	return append(
+		append(append(tokenParser(ts, token.INT), tokenParser(ts, token.FLOAT)...),
+			append(tokenParser(ts, token.IMAG), tokenParser(ts, token.CHAR)...)...),
+		tokenParser(ts, token.STRING)...)
 }
 
 func BinaryOp(ts [][]*Token) [][]*Token {
-	var result [][]*Token
-	for _, t := range ts {
-		switch p := pop(&t); true {
-		case p == nil:
-		case p.tok == token.LAND, p.tok == token.LOR:
-			result = append(result, t)
-		}
-	}
-	result = append(result, RelOp(ts)...)
-	result = append(result, AddOp(ts)...)
-	return append(result, MulOp(ts)...)
+	return append(
+		append(append(tokenParser(ts, token.LAND), tokenParser(ts, token.LOR)...),
+			append(RelOp(ts), AddOp(ts)...)...),
+		MulOp(ts)...)
 }
 
 func ChannelType(ts [][]*Token) [][]*Token {
@@ -117,15 +82,8 @@ func Conversion(ts [][]*Token) [][]*Token {
 	if len(ts) != 0 {
 		ts = Expression(ts)
 	}
-	temp := make([][]*Token, len(ts))
-	for i, t := range ts {
-		if p := pop(&t); p != nil && p.tok == token.COMMA {
-			temp[i] = t
-		} else {
-			temp[i] = ts[i]
-		}
-	}
-	return tokenParser(temp, token.RPAREN)
+	ts = append(ts, tokenParser(ts, token.COMMA)...)
+	return tokenParser(ts, token.RPAREN)
 }
 
 func Element(ts [][]*Token) [][]*Token {
@@ -182,13 +140,7 @@ func FieldDecl(ts [][]*Token) [][]*Token {
 		a = Type(a)
 	}
 	ts = append(AnonymousField(ts), a...)
-	var withTag [][]*Token
-	for _, t := range ts {
-		if newT := tokenParser([][]*Token{t}, token.STRING); len(newT) != 0 {
-			withTag = append(withTag, newT...)
-		}
-	}
-	return append(ts, withTag...)
+	return append(ts, tokenParser(ts, token.STRING)...)
 }
 
 func FunctionType(ts [][]*Token) [][]*Token {
@@ -197,23 +149,15 @@ func FunctionType(ts [][]*Token) [][]*Token {
 }
 
 func IdentifierList(ts [][]*Token) [][]*Token {
-	var result [][]*Token
-	for _, t := range ts {
-		if p := pop(&t); p == nil || p.tok != token.IDENT {
-			continue
-		}
-		for {
-			newT, p := t, (*Token)(nil)
-			if p = pop(&newT); p == nil || p.tok != token.COMMA {
-				break
-			} else if p = pop(&newT); p == nil || p.tok != token.IDENT {
-				break
-			}
-			t = newT
-		}
-		result = append(result, t)
+	ts = tokenParser(ts, token.IDENT)
+	more := ts
+	for len(more) != 0 {
+		next := tokenParser(more, token.COMMA)
+		next = tokenParser(next, token.IDENT)
+		ts = append(ts, next...)
+		more = next
 	}
-	return result
+	return ts
 }
 
 func Index(ts [][]*Token) [][]*Token {
@@ -294,12 +238,7 @@ func MethodExpr(ts [][]*Token) [][]*Token {
 }
 
 func MethodSpec(ts [][]*Token) [][]*Token {
-	var sig [][]*Token
-	for _, t := range ts {
-		if p := pop(&t); p != nil && p.tok == token.IDENT && p.lit != `_` {
-			sig = append(sig, t)
-		}
-	}
+	sig := nonBlankIdent(ts)
 	sig = Signature(sig)
 	return append(sig, TypeName(ts)...)
 }
@@ -333,15 +272,7 @@ func OperandName(ts [][]*Token) [][]*Token {
 	return append(tokenParser(ts, token.IDENT), QualifiedIdent(ts)...)
 }
 
-func PackageName(ts [][]*Token) [][]*Token {
-	var result [][]*Token
-	for _, t := range ts {
-		if p := pop(&t); p != nil && p.tok == token.IDENT && p.lit != "_" {
-			result = append(result, t)
-		}
-	}
-	return result
-}
+func PackageName(ts [][]*Token) [][]*Token { return nonBlankIdent(ts) }
 
 func ParameterDecl(ts [][]*Token) [][]*Token {
 	ts = append(ts, IdentifierList(ts)...)
@@ -449,42 +380,16 @@ func Signature(ts [][]*Token) [][]*Token {
 
 func Slice(ts [][]*Token) [][]*Token {
 	ts = tokenParser(ts, token.LBRACK)
-	temp := make([][]*Token, len(ts))
-	if len(ts) != 0 {
-		for i, t := range ts {
-			if newT := Expression([][]*Token{t}); len(newT) == 0 {
-				temp[i] = t
-			} else {
-				temp[i] = newT[0]
-			}
-		}
-	}
-	ts = tokenParser(temp, token.COLON)
+	ts = append(ts, Expression(ts)...)
+	ts = tokenParser(ts, token.COLON)
 
-	// [:]
-	if len(ts) != 0 {
-		for i, t := range ts {
-			if newT := Expression([][]*Token{t}); len(newT) == 0 {
-				temp[i] = t
-			} else {
-				temp[i] = newT[0]
-			}
-		}
-	}
-	a := tokenParser(temp, token.RBRACK)
+	a := append(ts, Expression(ts)...)
 
-	// [::]
-	var b [][]*Token
-	if len(ts) != 0 {
-		b = Expression(ts)
-	}
+	b := Expression(ts)
 	b = tokenParser(b, token.COLON)
-	if len(b) != 0 {
-		b = Expression(b)
-	}
-	b = tokenParser(b, token.RBRACK)
+	b = Expression(b)
 
-	return append(a, b...)
+	return tokenParser(append(a, b...), token.RBRACK)
 }
 
 func SliceType(ts [][]*Token) [][]*Token {
@@ -560,6 +465,16 @@ func UnaryOp(ts [][]*Token) [][]*Token {
 		case p == nil:
 		case p.tok == token.ADD, p.tok == token.SUB, p.tok == token.NOT, p.tok == token.XOR,
 			p.tok == token.MUL, p.tok == token.AND, p.tok == token.ARROW:
+			result = append(result, t)
+		}
+	}
+	return result
+}
+
+func nonBlankIdent(ts [][]*Token) [][]*Token {
+	var result [][]*Token
+	for _, t := range ts {
+		if p := pop(&t); p != nil && p.tok == token.IDENT && p.lit != `_` {
 			result = append(result, t)
 		}
 	}
