@@ -451,12 +451,13 @@ func TestStructType(t *testing.T) {
 
 func TestType(t *testing.T) {
 	remaining(t, Type, map[string][][]*Token{
-		`a`:       semiSlice,
-		`a.a`:     [][]*Token{{semi}, {semi, {tok: token.IDENT, lit: "a"}, {tok: token.PERIOD}}},
-		`1`:       empty,
-		`_`:       semiSlice,
-		`(a.a)`:   semiSlice,
-		`(((_)))`: semiSlice,
+		`a`:        semiSlice,
+		`a.a`:      [][]*Token{{semi}, {semi, {tok: token.IDENT, lit: "a"}, {tok: token.PERIOD}}},
+		`1`:        empty,
+		`_`:        semiSlice,
+		`(a.a)`:    semiSlice,
+		`(((_)))`:  semiSlice,
+		`chan int`: semiSlice,
 	})
 }
 

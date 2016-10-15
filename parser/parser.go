@@ -61,6 +61,9 @@ func ArrayType(ts [][]*Token) [][]*Token {
 		ts = Expression(ts)
 	}
 	ts = tokenParser(ts, token.RBRACK)
+	if len(ts) == 0 {
+		return nil
+	}
 	return Type(ts)
 }
 
@@ -97,6 +100,9 @@ func ChannelType(ts [][]*Token) [][]*Token {
 	before := tokenParser(ts, token.ARROW)
 	before = tokenParser(before, token.CHAN)
 	together := append(append(plain, after...), before...)
+	if len(together) == 0 {
+		return nil
+	}
 	return Type(together)
 }
 
@@ -275,6 +281,9 @@ func MapType(ts [][]*Token) [][]*Token {
 		ts = Type(ts)
 	}
 	ts = tokenParser(ts, token.RBRACK)
+	if len(ts) == 0 {
+		return nil
+	}
 	return Type(ts)
 }
 
@@ -337,6 +346,9 @@ func PackageName(ts [][]*Token) [][]*Token {
 func ParameterDecl(ts [][]*Token) [][]*Token {
 	ts = append(ts, IdentifierList(ts)...)
 	ts = append(ts, tokenParser(ts, token.ELLIPSIS)...)
+	if len(ts) == 0 {
+		return nil
+	}
 	return Type(ts)
 }
 
@@ -362,6 +374,9 @@ func Parameters(ts [][]*Token) [][]*Token {
 
 func PointerType(ts [][]*Token) [][]*Token {
 	ts = tokenParser(ts, token.MUL)
+	if len(ts) == 0 {
+		return nil
+	}
 	return Type(ts)
 }
 
@@ -414,7 +429,13 @@ func RelOp(ts [][]*Token) [][]*Token {
 	return result
 }
 
-func Result(ts [][]*Token) [][]*Token { return append(Parameters(ts), Type(ts)...) }
+func Result(ts [][]*Token) [][]*Token {
+	var t [][]*Token
+	if len(ts) != 0 {
+		t = Type(ts)
+	}
+	return append(Parameters(ts), t...)
+}
 
 func Selector(ts [][]*Token) [][]*Token {
 	ts = tokenParser(ts, token.PERIOD)
@@ -492,14 +513,14 @@ func StructType(ts [][]*Token) [][]*Token {
 }
 
 func Type(ts [][]*Token) [][]*Token {
-	a := TypeName(ts)
-	// TypeLit
-	b := tokenParser(ts, token.LPAREN)
-	if len(b) != 0 {
-		b = Type(b)
+	name := TypeName(ts)
+	lit := TypeLit(ts)
+	paren := tokenParser(ts, token.LPAREN)
+	if len(paren) != 0 {
+		paren = Type(paren)
 	}
-	b = tokenParser(b, token.RPAREN)
-	return append(a, b...)
+	paren = tokenParser(paren, token.RPAREN)
+	return append(append(name, paren...), lit...)
 }
 
 func TypeAssertion(ts [][]*Token) [][]*Token {
