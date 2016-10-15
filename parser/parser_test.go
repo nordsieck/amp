@@ -161,6 +161,15 @@ func TestIndex(t *testing.T) {
 	})
 }
 
+func TestInterfaceType(t *testing.T) {
+	remaining(t, InterfaceType, map[string][][]*Token{
+		`interface{}`:       semiSlice,
+		`interface{a}`:      semiSlice,
+		`interface{a()}`:    semiSlice,
+		`interface{a();a;}`: semiSlice,
+	})
+}
+
 func TestKey(t *testing.T) {
 	remaining(t, Key, map[string][][]*Token{
 		`a`:     [][]*Token{{semi}, {semi}},

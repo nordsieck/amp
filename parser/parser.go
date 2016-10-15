@@ -209,6 +209,23 @@ func Index(ts [][]*Token) [][]*Token {
 	return tokenParser(ts, token.RBRACK)
 }
 
+// bad spec
+func InterfaceType(ts [][]*Token) [][]*Token {
+	ts = tokenParser(ts, token.INTERFACE)
+	ts = tokenParser(ts, token.LBRACE)
+	list := MethodSpec(ts)
+	next := list
+	for len(next) != 0 {
+		ms := tokenParser(next, token.SEMICOLON)
+		ms = MethodSpec(ms)
+		list = append(list, ms...)
+		next = ms
+	}
+	list = append(list, tokenParser(list, token.SEMICOLON)...)
+	ts = append(ts, list...)
+	return tokenParser(ts, token.RBRACE)
+}
+
 func Key(ts [][]*Token) [][]*Token {
 	return append(tokenParser(ts, token.IDENT), Expression(ts)...)
 }
