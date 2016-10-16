@@ -192,6 +192,11 @@ func IdentifierList(ts [][]*Token) [][]*Token {
 	return ts
 }
 
+func IncDecStmt(ts [][]*Token) [][]*Token {
+	ts = Expression(ts)
+	return append(tokenParser(ts, token.INC), tokenParser(ts, token.DEC)...)
+}
+
 func Index(ts [][]*Token) [][]*Token {
 	ts = tokenParser(ts, token.LBRACK)
 	if len(ts) != 0 {

@@ -199,6 +199,13 @@ func TestIdentifierList(t *testing.T) {
 	})
 }
 
+func TestIncDecStmt(t *testing.T) {
+	remaining(t, IncDecStmt, map[string][][]*Token{
+		`a++`: semiSlice,
+		`a--`: semiSlice,
+	})
+}
+
 func TestIndex(t *testing.T) {
 	remaining(t, Index, map[string][][]*Token{
 		`[a]`: semiSlice,
