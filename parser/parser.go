@@ -111,6 +111,10 @@ func Conversion(ts [][]*Token) [][]*Token {
 	return tokenParser(ts, token.RPAREN)
 }
 
+func Declaration(ts [][]*Token) [][]*Token {
+	return append(append(ConstDecl(ts), TypeDecl(ts)...), VarDecl(ts)...)
+}
+
 func Element(ts [][]*Token) [][]*Token {
 	return append(Expression(ts), LiteralValue(ts)...)
 }

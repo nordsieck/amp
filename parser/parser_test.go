@@ -115,6 +115,14 @@ func TestConversion(t *testing.T) {
 	})
 }
 
+func TestDeclaration(t *testing.T) {
+	remaining(t, Declaration, map[string][][]*Token{
+		`const a = 1`: semiSlice,
+		`type a int`:  semiSlice,
+		`var a int`:   semiSlice,
+	})
+}
+
 func TestElement(t *testing.T) {
 	remaining(t, Element, map[string][][]*Token{
 		`1+1`:   [][]*Token{{semi, {tok: token.INT, lit: `1`}, {tok: token.ADD}}, {semi}},
