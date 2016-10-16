@@ -505,6 +505,13 @@ func TestTypeName(t *testing.T) {
 	})
 }
 
+func TestTypeSpec(t *testing.T) {
+	remaining(t, TypeSpec, map[string][][]*Token{
+		`a int`: semiSlice,
+		`a`:     empty,
+	})
+}
+
 func TestUnaryExpr(t *testing.T) {
 	remaining(t, UnaryExpr, map[string][][]*Token{
 		`1`:  semiSlice,

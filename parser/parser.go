@@ -474,6 +474,11 @@ func TypeName(ts [][]*Token) [][]*Token {
 	return append(result, tokenParser(ts, token.IDENT)...)
 }
 
+func TypeSpec(ts [][]*Token) [][]*Token {
+	ts = tokenParser(ts, token.IDENT)
+	return Type(ts)
+}
+
 func UnaryExpr(ts [][]*Token) [][]*Token {
 	uo := UnaryOp(ts)
 	if len(uo) != 0 {
