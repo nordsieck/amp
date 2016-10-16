@@ -45,6 +45,12 @@ func ArrayType(ts [][]*Token) [][]*Token {
 	return Type(ts)
 }
 
+func Assignment(ts [][]*Token) [][]*Token {
+	ts = ExpressionList(ts)
+	ts = AssignOp(ts)
+	return ExpressionList(ts)
+}
+
 func AssignOp(ts [][]*Token) [][]*Token {
 	var result [][]*Token
 	for _, t := range ts {

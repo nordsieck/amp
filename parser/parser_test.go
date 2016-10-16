@@ -47,6 +47,10 @@ func TestArrayType(t *testing.T) {
 	})
 }
 
+func TestAssignment(t *testing.T) {
+	remaining(t, Assignment, map[string][][]*Token{`a = 1`: semiSlice})
+}
+
 func TestAssignOp(t *testing.T) {
 	remaining(t, AssignOp, map[string][][]*Token{
 		`+=`: {{}}, `-=`: {{}}, `*=`: {{}}, `/=`: {{}},
