@@ -96,10 +96,9 @@ func ConstDecl(ts [][]*Token) [][]*Token {
 // spec is wrong
 func ConstSpec(ts [][]*Token) [][]*Token {
 	ts = IdentifierList(ts)
-	opt := append(ts, Type(ts)...)
-	opt = tokenParser(opt, token.ASSIGN)
-	opt = ExpressionList(opt)
-	return append(ts, opt...)
+	ts = append(ts, Type(ts)...)
+	ts = tokenParser(ts, token.ASSIGN)
+	return ExpressionList(ts)
 }
 
 func Conversion(ts [][]*Token) [][]*Token {
