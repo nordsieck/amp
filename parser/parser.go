@@ -141,6 +141,8 @@ func EllipsisArrayType(ts [][]*Token) [][]*Token {
 	return Type(ts)
 }
 
+func EmptyStmt(ts [][]*Token) [][]*Token { return ts }
+
 func Expression(ts [][]*Token) [][]*Token {
 	base := UnaryExpr(ts)
 	comp := BinaryOp(base)

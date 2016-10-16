@@ -145,6 +145,10 @@ func TestEllipsisArrayType(t *testing.T) {
 	remaining(t, EllipsisArrayType, map[string][][]*Token{`[...]int`: semiSlice})
 }
 
+func TestEmptyStmt(t *testing.T) {
+	remaining(t, EmptyStmt, map[string][][]*Token{`1`: {{semi, {tok: token.INT, lit: `1`}}}})
+}
+
 func TestExpression(t *testing.T) {
 	remaining(t, Expression, map[string][][]*Token{
 		`1`: semiSlice,
