@@ -429,8 +429,7 @@ func SliceType(ts [][]*Token) [][]*Token {
 	return Type(ts)
 }
 
-func Statement(ts [][]*token) [][]*Token {
-	// declaration
+func Statement(ts [][]*Token) [][]*Token {
 	// labeled
 	// simple
 	// go
@@ -446,7 +445,7 @@ func Statement(ts [][]*token) [][]*Token {
 	// for
 	// defer
 
-	return nil
+	return Declaration(ts)
 }
 
 // spec is wrong here - trailing semicolon is optional not mandatory
