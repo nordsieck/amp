@@ -448,6 +448,10 @@ func TestSelector(t *testing.T) {
 	})
 }
 
+func TestSendStmt(t *testing.T) {
+	remaining(t, SendStmt, map[string][][]*Token{`a <- 1`: semiSlice})
+}
+
 func TestSignature(t *testing.T) {
 	remaining(t, Signature, map[string][][]*Token{
 		`()`:             semiSlice,

@@ -414,6 +414,12 @@ func Selector(ts [][]*Token) [][]*Token {
 	return tokenParser(ts, token.IDENT)
 }
 
+func SendStmt(ts [][]*Token) [][]*Token {
+	ts = Expression(ts)
+	ts = tokenParser(ts, token.ARROW)
+	return Expression(ts)
+}
+
 func Signature(ts [][]*Token) [][]*Token {
 	ts = Parameters(ts)
 	return append(ts, Result(ts)...)
