@@ -445,6 +445,12 @@ func SendStmt(ts [][]*Token) [][]*Token {
 	return Expression(ts)
 }
 
+func ShortVarDecl(ts [][]*Token) [][]*Token {
+	ts = IdentifierList(ts)
+	ts = tokenParser(ts, token.DEFINE)
+	return ExpressionList(ts)
+}
+
 func Signature(ts [][]*Token) [][]*Token {
 	ts = Parameters(ts)
 	return append(ts, Result(ts)...)

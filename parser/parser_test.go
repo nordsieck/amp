@@ -471,6 +471,13 @@ func TestSendStmt(t *testing.T) {
 	remaining(t, SendStmt, map[string][][]*Token{`a <- 1`: semiSlice})
 }
 
+func TestShortVarDecl(t *testing.T) {
+	remaining(t, ShortVarDecl, map[string][][]*Token{
+		`a := 1`:       semiSlice,
+		`a, b := 1, 2`: {{semi, {tok: token.INT, lit: `2`}, {tok: token.COMMA}}, {semi}},
+	})
+}
+
 func TestSignature(t *testing.T) {
 	remaining(t, Signature, map[string][][]*Token{
 		`()`:             semiSlice,
