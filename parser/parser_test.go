@@ -250,7 +250,9 @@ func TestKeyedElement(t *testing.T) {
 }
 
 func TestLabeledStmt(t *testing.T) {
-	remaining(t, LabeledStmt, map[string][][]*Token{`a: var b int`: semiSlice})
+	remaining(t, LabeledStmt, map[string][][]*Token{
+		`a: var b int`: {{semi}, {semi, {tok: token.IDENT, lit: `int`}, {tok: token.IDENT, lit: `b`}, {tok: token.VAR, lit: `var`}}},
+	})
 }
 
 func TestLiteral(t *testing.T) {
@@ -486,6 +488,19 @@ func TestSignature(t *testing.T) {
 	})
 }
 
+func TestSimpleStmt(t *testing.T) {
+	remaining(t, SimpleStmt, map[string][][]*Token{
+		`1`: {{semi, {tok: token.INT, lit: `1`}}, {semi}},
+		`a <- 1`: {{semi, {tok: token.INT, lit: `1`}, {tok: token.ARROW}, {tok: token.IDENT, lit: `a`}},
+			{semi, {tok: token.INT, lit: `1`}, {tok: token.ARROW}}, {semi}},
+		`a++`: {{semi, {tok: token.INC}, {tok: token.IDENT, lit: `a`}}, {semi, {tok: token.INC}}, {semi}},
+		`a = 1`: {{semi, {tok: token.INT, lit: `1`}, {tok: token.ASSIGN}, {tok: token.IDENT, lit: `a`}},
+			{semi, {tok: token.INT, lit: `1`}, {tok: token.ASSIGN}}, {semi}},
+		`a := 1`: {{semi, {tok: token.INT, lit: `1`}, {tok: token.DEFINE}, {tok: token.IDENT, lit: `a`}},
+			{semi, {tok: token.INT, lit: `1`}, {tok: token.DEFINE}}, {semi}},
+	})
+}
+
 func TestSlice(t *testing.T) {
 	remaining(t, Slice, map[string][][]*Token{
 		`[:]`:     semiSlice,
@@ -503,8 +518,13 @@ func TestSliceType(t *testing.T) {
 
 func TestStatement(t *testing.T) {
 	remaining(t, Statement, map[string][][]*Token{
-		`var a int`:    semiSlice,
-		`a: var b int`: semiSlice,
+		`var a int`: {{semi}, {semi, {tok: token.IDENT, lit: `int`}, {tok: token.IDENT, lit: `a`}, {tok: token.VAR, lit: `var`}}},
+		`a: var b int`: {{semi},
+			{semi, {tok: token.IDENT, lit: `int`}, {tok: token.IDENT, lit: `b`}, {tok: token.VAR, lit: `var`}},
+			{semi, {tok: token.IDENT, lit: `int`}, {tok: token.IDENT, lit: `b`}, {tok: token.VAR, lit: `var`}, {tok: token.COLON}, {tok: token.IDENT, lit: `a`}},
+			{semi, {tok: token.IDENT, lit: `int`}, {tok: token.IDENT, lit: `b`}, {tok: token.VAR, lit: `var`}, {tok: token.COLON}}},
+		`a := 1`: {{semi, {tok: token.INT, lit: `1`}, {tok: token.DEFINE}, {tok: token.IDENT, lit: `a`}},
+			{semi, {tok: token.INT, lit: `1`}, {tok: token.DEFINE}}, {semi}},
 	})
 }
 
