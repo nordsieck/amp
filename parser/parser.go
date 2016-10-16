@@ -223,6 +223,15 @@ func KeyedElement(ts [][]*Token) [][]*Token {
 	return append(Element(ts), Element(with)...)
 }
 
+func LabeledStmt(ts [][]*Token) [][]*Token {
+	ts = tokenParser(ts, token.IDENT)
+	ts = tokenParser(ts, token.COLON)
+	if len(ts) == 0 {
+		return nil
+	}
+	return Statement(ts)
+}
+
 func Literal(ts [][]*Token) [][]*Token {
 	return append(BasicLit(ts), CompositeLit(ts)...)
 	// FunctionLit
@@ -430,7 +439,6 @@ func SliceType(ts [][]*Token) [][]*Token {
 }
 
 func Statement(ts [][]*Token) [][]*Token {
-	// labeled
 	// simple
 	// go
 	// return
@@ -445,7 +453,7 @@ func Statement(ts [][]*Token) [][]*Token {
 	// for
 	// defer
 
-	return Declaration(ts)
+	return append(Declaration(ts), LabeledStmt(ts)...)
 }
 
 // spec is wrong here - trailing semicolon is optional not mandatory

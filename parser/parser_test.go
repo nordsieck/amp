@@ -222,6 +222,10 @@ func TestKeyedElement(t *testing.T) {
 	})
 }
 
+func TestLabeledStmt(t *testing.T) {
+	remaining(t, LabeledStmt, map[string][][]*Token{`a: var b int`: semiSlice})
+}
+
 func TestLiteral(t *testing.T) {
 	remaining(t, Literal, map[string][][]*Token{
 		`1`:    semiSlice,
@@ -461,7 +465,8 @@ func TestSliceType(t *testing.T) {
 
 func TestStatement(t *testing.T) {
 	remaining(t, Statement, map[string][][]*Token{
-		`var a int`: semiSlice,
+		`var a int`:    semiSlice,
+		`a: var b int`: semiSlice,
 	})
 }
 
