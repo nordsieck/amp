@@ -543,6 +543,16 @@ func TestUnaryOp(t *testing.T) {
 	})
 }
 
+func TestVarDecl(t *testing.T) {
+	remaining(t, VarDecl, map[string][][]*Token{
+		`var a int`:                 semiSlice,
+		`var (a int)`:               semiSlice,
+		`var (a int;)`:              semiSlice,
+		`var (a, b = 1, 2)`:         semiSlice,
+		`var (a, b = 1, 2; c int;)`: semiSlice,
+	})
+}
+
 func TestVarSpec(t *testing.T) {
 	remaining(t, VarSpec, map[string][][]*Token{
 		`a int`:       semiSlice,

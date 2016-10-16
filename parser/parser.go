@@ -516,6 +516,22 @@ func UnaryOp(ts [][]*Token) [][]*Token {
 	return result
 }
 
+func VarDecl(ts [][]*Token) [][]*Token {
+	ts = tokenParser(ts, token.VAR)
+	paren := tokenParser(ts, token.LPAREN)
+	paren = VarSpec(paren)
+	next := paren
+	for len(next) != 0 {
+		current := tokenParser(next, token.SEMICOLON)
+		current = VarSpec(current)
+		paren = append(paren, current...)
+		next = current
+	}
+	paren = append(paren, tokenParser(paren, token.SEMICOLON)...)
+	paren = tokenParser(paren, token.RPAREN)
+	return append(VarSpec(ts), paren...)
+}
+
 func VarSpec(ts [][]*Token) [][]*Token {
 	ts = IdentifierList(ts)
 	typ := Type(ts)
