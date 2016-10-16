@@ -200,6 +200,11 @@ func FunctionType(ts [][]*Token) [][]*Token {
 	return Signature(ts)
 }
 
+func GoStmt(ts [][]*Token) [][]*Token {
+	ts = tokenParser(ts, token.GO)
+	return Expression(ts)
+}
+
 func IdentifierList(ts [][]*Token) [][]*Token {
 	ts = tokenParser(ts, token.IDENT)
 	more := ts
@@ -487,7 +492,6 @@ func SliceType(ts [][]*Token) [][]*Token {
 }
 
 func Statement(ts [][]*Token) [][]*Token {
-	// go
 	// return
 	// break
 	// continue
@@ -501,7 +505,7 @@ func Statement(ts [][]*Token) [][]*Token {
 	// defer
 
 	return append(append(Declaration(ts), LabeledStmt(ts)...),
-		SimpleStmt(ts)...)
+		append(SimpleStmt(ts), GoStmt(ts)...)...)
 }
 
 // spec is wrong here - trailing semicolon is optional not mandatory
