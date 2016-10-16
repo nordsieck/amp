@@ -76,6 +76,24 @@ func CompositeLit(ts [][]*Token) [][]*Token {
 	return LiteralValue(ts)
 }
 
+// spec is wrong
+func ConstDecl(ts [][]*Token) [][]*Token {
+	ts = tokenParser(ts, token.CONST)
+	paren := tokenParser(ts, token.LPAREN)
+	paren = ConstSpec(paren)
+	next := paren
+	for len(next) != 0 {
+		current := tokenParser(next, token.SEMICOLON)
+		current = ConstSpec(current)
+		paren = append(paren, current...)
+		next = current
+	}
+	paren = append(paren, tokenParser(paren, token.SEMICOLON)...)
+	paren = tokenParser(paren, token.RPAREN)
+	return append(paren, ConstSpec(ts)...)
+}
+
+// spec is wrong
 func ConstSpec(ts [][]*Token) [][]*Token {
 	ts = IdentifierList(ts)
 	opt := append(ts, Type(ts)...)
