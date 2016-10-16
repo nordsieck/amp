@@ -461,6 +461,22 @@ func TypeAssertion(ts [][]*Token) [][]*Token {
 	return tokenParser(ts, token.RPAREN)
 }
 
+func TypeDecl(ts [][]*Token) [][]*Token {
+	ts = tokenParser(ts, token.TYPE)
+	multi := tokenParser(ts, token.LPAREN)
+	multi = TypeSpec(multi)
+	next := multi
+	for len(next) != 0 {
+		current := tokenParser(next, token.SEMICOLON)
+		current = TypeSpec(current)
+		multi = append(multi, current...)
+		next = current
+	}
+	multi = append(multi, tokenParser(multi, token.SEMICOLON)...)
+	multi = tokenParser(multi, token.RPAREN)
+	return append(TypeSpec(ts), multi...)
+}
+
 func TypeLit(ts [][]*Token) [][]*Token {
 	return append(
 		append(append(ArrayType(ts), StructType(ts)...),
