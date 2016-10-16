@@ -164,6 +164,8 @@ func ExpressionList(ts [][]*Token) [][]*Token {
 	return ts
 }
 
+func ExpressionStmt(ts [][]*Token) [][]*Token { return Expression(ts) }
+
 func FieldDecl(ts [][]*Token) [][]*Token {
 	a := IdentifierList(ts)
 	if len(a) != 0 {
