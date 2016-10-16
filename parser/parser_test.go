@@ -543,6 +543,15 @@ func TestUnaryOp(t *testing.T) {
 	})
 }
 
+func TestVarSpec(t *testing.T) {
+	remaining(t, VarSpec, map[string][][]*Token{
+		`a int`:       semiSlice,
+		`a int = 1`:   [][]*Token{{semi, {tok: token.INT, lit: `1`}, {tok: token.ASSIGN}}, {semi}},
+		`a = 1`:       semiSlice,
+		`a, b = 1, 2`: [][]*Token{{semi, {tok: token.INT, lit: `2`}, {tok: token.COMMA}}, {semi}},
+	})
+}
+
 func TestTokenParser(t *testing.T) {
 	toks := [][]*Token{
 		{semi, {tok: token.RPAREN}},

@@ -516,6 +516,17 @@ func UnaryOp(ts [][]*Token) [][]*Token {
 	return result
 }
 
+func VarSpec(ts [][]*Token) [][]*Token {
+	ts = IdentifierList(ts)
+	typ := Type(ts)
+	extra := tokenParser(typ, token.ASSIGN)
+	extra = ExpressionList(extra)
+	typ = append(typ, extra...)
+	assign := tokenParser(ts, token.ASSIGN)
+	assign = ExpressionList(assign)
+	return append(typ, assign...)
+}
+
 func nonBlankIdent(ts [][]*Token) [][]*Token {
 	var result [][]*Token
 	for _, t := range ts {
