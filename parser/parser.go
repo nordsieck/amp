@@ -429,6 +429,26 @@ func SliceType(ts [][]*Token) [][]*Token {
 	return Type(ts)
 }
 
+func Statement(ts [][]*token) [][]*Token {
+	// declaration
+	// labeled
+	// simple
+	// go
+	// return
+	// break
+	// continue
+	// goto
+	// fallthrough
+	// block
+	// if
+	// switch
+	// select
+	// for
+	// defer
+
+	return nil
+}
+
 // spec is wrong here - trailing semicolon is optional not mandatory
 func StructType(ts [][]*Token) [][]*Token {
 	ts = tokenParser(ts, token.STRUCT)
