@@ -47,6 +47,14 @@ func TestArrayType(t *testing.T) {
 	})
 }
 
+func TestAssignOp(t *testing.T) {
+	remaining(t, AssignOp, map[string][][]*Token{
+		`+=`: {{}}, `-=`: {{}}, `*=`: {{}}, `/=`: {{}},
+		`%=`: {{}}, `&=`: {{}}, `|=`: {{}}, `^=`: {{}},
+		`<<=`: {{}}, `>>=`: {{}}, `&^=`: {{}}, `=`: {{}},
+	})
+}
+
 func TestBasicLit(t *testing.T) {
 	remaining(t, BasicLit, map[string][][]*Token{
 		``:    empty,

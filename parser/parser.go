@@ -45,6 +45,20 @@ func ArrayType(ts [][]*Token) [][]*Token {
 	return Type(ts)
 }
 
+func AssignOp(ts [][]*Token) [][]*Token {
+	var result [][]*Token
+	for _, t := range ts {
+		switch p := pop(&t); true {
+		case p == nil:
+		case p.tok == token.ADD_ASSIGN, p.tok == token.SUB_ASSIGN, p.tok == token.MUL_ASSIGN, p.tok == token.QUO_ASSIGN,
+			p.tok == token.REM_ASSIGN, p.tok == token.AND_ASSIGN, p.tok == token.OR_ASSIGN, p.tok == token.XOR_ASSIGN,
+			p.tok == token.SHL_ASSIGN, p.tok == token.SHR_ASSIGN, p.tok == token.AND_NOT_ASSIGN, p.tok == token.ASSIGN:
+			result = append(result, t)
+		}
+	}
+	return result
+}
+
 func BasicLit(ts [][]*Token) [][]*Token {
 	return append(
 		append(append(tokenParser(ts, token.INT), tokenParser(ts, token.FLOAT)...),
