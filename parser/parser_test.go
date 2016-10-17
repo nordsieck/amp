@@ -200,6 +200,13 @@ func TestExpressionStmt(t *testing.T) {
 	remaining(t, ExpressionStmt, map[string][][]*Token{`1`: semiSlice})
 }
 
+func TestFallthroughStmt(t *testing.T) {
+	remaining(t, FallthroughStmt, map[string][][]*Token{
+		`fallthrough`: semiSlice,
+		`a`:           empty,
+	})
+}
+
 func TestFieldDecl(t *testing.T) {
 	remaining(t, FieldDecl, map[string][][]*Token{
 		`a,a int`:    [][]*Token{{semi, {tok: token.IDENT, lit: `int`}, {tok: token.IDENT, lit: `a`}, {tok: token.COMMA}}, {semi}},
@@ -557,10 +564,11 @@ func TestStatement(t *testing.T) {
 			{semi, {tok: token.INT, lit: `1`}, {tok: token.DEFINE}}, {semi}},
 		`go a()`: {{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `a`}, {tok: token.GO, lit: `go`}},
 			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}}, {semi}},
-		`return 1`:   {{semi, {tok: token.INT, lit: `1`}, {tok: token.RETURN, lit: `return`}}, {semi, {tok: token.INT, lit: `1`}}, {semi}},
-		`break a`:    {{semi, {tok: token.IDENT, lit: `a`}, {tok: token.BREAK, lit: `break`}}, {semi, {tok: token.IDENT, lit: `a`}}, {semi}},
-		`continue a`: {{semi, {tok: token.IDENT, lit: `a`}, {tok: token.CONTINUE, lit: `continue`}}, {semi, {tok: token.IDENT, lit: `a`}}, {semi}},
-		`goto a`:     {{semi, {tok: token.IDENT, lit: `a`}, {tok: token.GOTO, lit: `goto`}}, {semi}},
+		`return 1`:    {{semi, {tok: token.INT, lit: `1`}, {tok: token.RETURN, lit: `return`}}, {semi, {tok: token.INT, lit: `1`}}, {semi}},
+		`break a`:     {{semi, {tok: token.IDENT, lit: `a`}, {tok: token.BREAK, lit: `break`}}, {semi, {tok: token.IDENT, lit: `a`}}, {semi}},
+		`continue a`:  {{semi, {tok: token.IDENT, lit: `a`}, {tok: token.CONTINUE, lit: `continue`}}, {semi, {tok: token.IDENT, lit: `a`}}, {semi}},
+		`goto a`:      {{semi, {tok: token.IDENT, lit: `a`}, {tok: token.GOTO, lit: `goto`}}, {semi}},
+		`fallthrough`: {{semi, {tok: token.FALLTHROUGH, lit: `fallthrough`}}, {semi}},
 	})
 }
 

@@ -196,6 +196,8 @@ func ExpressionList(ts [][]*Token) [][]*Token {
 
 func ExpressionStmt(ts [][]*Token) [][]*Token { return Expression(ts) }
 
+func FallthroughStmt(ts [][]*Token) [][]*Token { return tokenParser(ts, token.FALLTHROUGH) }
+
 func FieldDecl(ts [][]*Token) [][]*Token {
 	a := IdentifierList(ts)
 	if len(a) != 0 {
@@ -512,7 +514,6 @@ func SliceType(ts [][]*Token) [][]*Token {
 }
 
 func Statement(ts [][]*Token) [][]*Token {
-	// fallthrough
 	// block
 	// if
 	// switch
@@ -521,10 +522,9 @@ func Statement(ts [][]*Token) [][]*Token {
 	// defer
 
 	return append(
-		append(append(Declaration(ts), LabeledStmt(ts)...),
-			append(SimpleStmt(ts), GoStmt(ts)...)...),
-		append(append(ReturnStmt(ts), BreakStmt(ts)...),
-			append(ContinueStmt(ts), GotoStmt(ts)...)...)...)
+		append(append(append(Declaration(ts), LabeledStmt(ts)...), append(SimpleStmt(ts), GoStmt(ts)...)...),
+			append(append(ReturnStmt(ts), BreakStmt(ts)...), append(ContinueStmt(ts), GotoStmt(ts)...)...)...),
+		FallthroughStmt(ts)...)
 }
 
 // spec is wrong here - trailing semicolon is optional not mandatory
