@@ -465,6 +465,14 @@ func TestResult(t *testing.T) {
 	})
 }
 
+func TestReturnStmt(t *testing.T) {
+	remaining(t, ReturnStmt, map[string][][]*Token{
+		`return 1`: {{semi, {tok: token.INT, lit: `1`}}, {semi}},
+		`return 1, 2`: {{semi, {tok: token.INT, lit: `2`}, {tok: token.COMMA}, {tok: token.INT, lit: `1`}},
+			{semi, {tok: token.INT, lit: `2`}, {tok: token.COMMA}}, {semi}},
+	})
+}
+
 func TestSelector(t *testing.T) {
 	remaining(t, Selector, map[string][][]*Token{
 		`1`:  empty,
