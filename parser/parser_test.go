@@ -126,6 +126,13 @@ func TestConstSpec(t *testing.T) {
 	})
 }
 
+func TestContinueStmt(t *testing.T) {
+	remaining(t, ContinueStmt, map[string][][]*Token{
+		`continue a`: {{semi, {tok: token.IDENT, lit: `a`}}, {semi}},
+		`a`:          empty,
+	})
+}
+
 func TestConversion(t *testing.T) {
 	remaining(t, Conversion, map[string][][]*Token{
 		`float(1)`:   semiSlice,
@@ -546,8 +553,9 @@ func TestStatement(t *testing.T) {
 			{semi, {tok: token.INT, lit: `1`}, {tok: token.DEFINE}}, {semi}},
 		`go a()`: {{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `a`}, {tok: token.GO, lit: `go`}},
 			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}}, {semi}},
-		`return 1`: {{semi, {tok: token.INT, lit: `1`}, {tok: token.RETURN, lit: `return`}}, {semi, {tok: token.INT, lit: `1`}}, {semi}},
-		`break a`:  {{semi, {tok: token.IDENT, lit: `a`}, {tok: token.BREAK, lit: `break`}}, {semi, {tok: token.IDENT, lit: `a`}}, {semi}},
+		`return 1`:   {{semi, {tok: token.INT, lit: `1`}, {tok: token.RETURN, lit: `return`}}, {semi, {tok: token.INT, lit: `1`}}, {semi}},
+		`break a`:    {{semi, {tok: token.IDENT, lit: `a`}, {tok: token.BREAK, lit: `break`}}, {semi, {tok: token.IDENT, lit: `a`}}, {semi}},
+		`continue a`: {{semi, {tok: token.IDENT, lit: `a`}, {tok: token.CONTINUE, lit: `continue`}}, {semi, {tok: token.IDENT, lit: `a`}}, {semi}},
 	})
 }
 

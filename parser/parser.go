@@ -126,6 +126,11 @@ func ConstSpec(ts [][]*Token) [][]*Token {
 	return ExpressionList(ts)
 }
 
+func ContinueStmt(ts [][]*Token) [][]*Token {
+	ts = tokenParser(ts, token.CONTINUE)
+	return append(ts, tokenParser(ts, token.IDENT)...)
+}
+
 func Conversion(ts [][]*Token) [][]*Token {
 	ts = Type(ts)
 	ts = tokenParser(ts, token.LPAREN)
@@ -502,7 +507,6 @@ func SliceType(ts [][]*Token) [][]*Token {
 }
 
 func Statement(ts [][]*Token) [][]*Token {
-	// continue
 	// goto
 	// fallthrough
 	// block
@@ -515,7 +519,8 @@ func Statement(ts [][]*Token) [][]*Token {
 	return append(
 		append(append(Declaration(ts), LabeledStmt(ts)...),
 			append(SimpleStmt(ts), GoStmt(ts)...)...),
-		append(ReturnStmt(ts), BreakStmt(ts)...)...)
+		append(append(ReturnStmt(ts), BreakStmt(ts)...),
+			ContinueStmt(ts)...)...)
 }
 
 // spec is wrong here - trailing semicolon is optional not mandatory
