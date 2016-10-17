@@ -83,6 +83,13 @@ func TestBinaryOp(t *testing.T) {
 	})
 }
 
+func TestBreakStmt(t *testing.T) {
+	remaining(t, BreakStmt, map[string][][]*Token{
+		`break a`: {{semi, {tok: token.IDENT, lit: `a`}}, {semi}},
+		`a`:       empty,
+	})
+}
+
 func TestChannelType(t *testing.T) {
 	remaining(t, ChannelType, map[string][][]*Token{
 		`chan int`:   semiSlice,
@@ -539,6 +546,8 @@ func TestStatement(t *testing.T) {
 			{semi, {tok: token.INT, lit: `1`}, {tok: token.DEFINE}}, {semi}},
 		`go a()`: {{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `a`}, {tok: token.GO, lit: `go`}},
 			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}}, {semi}},
+		`return 1`: {{semi, {tok: token.INT, lit: `1`}, {tok: token.RETURN, lit: `return`}}, {semi, {tok: token.INT, lit: `1`}}, {semi}},
+		`break a`:  {{semi, {tok: token.IDENT, lit: `a`}, {tok: token.BREAK, lit: `break`}}, {semi, {tok: token.IDENT, lit: `a`}}, {semi}},
 	})
 }
 

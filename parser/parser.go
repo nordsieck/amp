@@ -79,6 +79,11 @@ func BinaryOp(ts [][]*Token) [][]*Token {
 		MulOp(ts)...)
 }
 
+func BreakStmt(ts [][]*Token) [][]*Token {
+	ts = tokenParser(ts, token.BREAK)
+	return append(ts, tokenParser(ts, token.IDENT)...)
+}
+
 func ChannelType(ts [][]*Token) [][]*Token {
 	plain := tokenParser(ts, token.CHAN)
 	after := tokenParser(plain, token.ARROW)
@@ -497,7 +502,6 @@ func SliceType(ts [][]*Token) [][]*Token {
 }
 
 func Statement(ts [][]*Token) [][]*Token {
-	// break
 	// continue
 	// goto
 	// fallthrough
@@ -511,7 +515,7 @@ func Statement(ts [][]*Token) [][]*Token {
 	return append(
 		append(append(Declaration(ts), LabeledStmt(ts)...),
 			append(SimpleStmt(ts), GoStmt(ts)...)...),
-		ReturnStmt(ts)...)
+		append(ReturnStmt(ts), BreakStmt(ts)...)...)
 }
 
 // spec is wrong here - trailing semicolon is optional not mandatory
