@@ -220,6 +220,10 @@ func TestGoStmt(t *testing.T) {
 	remaining(t, GoStmt, map[string][][]*Token{`go a()`: {{semi, {tok: token.RPAREN}, {tok: token.LPAREN}}, {semi}}})
 }
 
+func TestGotoStmt(t *testing.T) {
+	remaining(t, GotoStmt, map[string][][]*Token{`goto a`: semiSlice, `goto`: empty, `a`: empty})
+}
+
 func TestIdentifierList(t *testing.T) {
 	remaining(t, IdentifierList, map[string][][]*Token{
 		`a`:   semiSlice,
@@ -556,6 +560,7 @@ func TestStatement(t *testing.T) {
 		`return 1`:   {{semi, {tok: token.INT, lit: `1`}, {tok: token.RETURN, lit: `return`}}, {semi, {tok: token.INT, lit: `1`}}, {semi}},
 		`break a`:    {{semi, {tok: token.IDENT, lit: `a`}, {tok: token.BREAK, lit: `break`}}, {semi, {tok: token.IDENT, lit: `a`}}, {semi}},
 		`continue a`: {{semi, {tok: token.IDENT, lit: `a`}, {tok: token.CONTINUE, lit: `continue`}}, {semi, {tok: token.IDENT, lit: `a`}}, {semi}},
+		`goto a`:     {{semi, {tok: token.IDENT, lit: `a`}, {tok: token.GOTO, lit: `goto`}}, {semi}},
 	})
 }
 
