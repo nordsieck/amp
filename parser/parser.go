@@ -527,6 +527,22 @@ func Statement(ts [][]*Token) [][]*Token {
 		FallthroughStmt(ts)...)
 }
 
+func StatementList(ts [][]*Token) [][]*Token {
+	if len(ts) == 0 {
+		return nil
+	}
+	list := Statement(ts)
+	next := list
+	for len(next) != 0 {
+		current := tokenParser(next, token.SEMICOLON)
+		current = Statement(current)
+		list = append(list, current...)
+		next = current
+	}
+	list = append(list, tokenParser(list, token.SEMICOLON)...)
+	return append(ts, list...)
+}
+
 // spec is wrong here - trailing semicolon is optional not mandatory
 func StructType(ts [][]*Token) [][]*Token {
 	ts = tokenParser(ts, token.STRUCT)

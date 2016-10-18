@@ -572,6 +572,20 @@ func TestStatement(t *testing.T) {
 	})
 }
 
+func TestStatementList(t *testing.T) {
+	remaining(t, StatementList, map[string][][]*Token{
+		`fallthrough`: {{semi, {tok: token.FALLTHROUGH, lit: `fallthrough`}}, {semi, {tok: token.FALLTHROUGH, lit: `fallthrough`}}, {semi}, {}, {}},
+		`fallthrough;`: {{{tok: token.SEMICOLON, lit: `;`}, {tok: token.FALLTHROUGH, lit: `fallthrough`}},
+			{{tok: token.SEMICOLON, lit: `;`}, {tok: token.FALLTHROUGH, lit: `fallthrough`}},
+			{{tok: token.SEMICOLON, lit: `;`}}, {}, {}},
+		`fallthrough; fallthrough;`: {{{tok: token.SEMICOLON, lit: `;`}, {tok: token.FALLTHROUGH, lit: `fallthrough`}, {tok: token.SEMICOLON, lit: `;`}, {tok: token.FALLTHROUGH, lit: `fallthrough`}},
+			{{tok: token.SEMICOLON, lit: `;`}, {tok: token.FALLTHROUGH, lit: `fallthrough`}, {tok: token.SEMICOLON, lit: `;`}, {tok: token.FALLTHROUGH, lit: `fallthrough`}},
+			{{tok: token.SEMICOLON, lit: `;`}, {tok: token.FALLTHROUGH, lit: `fallthrough`}, {tok: token.SEMICOLON, lit: `;`}},
+			{{tok: token.SEMICOLON, lit: `;`}, {tok: token.FALLTHROUGH, lit: `fallthrough`}}, {{tok: token.SEMICOLON, lit: `;`}}, {},
+			{{tok: token.SEMICOLON, lit: `;`}, {tok: token.FALLTHROUGH, lit: `fallthrough`}}, {}},
+	})
+}
+
 func TestStructType(t *testing.T) {
 	remaining(t, StructType, map[string][][]*Token{
 		`struct{}`:                      semiSlice,
