@@ -214,6 +214,23 @@ func ExprSwitchCase(ts [][]*Token) [][]*Token {
 	return append(tokenParser(ts, token.DEFAULT), cas...)
 }
 
+func ExprSwitchStmt(ts [][]*Token) [][]*Token {
+	ts = tokenParser(ts, token.SWITCH)
+	stmt := SimpleStmt(ts)
+	ts = append(ts, tokenParser(stmt, token.SEMICOLON)...)
+	if len(ts) == 0 {
+		return nil
+	}
+	ts = append(ts, Expression(ts)...)
+	ts = tokenParser(ts, token.LBRACE)
+	next := ts
+	for len(next) != 0 {
+		next = ExprCaseClause(next)
+		ts = append(ts, next...)
+	}
+	return tokenParser(ts, token.RBRACE)
+}
+
 func FallthroughStmt(ts [][]*Token) [][]*Token { return tokenParser(ts, token.FALLTHROUGH) }
 
 func FieldDecl(ts [][]*Token) [][]*Token {

@@ -224,6 +224,20 @@ func TestExprSwitchCase(t *testing.T) {
 	})
 }
 
+func TestExprSwitchStmt(t *testing.T) {
+	remaining(t, ExprSwitchStmt, map[string][][]*Token{
+		`switch{}`:                                               semiSlice,
+		`switch{default:}`:                                       {{semi}, {semi}},
+		`switch a := 1; {}`:                                      semiSlice,
+		`switch a {}`:                                            semiSlice,
+		`switch a := 1; a {}`:                                    semiSlice,
+		`switch a := 1; a {default:}`:                            {{semi}, {semi}},
+		`switch {case true:}`:                                    {{semi}, {semi}},
+		`switch {case true: a()}`:                                semiSlice,
+		`switch{ case true: a(); case false: b(); default: c()}`: {{semi}, {semi}, {semi}, {semi}},
+	})
+}
+
 func TestFallthroughStmt(t *testing.T) {
 	remaining(t, FallthroughStmt, map[string][][]*Token{
 		`fallthrough`: semiSlice,
