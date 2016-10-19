@@ -179,6 +179,12 @@ func EllipsisArrayType(ts [][]*Token) [][]*Token {
 
 func EmptyStmt(ts [][]*Token) [][]*Token { return ts }
 
+func ExprCaseClause(ts [][]*Token) [][]*Token {
+	ts = ExprSwitchCase(ts)
+	ts = tokenParser(ts, token.COLON)
+	return StatementList(ts)
+}
+
 func Expression(ts [][]*Token) [][]*Token {
 	base := UnaryExpr(ts)
 	comp := BinaryOp(base)

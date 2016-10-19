@@ -183,6 +183,14 @@ func TestEmptyStmt(t *testing.T) {
 	remaining(t, EmptyStmt, map[string][][]*Token{`1`: {{semi, {tok: token.INT, lit: `1`}}}})
 }
 
+func TestExprCaseClause(t *testing.T) {
+	remaining(t, ExprCaseClause, map[string][][]*Token{
+		`default: a()`: {{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `a`}},
+			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `a`}},
+			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}}, {semi}, {}, {}},
+	})
+}
+
 func TestExpression(t *testing.T) {
 	remaining(t, Expression, map[string][][]*Token{
 		`1`: semiSlice,
