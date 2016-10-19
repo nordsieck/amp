@@ -208,6 +208,14 @@ func TestExpressionStmt(t *testing.T) {
 	remaining(t, ExpressionStmt, map[string][][]*Token{`1`: semiSlice})
 }
 
+func TestExprSwitchCase(t *testing.T) {
+	remaining(t, ExprSwitchCase, map[string][][]*Token{
+		`case 1`:    {{semi}},
+		`case 1, 1`: {{semi, {tok: token.INT, lit: `1`}, {tok: token.COMMA}}, {semi}},
+		`default`:   {{}},
+	})
+}
+
 func TestFallthroughStmt(t *testing.T) {
 	remaining(t, FallthroughStmt, map[string][][]*Token{
 		`fallthrough`: semiSlice,

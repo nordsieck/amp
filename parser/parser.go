@@ -202,6 +202,12 @@ func ExpressionList(ts [][]*Token) [][]*Token {
 
 func ExpressionStmt(ts [][]*Token) [][]*Token { return Expression(ts) }
 
+func ExprSwitchCase(ts [][]*Token) [][]*Token {
+	cas := tokenParser(ts, token.CASE)
+	cas = ExpressionList(cas)
+	return append(tokenParser(ts, token.DEFAULT), cas...)
+}
+
 func FallthroughStmt(ts [][]*Token) [][]*Token { return tokenParser(ts, token.FALLTHROUGH) }
 
 func FieldDecl(ts [][]*Token) [][]*Token {
