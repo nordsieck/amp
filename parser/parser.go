@@ -240,6 +240,23 @@ func IdentifierList(ts [][]*Token) [][]*Token {
 	return ts
 }
 
+func IfStmt(ts [][]*Token) [][]*Token {
+	ts = tokenParser(ts, token.IF)
+	simple := SimpleStmt(ts)
+	ts = append(ts, tokenParser(simple, token.SEMICOLON)...)
+	if len(ts) == 0 {
+		return nil
+	}
+	ts = Expression(ts)
+	ts = Block(ts)
+	els := tokenParser(ts, token.ELSE)
+	if len(els) == 0 {
+		return ts
+	}
+	els = append(IfStmt(els), Block(els)...)
+	return append(ts, els...)
+}
+
 func IncDecStmt(ts [][]*Token) [][]*Token {
 	ts = Expression(ts)
 	return append(tokenParser(ts, token.INC), tokenParser(ts, token.DEC)...)
@@ -520,7 +537,6 @@ func SliceType(ts [][]*Token) [][]*Token {
 }
 
 func Statement(ts [][]*Token) [][]*Token {
-	// if
 	// switch
 	// select
 	// for
@@ -529,7 +545,7 @@ func Statement(ts [][]*Token) [][]*Token {
 	return append(
 		append(append(append(Declaration(ts), LabeledStmt(ts)...), append(SimpleStmt(ts), GoStmt(ts)...)...),
 			append(append(ReturnStmt(ts), BreakStmt(ts)...), append(ContinueStmt(ts), GotoStmt(ts)...)...)...),
-		append(FallthroughStmt(ts), Block(ts)...)...)
+		append(append(FallthroughStmt(ts), Block(ts)...), IfStmt(ts)...)...)
 }
 
 func StatementList(ts [][]*Token) [][]*Token {

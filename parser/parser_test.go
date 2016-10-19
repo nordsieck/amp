@@ -248,6 +248,32 @@ func TestIdentifierList(t *testing.T) {
 	})
 }
 
+func TestIfStmt(t *testing.T) {
+	remaining(t, IfStmt, map[string][][]*Token{
+		`if a {}`:             {{semi}, {semi}},
+		`if a := false; a {}`: {{semi}, {semi}},
+		`if a {} else {}`: {{semi, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.ELSE, lit: `else`}},
+			{semi, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.ELSE, lit: `else`}},
+			{semi}, {semi}, {semi}, {semi}},
+		`if a {} else if b {}`: {
+			{semi, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.IDENT, lit: `b`}, {tok: token.IF, lit: `if`}, {tok: token.ELSE, lit: `else`}},
+			{semi, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.IDENT, lit: `b`}, {tok: token.IF, lit: `if`}, {tok: token.ELSE, lit: `else`}},
+			{semi}, {semi}, {semi}, {semi}},
+		`if a := false; a {} else if b {} else {}`: {
+			{semi, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.ELSE, lit: `else`}, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.IDENT, lit: `b`},
+				{tok: token.IF, lit: `if`}, {tok: token.ELSE, lit: `else`}},
+			{semi, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.ELSE, lit: `else`}, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.IDENT, lit: `b`},
+				{tok: token.IF, lit: `if`}, {tok: token.ELSE, lit: `else`}},
+			{semi, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.ELSE, lit: `else`}},
+			{semi, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.ELSE, lit: `else`}},
+			{semi, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.ELSE, lit: `else`}},
+			{semi, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.ELSE, lit: `else`}},
+			{semi}, {semi}, {semi}, {semi}, {semi}, {semi}, {semi}, {semi},
+		},
+		`if a { b() }`: {{semi}},
+	})
+}
+
 func TestIncDecStmt(t *testing.T) {
 	remaining(t, IncDecStmt, map[string][][]*Token{
 		`a++`: semiSlice,
@@ -578,6 +604,7 @@ func TestStatement(t *testing.T) {
 		`goto a`:      {{semi, {tok: token.IDENT, lit: `a`}, {tok: token.GOTO, lit: `goto`}}, {semi}},
 		`fallthrough`: {{semi, {tok: token.FALLTHROUGH, lit: `fallthrough`}}, {semi}},
 		`{a()}`:       {{semi, {tok: token.RBRACE}, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `a`}, {tok: token.LBRACE}}, {semi}},
+		`if a {}`:     {{semi, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.IDENT, lit: `a`}, {tok: token.IF, lit: `if`}}, {semi}, {semi}},
 	})
 }
 
