@@ -83,6 +83,14 @@ func TestBinaryOp(t *testing.T) {
 	})
 }
 
+func TestBlock(t *testing.T) {
+	remaining(t, Block, map[string][][]*Token{
+		`{a()}`:     semiSlice,
+		`{a();}`:    {{semi}, {semi}},
+		`{a();b()}`: semiSlice,
+	})
+}
+
 func TestBreakStmt(t *testing.T) {
 	remaining(t, BreakStmt, map[string][][]*Token{
 		`break a`: {{semi, {tok: token.IDENT, lit: `a`}}, {semi}},
@@ -569,6 +577,7 @@ func TestStatement(t *testing.T) {
 		`continue a`:  {{semi, {tok: token.IDENT, lit: `a`}, {tok: token.CONTINUE, lit: `continue`}}, {semi, {tok: token.IDENT, lit: `a`}}, {semi}},
 		`goto a`:      {{semi, {tok: token.IDENT, lit: `a`}, {tok: token.GOTO, lit: `goto`}}, {semi}},
 		`fallthrough`: {{semi, {tok: token.FALLTHROUGH, lit: `fallthrough`}}, {semi}},
+		`{a()}`:       {{semi, {tok: token.RBRACE}, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `a`}, {tok: token.LBRACE}}, {semi}},
 	})
 }
 

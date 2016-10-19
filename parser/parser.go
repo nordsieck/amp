@@ -79,6 +79,12 @@ func BinaryOp(ts [][]*Token) [][]*Token {
 		MulOp(ts)...)
 }
 
+func Block(ts [][]*Token) [][]*Token {
+	ts = tokenParser(ts, token.LBRACE)
+	ts = StatementList(ts)
+	return tokenParser(ts, token.RBRACE)
+}
+
 func BreakStmt(ts [][]*Token) [][]*Token {
 	ts = tokenParser(ts, token.BREAK)
 	return append(ts, tokenParser(ts, token.IDENT)...)
@@ -514,7 +520,6 @@ func SliceType(ts [][]*Token) [][]*Token {
 }
 
 func Statement(ts [][]*Token) [][]*Token {
-	// block
 	// if
 	// switch
 	// select
@@ -524,7 +529,7 @@ func Statement(ts [][]*Token) [][]*Token {
 	return append(
 		append(append(append(Declaration(ts), LabeledStmt(ts)...), append(SimpleStmt(ts), GoStmt(ts)...)...),
 			append(append(ReturnStmt(ts), BreakStmt(ts)...), append(ContinueStmt(ts), GotoStmt(ts)...)...)...),
-		FallthroughStmt(ts)...)
+		append(FallthroughStmt(ts), Block(ts)...)...)
 }
 
 func StatementList(ts [][]*Token) [][]*Token {
