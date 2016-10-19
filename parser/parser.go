@@ -675,6 +675,11 @@ func TypeSpec(ts [][]*Token) [][]*Token {
 	return Type(ts)
 }
 
+func TypeSwitchCase(ts [][]*Token) [][]*Token {
+	cas := tokenParser(ts, token.CASE)
+	return append(TypeList(cas), tokenParser(ts, token.DEFAULT)...)
+}
+
 func UnaryExpr(ts [][]*Token) [][]*Token {
 	uo := UnaryOp(ts)
 	if len(uo) != 0 {

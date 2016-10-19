@@ -731,6 +731,14 @@ func TestTypeSpec(t *testing.T) {
 	})
 }
 
+func TestTypeSwitchCase(t *testing.T) {
+	remaining(t, TypeSwitchCase, map[string][][]*Token{
+		`default`:   {{}},
+		`case a`:    semiSlice,
+		`case a, b`: {{semi, {tok: token.IDENT, lit: `b`}, {tok: token.COMMA}}, {semi}},
+	})
+}
+
 func TestUnaryExpr(t *testing.T) {
 	remaining(t, UnaryExpr, map[string][][]*Token{
 		`1`:  semiSlice,
