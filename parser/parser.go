@@ -645,6 +645,18 @@ func TypeDecl(ts [][]*Token) [][]*Token {
 	return append(TypeSpec(ts), multi...)
 }
 
+func TypeList(ts [][]*Token) [][]*Token {
+	ts = Type(ts)
+	next := ts
+	for len(next) != 0 {
+		current := tokenParser(next, token.COMMA)
+		current = Type(current)
+		ts = append(ts, current...)
+		next = current
+	}
+	return ts
+}
+
 func TypeLit(ts [][]*Token) [][]*Token {
 	return append(
 		append(append(ArrayType(ts), StructType(ts)...),

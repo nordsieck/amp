@@ -694,6 +694,14 @@ func TestTypeDecl(t *testing.T) {
 	})
 }
 
+func TestTypeList(t *testing.T) {
+	remaining(t, TypeList, map[string][][]*Token{
+		`a`:     semiSlice,
+		`a, b`:  {{semi, {tok: token.IDENT, lit: `b`}, {tok: token.COMMA}}, {semi}},
+		`a, b,`: {{{tok: token.COMMA}, {tok: token.IDENT, lit: `b`}, {tok: token.COMMA}}, {{tok: token.COMMA}}},
+	})
+}
+
 func TestTypeLit(t *testing.T) {
 	remaining(t, TypeLit, map[string][][]*Token{
 		`[1]int`:      semiSlice,
