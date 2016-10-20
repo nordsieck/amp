@@ -576,7 +576,6 @@ func SliceType(ts [][]*Token) [][]*Token {
 }
 
 func Statement(ts [][]*Token) [][]*Token {
-	// switch
 	// select
 	// for
 	// defer
@@ -584,7 +583,7 @@ func Statement(ts [][]*Token) [][]*Token {
 	return append(
 		append(append(append(Declaration(ts), LabeledStmt(ts)...), append(SimpleStmt(ts), GoStmt(ts)...)...),
 			append(append(ReturnStmt(ts), BreakStmt(ts)...), append(ContinueStmt(ts), GotoStmt(ts)...)...)...),
-		append(append(FallthroughStmt(ts), Block(ts)...), IfStmt(ts)...)...)
+		append(append(FallthroughStmt(ts), Block(ts)...), append(IfStmt(ts), SwitchStmt(ts)...)...)...)
 }
 
 // bad spec
@@ -619,6 +618,8 @@ func StructType(ts [][]*Token) [][]*Token {
 	fields = append(fields, tokenParser(fields, token.SEMICOLON)...)
 	return tokenParser(append(ts, fields...), token.RBRACE)
 }
+
+func SwitchStmt(ts [][]*Token) [][]*Token { return append(ExprSwitchStmt(ts), TypeSwitchStmt(ts)...) }
 
 func Type(ts [][]*Token) [][]*Token {
 	name := TypeName(ts)

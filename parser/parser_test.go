@@ -635,6 +635,7 @@ func TestStatement(t *testing.T) {
 		`fallthrough`: {{semi, {tok: token.FALLTHROUGH, lit: `fallthrough`}}, {semi}},
 		`{a()}`:       {{semi, {tok: token.RBRACE}, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `a`}, {tok: token.LBRACE}}, {semi}},
 		`if a {}`:     {{semi, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.IDENT, lit: `a`}, {tok: token.IF, lit: `if`}}, {semi}, {semi}},
+		`switch {}`:   {{semi, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.SWITCH, lit: `switch`}}, {semi}},
 	})
 }
 
@@ -661,6 +662,13 @@ func TestStructType(t *testing.T) {
 		`struct{a, b int}`:              semiSlice,
 		`struct{a, b int;}`:             semiSlice,
 		`struct{a, b int; c, d string}`: semiSlice,
+	})
+}
+
+func TestSwitchStmt(t *testing.T) {
+	remaining(t, SwitchStmt, map[string][][]*Token{
+		`switch {}`:          semiSlice,
+		`switch a.(type) {}`: semiSlice,
 	})
 }
 
