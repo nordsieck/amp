@@ -283,6 +283,22 @@ func TestFieldDecl(t *testing.T) {
 	})
 }
 
+func TestForClause(t *testing.T) {
+	remaining(t, ForClause, map[string][][]*Token{
+		`;;`:       {{}, {}, {}, {}},
+		`a := 1;;`: {{}, {}},
+		`; a < 5;`: {{}, {}, {}, {}},
+		`;; a++`: {{semi, {tok: token.INC}, {tok: token.IDENT, lit: `a`}},
+			{semi, {tok: token.INC}, {tok: token.IDENT, lit: `a`}},
+			{semi, {tok: token.INC}, {tok: token.IDENT, lit: `a`}},
+			{semi, {tok: token.INC}, {tok: token.IDENT, lit: `a`}},
+			{semi, {tok: token.INC}}, {semi, {tok: token.INC}}, {semi}, {semi}},
+		`a := 1; a < 5; a++`: {{semi, {tok: token.INC}, {tok: token.IDENT, lit: `a`}},
+			{semi, {tok: token.INC}, {tok: token.IDENT, lit: `a`}},
+			{semi, {tok: token.INC}}, {semi}},
+	})
+}
+
 func TestFunctionType(t *testing.T) {
 	remaining(t, FunctionType, map[string][][]*Token{
 		`func()`:             semiSlice,

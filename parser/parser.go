@@ -264,6 +264,14 @@ func FieldDecl(ts [][]*Token) [][]*Token {
 	return append(ts, tokenParser(ts, token.STRING)...)
 }
 
+func ForClause(ts [][]*Token) [][]*Token {
+	ts = append(ts, SimpleStmt(ts)...)
+	ts = tokenParser(ts, token.SEMICOLON)
+	ts = append(ts, Expression(ts)...)
+	ts = tokenParser(ts, token.SEMICOLON)
+	return append(ts, SimpleStmt(ts)...)
+}
+
 func FunctionType(ts [][]*Token) [][]*Token {
 	ts = tokenParser(ts, token.FUNC)
 	return Signature(ts)
