@@ -686,6 +686,16 @@ func TypeSwitchCase(ts [][]*Token) [][]*Token {
 	return append(TypeList(cas), tokenParser(ts, token.DEFAULT)...)
 }
 
+func TypeSwitchGuard(ts [][]*Token) [][]*Token {
+	id := tokenParser(ts, token.IDENT)
+	ts = append(ts, tokenParser(id, token.DEFINE)...)
+	ts = PrimaryExpr(ts)
+	ts = tokenParser(ts, token.PERIOD)
+	ts = tokenParser(ts, token.LPAREN)
+	ts = tokenParser(ts, token.TYPE)
+	return tokenParser(ts, token.RPAREN)
+}
+
 func UnaryExpr(ts [][]*Token) [][]*Token {
 	uo := UnaryOp(ts)
 	if len(uo) != 0 {

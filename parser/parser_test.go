@@ -763,6 +763,13 @@ func TestTypeSwitchCase(t *testing.T) {
 	})
 }
 
+func TestTypeSwitchGuard(t *testing.T) {
+	remaining(t, TypeSwitchGuard, map[string][][]*Token{
+		`a.(type)`:      semiSlice,
+		`a := a.(type)`: semiSlice,
+	})
+}
+
 func TestUnaryExpr(t *testing.T) {
 	remaining(t, UnaryExpr, map[string][][]*Token{
 		`1`:  semiSlice,
