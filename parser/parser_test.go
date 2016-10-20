@@ -114,6 +114,14 @@ func TestCompositeLit(t *testing.T) {
 	})
 }
 
+func TestCommCase(t *testing.T) {
+	remaining(t, CommCase, map[string][][]*Token{
+		`default`:   {{}},
+		`case <-a`:  {{semi}},
+		`case a<-5`: {{semi}, {semi, {tok: token.INT, lit: `5`}, {tok: token.ARROW}}},
+	})
+}
+
 func TestConstDecl(t *testing.T) {
 	remaining(t, ConstDecl, map[string][][]*Token{
 		`const a = 1`:                         semiSlice,

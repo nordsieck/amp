@@ -105,6 +105,12 @@ func ChannelType(ts [][]*Token) [][]*Token {
 	return Type(together)
 }
 
+func CommCase(ts [][]*Token) [][]*Token {
+	cas := tokenParser(ts, token.CASE)
+	cas = append(SendStmt(cas), RecvStmt(cas)...)
+	return append(cas, tokenParser(ts, token.DEFAULT)...)
+}
+
 func CompositeLit(ts [][]*Token) [][]*Token {
 	ts = LiteralType(ts)
 	return LiteralValue(ts)
