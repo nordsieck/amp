@@ -548,6 +548,24 @@ func Selector(ts [][]*Token) [][]*Token {
 	return tokenParser(ts, token.IDENT)
 }
 
+// bad spec
+// "select" "{" [ CommClause { ";" CommClause } [ ";" ]] "}"
+func SelectStmt(ts [][]*Token) [][]*Token {
+	ts = tokenParser(ts, token.SELECT)
+	ts = tokenParser(ts, token.LBRACE)
+	clause := CommClause(ts)
+	next := clause
+	for len(next) != 0 {
+		current := tokenParser(next, token.SEMICOLON)
+		current = CommClause(current)
+		clause = append(clause, current...)
+		next = current
+	}
+	clause = append(clause, tokenParser(clause, token.SEMICOLON)...)
+	ts = append(ts, clause...)
+	return tokenParser(ts, token.RBRACE)
+}
+
 func SendStmt(ts [][]*Token) [][]*Token {
 	ts = Expression(ts)
 	ts = tokenParser(ts, token.ARROW)
@@ -596,14 +614,14 @@ func SliceType(ts [][]*Token) [][]*Token {
 }
 
 func Statement(ts [][]*Token) [][]*Token {
-	// select
 	// for
 	// defer
 
 	return append(
 		append(append(append(Declaration(ts), LabeledStmt(ts)...), append(SimpleStmt(ts), GoStmt(ts)...)...),
 			append(append(ReturnStmt(ts), BreakStmt(ts)...), append(ContinueStmt(ts), GotoStmt(ts)...)...)...),
-		append(append(FallthroughStmt(ts), Block(ts)...), append(IfStmt(ts), SwitchStmt(ts)...)...)...)
+		append(append(append(FallthroughStmt(ts), Block(ts)...), append(IfStmt(ts), SwitchStmt(ts)...)...),
+			SelectStmt(ts)...)...)
 }
 
 // bad spec

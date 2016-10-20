@@ -613,6 +613,17 @@ func TestSelector(t *testing.T) {
 	})
 }
 
+func TestSelectStmt(t *testing.T) {
+	remaining(t, SelectStmt, map[string][][]*Token{
+		`select {}`:                                            {{semi}},
+		`select {default:}`:                                    {{semi}, {semi}},
+		`select {default: a()}`:                                {{semi}},
+		`select {default: a();}`:                               {{semi}, {semi}},
+		`select {case <-a: ;default:}`:                         {{semi}, {semi}, {semi}, {semi}},
+		`select {case <-a: b(); case c<-d: e(); default: f()}`: {{semi}},
+	})
+}
+
 func TestSendStmt(t *testing.T) {
 	remaining(t, SendStmt, map[string][][]*Token{`a <- 1`: semiSlice})
 }
@@ -679,6 +690,7 @@ func TestStatement(t *testing.T) {
 		`{a()}`:       {{semi, {tok: token.RBRACE}, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `a`}, {tok: token.LBRACE}}, {semi}},
 		`if a {}`:     {{semi, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.IDENT, lit: `a`}, {tok: token.IF, lit: `if`}}, {semi}, {semi}},
 		`switch {}`:   {{semi, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.SWITCH, lit: `switch`}}, {semi}},
+		`select {}`:   {{semi, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.SELECT, lit: `select`}}, {semi}},
 	})
 }
 
