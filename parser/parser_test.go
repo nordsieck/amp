@@ -8,9 +8,8 @@ import (
 )
 
 var (
-	empty     = [][]*Token(nil)
-	semi      = &Token{tok: token.SEMICOLON, lit: "\n"}
-	semiSlice = [][]*Token{{semi}}
+	empty = [][]*Token(nil)
+	semi  = &Token{tok: token.SEMICOLON, lit: "\n"}
 )
 
 func TestAddOp(t *testing.T) {
@@ -32,23 +31,23 @@ func TestAnonymousField(t *testing.T) {
 
 func TestArguments(t *testing.T) {
 	remaining(t, Arguments, map[string][][]*Token{
-		`()`:        semiSlice,
-		`(a)`:       semiSlice,
-		`(a,a)`:     semiSlice,
-		`(a,a,)`:    semiSlice,
-		`(a,a...,)`: semiSlice,
+		`()`:        {{semi}},
+		`(a)`:       {{semi}},
+		`(a,a)`:     {{semi}},
+		`(a,a,)`:    {{semi}},
+		`(a,a...,)`: {{semi}},
 	})
 }
 
 func TestArrayType(t *testing.T) {
 	remaining(t, ArrayType, map[string][][]*Token{
-		`[1]int`: semiSlice,
-		`[a]int`: semiSlice,
+		`[1]int`: {{semi}},
+		`[a]int`: {{semi}},
 	})
 }
 
 func TestAssignment(t *testing.T) {
-	remaining(t, Assignment, map[string][][]*Token{`a = 1`: semiSlice})
+	remaining(t, Assignment, map[string][][]*Token{`a = 1`: {{semi}}})
 }
 
 func TestAssignOp(t *testing.T) {
@@ -62,11 +61,11 @@ func TestAssignOp(t *testing.T) {
 func TestBasicLit(t *testing.T) {
 	remaining(t, BasicLit, map[string][][]*Token{
 		``:    empty,
-		`1`:   semiSlice,
-		`1.1`: semiSlice,
-		`1i`:  semiSlice,
-		`'a'`: semiSlice,
-		`"a"`: semiSlice,
+		`1`:   {{semi}},
+		`1.1`: {{semi}},
+		`1i`:  {{semi}},
+		`'a'`: {{semi}},
+		`"a"`: {{semi}},
 		`a`:   empty,
 		`_`:   empty,
 	})
@@ -85,9 +84,9 @@ func TestBinaryOp(t *testing.T) {
 
 func TestBlock(t *testing.T) {
 	remaining(t, Block, map[string][][]*Token{
-		`{a()}`:     semiSlice,
+		`{a()}`:     {{semi}},
 		`{a();}`:    {{semi}, {semi}},
-		`{a();b()}`: semiSlice,
+		`{a();b()}`: {{semi}},
 	})
 }
 
@@ -100,16 +99,16 @@ func TestBreakStmt(t *testing.T) {
 
 func TestChannelType(t *testing.T) {
 	remaining(t, ChannelType, map[string][][]*Token{
-		`chan int`:   semiSlice,
-		`<-chan int`: semiSlice,
-		`chan<- int`: semiSlice,
+		`chan int`:   {{semi}},
+		`<-chan int`: {{semi}},
+		`chan<- int`: {{semi}},
 		`int`:        empty,
 	})
 }
 
 func TestCompositeLit(t *testing.T) {
 	remaining(t, CompositeLit, map[string][][]*Token{
-		`T{1}`: semiSlice,
+		`T{1}`: {{semi}},
 		`T{foo: "bar", baz: "quux",}`: {{semi}, {semi}, {semi}, {semi}},
 	})
 }
@@ -146,18 +145,18 @@ func TestCommClause(t *testing.T) {
 
 func TestConstDecl(t *testing.T) {
 	remaining(t, ConstDecl, map[string][][]*Token{
-		`const a = 1`:                         semiSlice,
-		`const a int = 1`:                     semiSlice,
-		`const (a = 1)`:                       semiSlice,
-		`const (a int = 1)`:                   semiSlice,
-		`const (a, b int = 1, 2; c int = 3;)`: semiSlice,
+		`const a = 1`:                         {{semi}},
+		`const a int = 1`:                     {{semi}},
+		`const (a = 1)`:                       {{semi}},
+		`const (a int = 1)`:                   {{semi}},
+		`const (a, b int = 1, 2; c int = 3;)`: {{semi}},
 	})
 }
 
 func TestConstSpec(t *testing.T) {
 	remaining(t, ConstSpec, map[string][][]*Token{
-		`a = 1`:     semiSlice,
-		`a int = 1`: semiSlice,
+		`a = 1`:     {{semi}},
+		`a int = 1`: {{semi}},
 		`a, b int = 1, 2`: [][]*Token{
 			{semi, {tok: token.INT, lit: `2`}, {tok: token.COMMA}}, {semi},
 		},
@@ -173,17 +172,17 @@ func TestContinueStmt(t *testing.T) {
 
 func TestConversion(t *testing.T) {
 	remaining(t, Conversion, map[string][][]*Token{
-		`float(1)`:   semiSlice,
-		`(int)(5,)`:  semiSlice,
-		`a.a("foo")`: semiSlice,
+		`float(1)`:   {{semi}},
+		`(int)(5,)`:  {{semi}},
+		`a.a("foo")`: {{semi}},
 	})
 }
 
 func TestDeclaration(t *testing.T) {
 	remaining(t, Declaration, map[string][][]*Token{
-		`const a = 1`: semiSlice,
-		`type a int`:  semiSlice,
-		`var a int`:   semiSlice,
+		`const a = 1`: {{semi}},
+		`type a int`:  {{semi}},
+		`var a int`:   {{semi}},
 	})
 }
 
@@ -198,7 +197,7 @@ func TestDeferStmt(t *testing.T) {
 func TestElement(t *testing.T) {
 	remaining(t, Element, map[string][][]*Token{
 		`1+1`:   {{semi, {tok: token.INT, lit: `1`}, {tok: token.ADD}}, {semi}},
-		`{1+1}`: semiSlice,
+		`{1+1}`: {{semi}},
 	})
 }
 
@@ -214,7 +213,7 @@ func TestElementList(t *testing.T) {
 }
 
 func TestEllipsisArrayType(t *testing.T) {
-	remaining(t, EllipsisArrayType, map[string][][]*Token{`[...]int`: semiSlice})
+	remaining(t, EllipsisArrayType, map[string][][]*Token{`[...]int`: {{semi}}})
 }
 
 func TestEmptyStmt(t *testing.T) {
@@ -231,7 +230,7 @@ func TestExprCaseClause(t *testing.T) {
 
 func TestExpression(t *testing.T) {
 	remaining(t, Expression, map[string][][]*Token{
-		`1`: semiSlice,
+		`1`: {{semi}},
 		`1+1`: [][]*Token{
 			{semi, {tok: token.INT, lit: `1`}, {tok: token.ADD}},
 			{semi},
@@ -245,13 +244,13 @@ func TestExpression(t *testing.T) {
 
 func TestExpressionList(t *testing.T) {
 	remaining(t, ExpressionList, map[string][][]*Token{
-		`1`:   semiSlice,
+		`1`:   {{semi}},
 		`1,1`: {{semi, {tok: token.INT, lit: `1`}, {tok: token.COMMA}}, {semi}},
 	})
 }
 
 func TestExpressionStmt(t *testing.T) {
-	remaining(t, ExpressionStmt, map[string][][]*Token{`1`: semiSlice})
+	remaining(t, ExpressionStmt, map[string][][]*Token{`1`: {{semi}}})
 }
 
 func TestExprSwitchCase(t *testing.T) {
@@ -264,21 +263,21 @@ func TestExprSwitchCase(t *testing.T) {
 
 func TestExprSwitchStmt(t *testing.T) {
 	remaining(t, ExprSwitchStmt, map[string][][]*Token{
-		`switch{}`:                                               semiSlice,
+		`switch{}`:                                               {{semi}},
 		`switch{default:}`:                                       {{semi}, {semi}},
-		`switch a := 1; {}`:                                      semiSlice,
-		`switch a {}`:                                            semiSlice,
-		`switch a := 1; a {}`:                                    semiSlice,
+		`switch a := 1; {}`:                                      {{semi}},
+		`switch a {}`:                                            {{semi}},
+		`switch a := 1; a {}`:                                    {{semi}},
 		`switch a := 1; a {default:}`:                            {{semi}, {semi}},
 		`switch {case true:}`:                                    {{semi}, {semi}},
-		`switch {case true: a()}`:                                semiSlice,
+		`switch {case true: a()}`:                                {{semi}},
 		`switch{ case true: a(); case false: b(); default: c()}`: {{semi}},
 	})
 }
 
 func TestFallthroughStmt(t *testing.T) {
 	remaining(t, FallthroughStmt, map[string][][]*Token{
-		`fallthrough`: semiSlice,
+		`fallthrough`: {{semi}},
 		`a`:           empty,
 	})
 }
@@ -286,7 +285,7 @@ func TestFallthroughStmt(t *testing.T) {
 func TestFieldDecl(t *testing.T) {
 	remaining(t, FieldDecl, map[string][][]*Token{
 		`a,a int`:    {{semi, {tok: token.IDENT, lit: `int`}, {tok: token.IDENT, lit: `a`}, {tok: token.COMMA}}, {semi}},
-		`*int`:       semiSlice,
+		`*int`:       {{semi}},
 		`*int "foo"`: {{semi, {tok: token.STRING, lit: `"foo"`}}, {semi}},
 	})
 }
@@ -322,7 +321,7 @@ func TestForStmt(t *testing.T) {
 
 func TestFunctionType(t *testing.T) {
 	remaining(t, FunctionType, map[string][][]*Token{
-		`func()`:             semiSlice,
+		`func()`:             {{semi}},
 		`func()()`:           {{semi, {tok: token.RPAREN}, {tok: token.LPAREN}}, {semi}},
 		`func(int, int) int`: {{semi, {tok: token.IDENT, lit: `int`}}, {semi}},
 	})
@@ -333,15 +332,15 @@ func TestGoStmt(t *testing.T) {
 }
 
 func TestGotoStmt(t *testing.T) {
-	remaining(t, GotoStmt, map[string][][]*Token{`goto a`: semiSlice, `goto`: empty, `a`: empty})
+	remaining(t, GotoStmt, map[string][][]*Token{`goto a`: {{semi}}, `goto`: empty, `a`: empty})
 }
 
 func TestIdentifierList(t *testing.T) {
 	remaining(t, IdentifierList, map[string][][]*Token{
-		`a`:   semiSlice,
+		`a`:   {{semi}},
 		`a,a`: {{semi, {tok: token.IDENT, lit: `a`}, {tok: token.COMMA}}, {semi}},
 		`1`:   empty,
-		`_`:   semiSlice,
+		`_`:   {{semi}},
 	})
 }
 
@@ -373,24 +372,24 @@ func TestIfStmt(t *testing.T) {
 
 func TestIncDecStmt(t *testing.T) {
 	remaining(t, IncDecStmt, map[string][][]*Token{
-		`a++`: semiSlice,
-		`a--`: semiSlice,
+		`a++`: {{semi}},
+		`a--`: {{semi}},
 	})
 }
 
 func TestIndex(t *testing.T) {
 	remaining(t, Index, map[string][][]*Token{
-		`[a]`: semiSlice,
-		`[1]`: semiSlice,
+		`[a]`: {{semi}},
+		`[1]`: {{semi}},
 	})
 }
 
 func TestInterfaceType(t *testing.T) {
 	remaining(t, InterfaceType, map[string][][]*Token{
-		`interface{}`:       semiSlice,
-		`interface{a}`:      semiSlice,
-		`interface{a()}`:    semiSlice,
-		`interface{a();a;}`: semiSlice,
+		`interface{}`:       {{semi}},
+		`interface{a}`:      {{semi}},
+		`interface{a()}`:    {{semi}},
+		`interface{a();a;}`: {{semi}},
 	})
 }
 
@@ -398,13 +397,13 @@ func TestKey(t *testing.T) {
 	remaining(t, Key, map[string][][]*Token{
 		`a`:     {{semi}, {semi}},
 		`1+a`:   {{semi, {tok: token.IDENT, lit: `a`}, {tok: token.ADD}}, {semi}},
-		`"foo"`: semiSlice,
+		`"foo"`: {{semi}},
 	})
 }
 
 func TestKeyedElement(t *testing.T) {
 	remaining(t, KeyedElement, map[string][][]*Token{
-		`1`:   semiSlice,
+		`1`:   {{semi}},
 		`1:1`: {{semi, {tok: token.INT, lit: `1`}, {tok: token.COLON}}, {semi}},
 	})
 }
@@ -417,8 +416,8 @@ func TestLabeledStmt(t *testing.T) {
 
 func TestLiteral(t *testing.T) {
 	remaining(t, Literal, map[string][][]*Token{
-		`1`:    semiSlice,
-		`T{1}`: semiSlice,
+		`1`:    {{semi}},
+		`T{1}`: {{semi}},
 		`a`:    empty,
 		`_`:    empty,
 	})
@@ -426,41 +425,41 @@ func TestLiteral(t *testing.T) {
 
 func TestLiteralType(t *testing.T) {
 	remaining(t, LiteralType, map[string][][]*Token{
-		`struct{}`:    semiSlice,
-		`[1]int`:      semiSlice,
-		`[...]int`:    semiSlice,
-		`[]int`:       semiSlice,
-		`map[int]int`: semiSlice,
+		`struct{}`:    {{semi}},
+		`[1]int`:      {{semi}},
+		`[...]int`:    {{semi}},
+		`[]int`:       {{semi}},
+		`map[int]int`: {{semi}},
 		`a.a`:         {{semi}, {semi, {tok: token.IDENT, lit: `a`}, {tok: token.PERIOD}}},
 	})
 }
 
 func TestLiteralValue(t *testing.T) {
 	remaining(t, LiteralValue, map[string][][]*Token{
-		`{1}`:           semiSlice,
-		`{0: 1, 1: 2,}`: semiSlice,
+		`{1}`:           {{semi}},
+		`{0: 1, 1: 2,}`: {{semi}},
 	})
 }
 
 func TestMapType(t *testing.T) {
-	remaining(t, MapType, map[string][][]*Token{`map[int]int`: semiSlice})
+	remaining(t, MapType, map[string][][]*Token{`map[int]int`: {{semi}}})
 }
 
 func TestMethodExpr(t *testing.T) {
 	remaining(t, MethodExpr, map[string][][]*Token{
 		`1`:        empty,
-		`a.a`:      semiSlice,
+		`a.a`:      {{semi}},
 		`a.a.a`:    {{semi}, {semi, {tok: token.IDENT, lit: `a`}, {tok: token.PERIOD}}},
-		`(a).a`:    semiSlice,
-		`(a.a).a`:  semiSlice,
-		`(*a.a).a`: semiSlice,
+		`(a).a`:    {{semi}},
+		`(a.a).a`:  {{semi}},
+		`(*a.a).a`: {{semi}},
 	})
 }
 
 func TestMethodSpec(t *testing.T) {
 	remaining(t, MethodSpec, map[string][][]*Token{
 		`a()`: {{semi}, {semi, {tok: token.RPAREN}, {tok: token.LPAREN}}},
-		`a`:   semiSlice,
+		`a`:   {{semi}},
 		`a.a()`: {{semi, {tok: token.RPAREN}, {tok: token.LPAREN}},
 			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `a`}, {tok: token.PERIOD}}},
 	})
@@ -481,7 +480,7 @@ func TestMulOp(t *testing.T) {
 
 func TestOperand(t *testing.T) {
 	remaining(t, Operand, map[string][][]*Token{
-		`1`:     semiSlice,
+		`1`:     {{semi}},
 		`a.a`:   {{semi, {tok: token.IDENT, lit: `a`}, {tok: token.PERIOD}}, {semi}, {semi}},
 		`(a.a)`: {{semi}, {semi}, {semi}},
 	})
@@ -490,15 +489,15 @@ func TestOperand(t *testing.T) {
 func TestOperandName(t *testing.T) {
 	remaining(t, OperandName, map[string][][]*Token{
 		`1`:   empty,
-		`_`:   semiSlice,
-		`a`:   semiSlice,
+		`_`:   {{semi}},
+		`a`:   {{semi}},
 		`a.a`: {{semi, {tok: token.IDENT, lit: `a`}, {tok: token.PERIOD}}, {semi}},
 	})
 }
 
 func TestPackageName(t *testing.T) {
 	remaining(t, PackageName, map[string][][]*Token{
-		`a`: semiSlice,
+		`a`: {{semi}},
 		`1`: empty,
 		`_`: empty,
 	})
@@ -506,8 +505,8 @@ func TestPackageName(t *testing.T) {
 
 func TestParameterDecl(t *testing.T) {
 	remaining(t, ParameterDecl, map[string][][]*Token{
-		`int`:      semiSlice,
-		`...int`:   semiSlice,
+		`int`:      {{semi}},
+		`...int`:   {{semi}},
 		`a, b int`: {{semi, {tok: token.IDENT, lit: `int`}, {tok: token.IDENT, lit: `b`}, {tok: token.COMMA}}, {semi}},
 		`b... int`: {{semi, {tok: token.IDENT, lit: `int`}, {tok: token.ELLIPSIS}}, {semi}},
 	})
@@ -515,7 +514,7 @@ func TestParameterDecl(t *testing.T) {
 
 func TestParameterList(t *testing.T) {
 	remaining(t, ParameterList, map[string][][]*Token{
-		`int`:      semiSlice,
+		`int`:      {{semi}},
 		`int, int`: {{semi, {tok: token.IDENT, lit: `int`}, {tok: token.COMMA}}, {semi}},
 		`a, b int, c, d int`: [][]*Token{
 			{semi, {tok: token.IDENT, lit: `int`}, {tok: token.IDENT, lit: `d`}, {tok: token.COMMA}, {tok: token.IDENT, lit: `c`}, {tok: token.COMMA},
@@ -534,9 +533,9 @@ func TestParameterList(t *testing.T) {
 
 func TestParameters(t *testing.T) {
 	remaining(t, Parameters, map[string][][]*Token{
-		`(int)`:                semiSlice,
-		`(int, int)`:           semiSlice,
-		`(int, int,)`:          semiSlice,
+		`(int)`:                {{semi}},
+		`(int, int)`:           {{semi}},
+		`(int, int,)`:          {{semi}},
 		`(a, b int)`:           {{semi}, {semi}},
 		`(a, b int, c, d int)`: {{semi}, {semi}, {semi}, {semi}},
 	})
@@ -544,14 +543,14 @@ func TestParameters(t *testing.T) {
 
 func TestPointerType(t *testing.T) {
 	remaining(t, PointerType, map[string][][]*Token{
-		`*int`: semiSlice,
+		`*int`: {{semi}},
 		`int`:  empty,
 	})
 }
 
 func TestPrimaryExpr(t *testing.T) {
 	remaining(t, PrimaryExpr, map[string][][]*Token{
-		`1`: semiSlice,
+		`1`: {{semi}},
 		`(a.a)("foo")`: [][]*Token{
 			{semi, {tok: token.RPAREN}, {tok: token.STRING, lit: `"foo"`}, {tok: token.LPAREN}},
 			{semi, {tok: token.RPAREN}, {tok: token.STRING, lit: `"foo"`}, {tok: token.LPAREN}},
@@ -586,18 +585,18 @@ func TestQualifiedIdent(t *testing.T) {
 	remaining(t, QualifiedIdent, map[string][][]*Token{
 		`1`:   empty,
 		`a`:   empty,
-		`a.a`: semiSlice,
+		`a.a`: {{semi}},
 		`_.a`: empty,
-		`a._`: semiSlice,
+		`a._`: {{semi}},
 		`_._`: empty,
 	})
 }
 
 func TestRangeClause(t *testing.T) {
 	remaining(t, RangeClause, map[string][][]*Token{
-		`range a`:              semiSlice,
-		`a[0], a[1] = range b`: semiSlice,
-		`k, v := range a`:      semiSlice,
+		`range a`:              {{semi}},
+		`a[0], a[1] = range b`: {{semi}},
+		`k, v := range a`:      {{semi}},
 	})
 }
 
@@ -605,8 +604,8 @@ func TestReceiverType(t *testing.T) {
 	remaining(t, ReceiverType, map[string][][]*Token{
 		`1`:      empty,
 		`a.a`:    {{semi}, {semi, {tok: token.IDENT, lit: `a`}, {tok: token.PERIOD}}},
-		`(a.a)`:  semiSlice,
-		`(*a.a)`: semiSlice,
+		`(a.a)`:  {{semi}},
+		`(*a.a)`: {{semi}},
 	})
 }
 
@@ -637,8 +636,8 @@ func TestRelOp(t *testing.T) {
 
 func TestResult(t *testing.T) {
 	remaining(t, Result, map[string][][]*Token{
-		`int`:        semiSlice,
-		`(int, int)`: semiSlice,
+		`int`:        {{semi}},
+		`(int, int)`: {{semi}},
 	})
 }
 
@@ -654,7 +653,7 @@ func TestSelector(t *testing.T) {
 	remaining(t, Selector, map[string][][]*Token{
 		`1`:  empty,
 		`a`:  empty,
-		`.a`: semiSlice,
+		`.a`: {{semi}},
 	})
 }
 
@@ -670,19 +669,19 @@ func TestSelectStmt(t *testing.T) {
 }
 
 func TestSendStmt(t *testing.T) {
-	remaining(t, SendStmt, map[string][][]*Token{`a <- 1`: semiSlice})
+	remaining(t, SendStmt, map[string][][]*Token{`a <- 1`: {{semi}}})
 }
 
 func TestShortVarDecl(t *testing.T) {
 	remaining(t, ShortVarDecl, map[string][][]*Token{
-		`a := 1`:       semiSlice,
+		`a := 1`:       {{semi}},
 		`a, b := 1, 2`: {{semi, {tok: token.INT, lit: `2`}, {tok: token.COMMA}}, {semi}},
 	})
 }
 
 func TestSignature(t *testing.T) {
 	remaining(t, Signature, map[string][][]*Token{
-		`()`:             semiSlice,
+		`()`:             {{semi}},
 		`()()`:           {{semi, {tok: token.RPAREN}, {tok: token.LPAREN}}, {semi}},
 		`(int, int) int`: {{semi, {tok: token.IDENT, lit: `int`}}, {semi}},
 	})
@@ -703,17 +702,17 @@ func TestSimpleStmt(t *testing.T) {
 
 func TestSlice(t *testing.T) {
 	remaining(t, Slice, map[string][][]*Token{
-		`[:]`:     semiSlice,
-		`[1:]`:    semiSlice,
-		`[:1]`:    semiSlice,
-		`[1:1]`:   semiSlice,
-		`[:1:1]`:  semiSlice,
-		`[1:1:1]`: semiSlice,
+		`[:]`:     {{semi}},
+		`[1:]`:    {{semi}},
+		`[:1]`:    {{semi}},
+		`[1:1]`:   {{semi}},
+		`[:1:1]`:  {{semi}},
+		`[1:1:1]`: {{semi}},
 	})
 }
 
 func TestSliceType(t *testing.T) {
-	remaining(t, SliceType, map[string][][]*Token{`[]int`: semiSlice})
+	remaining(t, SliceType, map[string][][]*Token{`[]int`: {{semi}}})
 }
 
 func TestStatement(t *testing.T) {
@@ -757,39 +756,39 @@ func TestStatementList(t *testing.T) {
 
 func TestStructType(t *testing.T) {
 	remaining(t, StructType, map[string][][]*Token{
-		`struct{}`:                      semiSlice,
-		`struct{int}`:                   semiSlice,
-		`struct{int;}`:                  semiSlice,
-		`struct{int;float64;}`:          semiSlice,
-		`struct{a int}`:                 semiSlice,
-		`struct{a, b int}`:              semiSlice,
-		`struct{a, b int;}`:             semiSlice,
-		`struct{a, b int; c, d string}`: semiSlice,
+		`struct{}`:                      {{semi}},
+		`struct{int}`:                   {{semi}},
+		`struct{int;}`:                  {{semi}},
+		`struct{int;float64;}`:          {{semi}},
+		`struct{a int}`:                 {{semi}},
+		`struct{a, b int}`:              {{semi}},
+		`struct{a, b int;}`:             {{semi}},
+		`struct{a, b int; c, d string}`: {{semi}},
 	})
 }
 
 func TestSwitchStmt(t *testing.T) {
 	remaining(t, SwitchStmt, map[string][][]*Token{
-		`switch {}`:          semiSlice,
-		`switch a.(type) {}`: semiSlice,
+		`switch {}`:          {{semi}},
+		`switch a.(type) {}`: {{semi}},
 	})
 }
 
 func TestType(t *testing.T) {
 	remaining(t, Type, map[string][][]*Token{
-		`a`:        semiSlice,
+		`a`:        {{semi}},
 		`a.a`:      {{semi}, {semi, {tok: token.IDENT, lit: "a"}, {tok: token.PERIOD}}},
 		`1`:        empty,
-		`_`:        semiSlice,
-		`(a.a)`:    semiSlice,
-		`(((_)))`:  semiSlice,
-		`chan int`: semiSlice,
+		`_`:        {{semi}},
+		`(a.a)`:    {{semi}},
+		`(((_)))`:  {{semi}},
+		`chan int`: {{semi}},
 	})
 }
 
 func TestTypeAssertion(t *testing.T) {
 	remaining(t, TypeAssertion, map[string][][]*Token{
-		`.(int)`: semiSlice,
+		`.(int)`: {{semi}},
 		`1`:      empty,
 	})
 }
@@ -817,17 +816,17 @@ func TestTypeCaseClause(t *testing.T) {
 
 func TestTypeDecl(t *testing.T) {
 	remaining(t, TypeDecl, map[string][][]*Token{
-		`type a int`:           semiSlice,
-		`type (a int)`:         semiSlice,
-		`type (a int;)`:        semiSlice,
-		`type (a int; b int)`:  semiSlice,
-		`type (a int; b int;)`: semiSlice,
+		`type a int`:           {{semi}},
+		`type (a int)`:         {{semi}},
+		`type (a int;)`:        {{semi}},
+		`type (a int; b int)`:  {{semi}},
+		`type (a int; b int;)`: {{semi}},
 	})
 }
 
 func TestTypeList(t *testing.T) {
 	remaining(t, TypeList, map[string][][]*Token{
-		`a`:     semiSlice,
+		`a`:     {{semi}},
 		`a, b`:  {{semi, {tok: token.IDENT, lit: `b`}, {tok: token.COMMA}}, {semi}},
 		`a, b,`: {{{tok: token.COMMA}, {tok: token.IDENT, lit: `b`}, {tok: token.COMMA}}, {{tok: token.COMMA}}},
 	})
@@ -835,29 +834,29 @@ func TestTypeList(t *testing.T) {
 
 func TestTypeLit(t *testing.T) {
 	remaining(t, TypeLit, map[string][][]*Token{
-		`[1]int`:      semiSlice,
-		`struct{}`:    semiSlice,
-		`*int`:        semiSlice,
-		`func()`:      semiSlice,
-		`interface{}`: semiSlice,
-		`[]int`:       semiSlice,
-		`map[int]int`: semiSlice,
-		`chan int`:    semiSlice,
+		`[1]int`:      {{semi}},
+		`struct{}`:    {{semi}},
+		`*int`:        {{semi}},
+		`func()`:      {{semi}},
+		`interface{}`: {{semi}},
+		`[]int`:       {{semi}},
+		`map[int]int`: {{semi}},
+		`chan int`:    {{semi}},
 	})
 }
 
 func TestTypeName(t *testing.T) {
 	remaining(t, TypeName, map[string][][]*Token{
-		`a`:   semiSlice,
+		`a`:   {{semi}},
 		`a.a`: {{semi}, {semi, {tok: token.IDENT, lit: "a"}, {tok: token.PERIOD}}},
 		`1`:   empty,
-		`_`:   semiSlice,
+		`_`:   {{semi}},
 	})
 }
 
 func TestTypeSpec(t *testing.T) {
 	remaining(t, TypeSpec, map[string][][]*Token{
-		`a int`: semiSlice,
+		`a int`: {{semi}},
 		`a`:     empty,
 	})
 }
@@ -865,25 +864,25 @@ func TestTypeSpec(t *testing.T) {
 func TestTypeSwitchCase(t *testing.T) {
 	remaining(t, TypeSwitchCase, map[string][][]*Token{
 		`default`:   {{}},
-		`case a`:    semiSlice,
+		`case a`:    {{semi}},
 		`case a, b`: {{semi, {tok: token.IDENT, lit: `b`}, {tok: token.COMMA}}, {semi}},
 	})
 }
 
 func TestTypeSwitchGuard(t *testing.T) {
 	remaining(t, TypeSwitchGuard, map[string][][]*Token{
-		`a.(type)`:      semiSlice,
-		`a := a.(type)`: semiSlice,
+		`a.(type)`:      {{semi}},
+		`a := a.(type)`: {{semi}},
 	})
 }
 
 func TestTypeSwitchStmt(t *testing.T) {
 	remaining(t, TypeSwitchStmt, map[string][][]*Token{
-		`switch a.(type) {}`:                              semiSlice,
-		`switch a := 5; a := a.(type) {}`:                 semiSlice,
+		`switch a.(type) {}`:                              {{semi}},
+		`switch a := 5; a := a.(type) {}`:                 {{semi}},
 		`switch a.(type) { case int: }`:                   {{semi}, {semi}},
 		`switch a.(type) { case int:; }`:                  {{semi}, {semi}, {semi}},
-		`switch a.(type) { case int: b() }`:               semiSlice,
+		`switch a.(type) { case int: b() }`:               {{semi}},
 		`switch a.(type) { case int: b(); }`:              {{semi}, {semi}},
 		`switch a.(type) { case int: b(); default: c() }`: {{semi}},
 	})
@@ -891,9 +890,9 @@ func TestTypeSwitchStmt(t *testing.T) {
 
 func TestUnaryExpr(t *testing.T) {
 	remaining(t, UnaryExpr, map[string][][]*Token{
-		`1`:  semiSlice,
-		`-1`: semiSlice,
-		`!a`: semiSlice,
+		`1`:  {{semi}},
+		`-1`: {{semi}},
+		`!a`: {{semi}},
 	})
 }
 
@@ -912,19 +911,19 @@ func TestUnaryOp(t *testing.T) {
 
 func TestVarDecl(t *testing.T) {
 	remaining(t, VarDecl, map[string][][]*Token{
-		`var a int`:                 semiSlice,
-		`var (a int)`:               semiSlice,
-		`var (a int;)`:              semiSlice,
-		`var (a, b = 1, 2)`:         semiSlice,
-		`var (a, b = 1, 2; c int;)`: semiSlice,
+		`var a int`:                 {{semi}},
+		`var (a int)`:               {{semi}},
+		`var (a int;)`:              {{semi}},
+		`var (a, b = 1, 2)`:         {{semi}},
+		`var (a, b = 1, 2; c int;)`: {{semi}},
 	})
 }
 
 func TestVarSpec(t *testing.T) {
 	remaining(t, VarSpec, map[string][][]*Token{
-		`a int`:       semiSlice,
+		`a int`:       {{semi}},
 		`a int = 1`:   {{semi, {tok: token.INT, lit: `1`}, {tok: token.ASSIGN}}, {semi}},
-		`a = 1`:       semiSlice,
+		`a = 1`:       {{semi}},
 		`a, b = 1, 2`: {{semi, {tok: token.INT, lit: `2`}, {tok: token.COMMA}}, {semi}},
 	})
 }
@@ -934,5 +933,5 @@ func TestTokenParser(t *testing.T) {
 		{semi, {tok: token.RPAREN}},
 		{semi, {tok: token.RPAREN}, {tok: token.IDENT, lit: `a`}, {tok: token.PERIOD}},
 	}
-	defect.DeepEqual(t, tokenParser(toks, token.RPAREN), semiSlice)
+	defect.DeepEqual(t, tokenParser(toks, token.RPAREN), [][]*Token{{semi}})
 }
