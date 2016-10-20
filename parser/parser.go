@@ -497,6 +497,14 @@ func ReceiverType(ts [][]*Token) [][]*Token {
 	return append(append(ptr, par...), TypeName(ts)...)
 }
 
+func RecvStmt(ts [][]*Token) [][]*Token {
+	expr := ExpressionList(ts)
+	expr = tokenParser(expr, token.ASSIGN)
+	ident := IdentifierList(ts)
+	ident = tokenParser(ident, token.DEFINE)
+	return Expression(append(ts, append(expr, ident...)...))
+}
+
 func RelOp(ts [][]*Token) [][]*Token {
 	var result [][]*Token
 	for _, t := range ts {

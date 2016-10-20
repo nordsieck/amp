@@ -535,6 +535,19 @@ func TestReceiverType(t *testing.T) {
 	})
 }
 
+func TestRecvStmt(t *testing.T) {
+	remaining(t, RecvStmt, map[string][][]*Token{
+		`<-a`: {{semi}},
+		`a[0], b = <-c`: {{semi, {tok: token.IDENT, lit: `c`}, {tok: token.ARROW}, {tok: token.ASSIGN}, {tok: token.IDENT, lit: `b`}, {tok: token.COMMA},
+			{tok: token.RBRACK}, {tok: token.INT, lit: `0`}, {tok: token.LBRACK}},
+			{semi, {tok: token.IDENT, lit: `c`}, {tok: token.ARROW}, {tok: token.ASSIGN}, {tok: token.IDENT, lit: `b`}, {tok: token.COMMA}}, {semi}},
+		`a, b := <-c`: {{semi, {tok: token.IDENT, lit: `c`}, {tok: token.ARROW}, {tok: token.DEFINE}, {tok: token.IDENT, lit: `b`}, {tok: token.COMMA}}, {semi}},
+		`a[0], b := <-c`: {{semi, {tok: token.IDENT, lit: `c`}, {tok: token.ARROW}, {tok: token.DEFINE}, {tok: token.IDENT, lit: `b`}, {tok: token.COMMA},
+			{tok: token.RBRACK}, {tok: token.INT, lit: `0`}, {tok: token.LBRACK}},
+			{semi, {tok: token.IDENT, lit: `c`}, {tok: token.ARROW}, {tok: token.DEFINE}, {tok: token.IDENT, lit: `b`}, {tok: token.COMMA}}},
+	})
+}
+
 func TestRelOp(t *testing.T) {
 	remaining(t, RelOp, map[string][][]*Token{
 		`==`: [][]*Token{{}},
