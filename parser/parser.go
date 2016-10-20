@@ -288,6 +288,14 @@ func Function(ts [][]*Token) [][]*Token {
 	return Block(ts)
 }
 
+// bad spec
+// "func" FunctionName Function
+func FunctionDecl(ts [][]*Token) [][]*Token {
+	ts = tokenParser(ts, token.FUNC)
+	ts = tokenParser(ts, token.IDENT)
+	return Function(ts)
+}
+
 func FunctionType(ts [][]*Token) [][]*Token {
 	ts = tokenParser(ts, token.FUNC)
 	return Signature(ts)

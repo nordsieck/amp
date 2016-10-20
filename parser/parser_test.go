@@ -330,6 +330,14 @@ func TestFunction(t *testing.T) {
 	})
 }
 
+func TestFunctionDecl(t *testing.T) {
+	remaining(t, FunctionDecl, Tmap{
+		`func f(){}`:                        {{semi}, {semi}},
+		`func f()(){}`:                      {{semi}, {semi}},
+		`func f(int)int{ a(); return b() }`: {{semi}},
+	})
+}
+
 func TestFunctionType(t *testing.T) {
 	remaining(t, FunctionType, Tmap{
 		`func()`:             {{semi}},
