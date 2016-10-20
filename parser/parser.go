@@ -696,6 +696,21 @@ func TypeSwitchGuard(ts [][]*Token) [][]*Token {
 	return tokenParser(ts, token.RPAREN)
 }
 
+func TypeSwitchStmt(ts [][]*Token) [][]*Token {
+	ts = tokenParser(ts, token.SWITCH)
+	stmt := SimpleStmt(ts)
+	ts = append(ts, tokenParser(stmt, token.SEMICOLON)...)
+	ts = TypeSwitchGuard(ts)
+	ts = tokenParser(ts, token.LBRACE)
+	next := ts
+	for len(next) != 0 {
+		next = TypeCaseClause(next)
+		ts = append(ts, next...)
+
+	}
+	return tokenParser(ts, token.RBRACE)
+}
+
 func UnaryExpr(ts [][]*Token) [][]*Token {
 	uo := UnaryOp(ts)
 	if len(uo) != 0 {

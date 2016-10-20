@@ -770,6 +770,16 @@ func TestTypeSwitchGuard(t *testing.T) {
 	})
 }
 
+func TestTypeSwitchStmt(t *testing.T) {
+	remaining(t, TypeSwitchStmt, map[string][][]*Token{
+		`switch a.(type) {}`:                              semiSlice,
+		`switch a := 5; a := a.(type) {}`:                 semiSlice,
+		`switch a.(type) { case int: }`:                   {{semi}, {semi}},
+		`switch a.(type) { case int: b() }`:               semiSlice,
+		`switch a.(type) { case int: b(); default: c() }`: {{semi}, {semi}},
+	})
+}
+
 func TestUnaryExpr(t *testing.T) {
 	remaining(t, UnaryExpr, map[string][][]*Token{
 		`1`:  semiSlice,
