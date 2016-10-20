@@ -707,6 +707,10 @@ func StructType(ts [][]*Token) [][]*Token {
 
 func SwitchStmt(ts [][]*Token) [][]*Token { return append(ExprSwitchStmt(ts), TypeSwitchStmt(ts)...) }
 
+func TopLevelDecl(ts [][]*Token) [][]*Token {
+	return append(append(Declaration(ts), FunctionDecl(ts)...), MethodDecl(ts)...)
+}
+
 func Type(ts [][]*Token) [][]*Token {
 	name := TypeName(ts)
 	lit := TypeLit(ts)

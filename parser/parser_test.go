@@ -802,6 +802,14 @@ func TestSwitchStmt(t *testing.T) {
 	})
 }
 
+func TestTopLevelDecl(t *testing.T) {
+	remaining(t, TopLevelDecl, Tmap{
+		`var a int`:        {{semi}},
+		`func f(){}`:       {{semi}, {semi}},
+		`func (m M) f(){}`: {{semi}, {semi}},
+	})
+}
+
 func TestType(t *testing.T) {
 	remaining(t, Type, Tmap{
 		`a`:        {{semi}},
