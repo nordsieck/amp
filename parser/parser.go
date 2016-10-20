@@ -166,6 +166,11 @@ func Declaration(ts [][]*Token) [][]*Token {
 	return append(append(ConstDecl(ts), TypeDecl(ts)...), VarDecl(ts)...)
 }
 
+func DeferStmt(ts [][]*Token) [][]*Token {
+	ts = tokenParser(ts, token.DEFER)
+	return Expression(ts)
+}
+
 func Element(ts [][]*Token) [][]*Token {
 	return append(Expression(ts), LiteralValue(ts)...)
 }
@@ -638,13 +643,11 @@ func SliceType(ts [][]*Token) [][]*Token {
 }
 
 func Statement(ts [][]*Token) [][]*Token {
-	// defer
-
 	return append(
 		append(append(append(Declaration(ts), LabeledStmt(ts)...), append(SimpleStmt(ts), GoStmt(ts)...)...),
 			append(append(ReturnStmt(ts), BreakStmt(ts)...), append(ContinueStmt(ts), GotoStmt(ts)...)...)...),
 		append(append(append(FallthroughStmt(ts), Block(ts)...), append(IfStmt(ts), SwitchStmt(ts)...)...),
-			append(SelectStmt(ts), ForStmt(ts)...)...)...)
+			append(append(SelectStmt(ts), ForStmt(ts)...), DeferStmt(ts)...)...)...)
 }
 
 // bad spec

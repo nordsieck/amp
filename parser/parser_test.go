@@ -187,6 +187,14 @@ func TestDeclaration(t *testing.T) {
 	})
 }
 
+func TestDeferStmt(t *testing.T) {
+	remaining(t, DeferStmt, map[string][][]*Token{
+		`defer a()`: {{semi, {tok: token.RPAREN}, {tok: token.LPAREN}}, {semi}},
+		`defer`:     empty,
+		`a()`:       empty,
+	})
+}
+
 func TestElement(t *testing.T) {
 	remaining(t, Element, map[string][][]*Token{
 		`1+1`:   [][]*Token{{semi, {tok: token.INT, lit: `1`}, {tok: token.ADD}}, {semi}},
@@ -729,6 +737,8 @@ func TestStatement(t *testing.T) {
 		`switch {}`:   {{semi, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.SWITCH, lit: `switch`}}, {semi}},
 		`select {}`:   {{semi, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.SELECT, lit: `select`}}, {semi}},
 		`for {}`:      {{semi, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.FOR, lit: `for`}}, {semi}, {semi}},
+		`defer a()`: {{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `a`}, {tok: token.DEFER, lit: `defer`}},
+			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}}, {semi}},
 	})
 }
 
