@@ -299,6 +299,19 @@ func TestForClause(t *testing.T) {
 	})
 }
 
+func TestForStmt(t *testing.T) {
+	remaining(t, ForStmt, map[string][][]*Token{
+		`for {}`:                               {{semi}, {semi}},
+		`for true {}`:                          {{semi}, {semi}},
+		`for a := 0; a < 5; a++ {}`:            {{semi}, {semi}},
+		`for range a {}`:                       {{semi}, {semi}},
+		`for { a() }`:                          {{semi}},
+		`for { a(); }`:                         {{semi}, {semi}},
+		`for { a(); b() }`:                     {{semi}},
+		`for a := 0; a < 5; a++ { a(); b(); }`: {{semi}, {semi}},
+	})
+}
+
 func TestFunctionType(t *testing.T) {
 	remaining(t, FunctionType, map[string][][]*Token{
 		`func()`:             semiSlice,
@@ -715,6 +728,7 @@ func TestStatement(t *testing.T) {
 		`if a {}`:     {{semi, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.IDENT, lit: `a`}, {tok: token.IF, lit: `if`}}, {semi}, {semi}},
 		`switch {}`:   {{semi, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.SWITCH, lit: `switch`}}, {semi}},
 		`select {}`:   {{semi, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.SELECT, lit: `select`}}, {semi}},
+		`for {}`:      {{semi, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.FOR, lit: `for`}}, {semi}, {semi}},
 	})
 }
 

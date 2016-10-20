@@ -272,6 +272,12 @@ func ForClause(ts [][]*Token) [][]*Token {
 	return append(ts, SimpleStmt(ts)...)
 }
 
+func ForStmt(ts [][]*Token) [][]*Token {
+	ts = tokenParser(ts, token.FOR)
+	ts = append(append(ts, Expression(ts)...), append(ForClause(ts), RangeClause(ts)...)...)
+	return Block(ts)
+}
+
 func FunctionType(ts [][]*Token) [][]*Token {
 	ts = tokenParser(ts, token.FUNC)
 	return Signature(ts)
@@ -632,14 +638,13 @@ func SliceType(ts [][]*Token) [][]*Token {
 }
 
 func Statement(ts [][]*Token) [][]*Token {
-	// for
 	// defer
 
 	return append(
 		append(append(append(Declaration(ts), LabeledStmt(ts)...), append(SimpleStmt(ts), GoStmt(ts)...)...),
 			append(append(ReturnStmt(ts), BreakStmt(ts)...), append(ContinueStmt(ts), GotoStmt(ts)...)...)...),
 		append(append(append(FallthroughStmt(ts), Block(ts)...), append(IfStmt(ts), SwitchStmt(ts)...)...),
-			SelectStmt(ts)...)...)
+			append(SelectStmt(ts), ForStmt(ts)...)...)...)
 }
 
 // bad spec
