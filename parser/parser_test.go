@@ -321,6 +321,15 @@ func TestForStmt(t *testing.T) {
 	})
 }
 
+func TestFunction(t *testing.T) {
+	remaining(t, Function, Tmap{
+		`(){}`:                 {{semi}, {semi}},
+		`()(){}`:               {{semi}, {semi}},
+		`(int)int{ return 0 }`: {{semi}},
+		`(){ a() }`:            {{semi}},
+	})
+}
+
 func TestFunctionType(t *testing.T) {
 	remaining(t, FunctionType, Tmap{
 		`func()`:             {{semi}},

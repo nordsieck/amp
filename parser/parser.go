@@ -283,6 +283,11 @@ func ForStmt(ts [][]*Token) [][]*Token {
 	return Block(ts)
 }
 
+func Function(ts [][]*Token) [][]*Token {
+	ts = Signature(ts)
+	return Block(ts)
+}
+
 func FunctionType(ts [][]*Token) [][]*Token {
 	ts = tokenParser(ts, token.FUNC)
 	return Signature(ts)
