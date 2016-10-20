@@ -572,6 +572,14 @@ func TestQualifiedIdent(t *testing.T) {
 	})
 }
 
+func TestRangeClause(t *testing.T) {
+	remaining(t, RangeClause, map[string][][]*Token{
+		`range a`:              semiSlice,
+		`a[0], a[1] = range b`: semiSlice,
+		`k, v := range a`:      semiSlice,
+	})
+}
+
 func TestReceiverType(t *testing.T) {
 	remaining(t, ReceiverType, map[string][][]*Token{
 		`1`:      empty,

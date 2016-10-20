@@ -502,6 +502,16 @@ func QualifiedIdent(ts [][]*Token) [][]*Token {
 	return tokenParser(ts, token.IDENT)
 }
 
+func RangeClause(ts [][]*Token) [][]*Token {
+	exp := ExpressionList(ts)
+	exp = tokenParser(exp, token.ASSIGN)
+	id := IdentifierList(ts)
+	id = tokenParser(id, token.DEFINE)
+	ts = append(ts, append(exp, id...)...)
+	ts = tokenParser(ts, token.RANGE)
+	return Expression(ts)
+}
+
 func ReceiverType(ts [][]*Token) [][]*Token {
 	ptr := tokenParser(ts, token.LPAREN)
 	ptr = tokenParser(ptr, token.MUL)
