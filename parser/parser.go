@@ -425,6 +425,15 @@ func MapType(ts [][]*Token) [][]*Token {
 	return Type(ts)
 }
 
+// bad spec
+// "func" Reciever MethodName Function
+func MethodDecl(ts [][]*Token) [][]*Token {
+	ts = tokenParser(ts, token.FUNC)
+	ts = Parameters(ts)
+	ts = nonBlankIdent(ts)
+	return Function(ts)
+}
+
 func MethodExpr(ts [][]*Token) [][]*Token {
 	ts = ReceiverType(ts)
 	ts = tokenParser(ts, token.PERIOD)

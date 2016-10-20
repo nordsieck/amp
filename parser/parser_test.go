@@ -464,6 +464,15 @@ func TestMapType(t *testing.T) {
 	remaining(t, MapType, Tmap{`map[int]int`: {{semi}}})
 }
 
+func TestMethodDecl(t *testing.T) {
+	remaining(t, MethodDecl, Tmap{
+		`func (m M) f(){}`:                 {{semi}, {semi}},
+		`func (m M) f()(){}`:               {{semi}, {semi}},
+		`func (m M) f(int)int{ return 0 }`: {{semi}},
+		`func (m *M) f() { a(); b(); }`:    {{semi}, {semi}},
+	})
+}
+
 func TestMethodExpr(t *testing.T) {
 	remaining(t, MethodExpr, Tmap{
 		`1`:        empty,
