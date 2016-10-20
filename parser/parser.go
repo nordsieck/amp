@@ -629,6 +629,12 @@ func TypeAssertion(ts [][]*Token) [][]*Token {
 	return tokenParser(ts, token.RPAREN)
 }
 
+func TypeCaseClause(ts [][]*Token) [][]*Token {
+	ts = TypeSwitchCase(ts)
+	ts = tokenParser(ts, token.COLON)
+	return StatementList(ts)
+}
+
 func TypeDecl(ts [][]*Token) [][]*Token {
 	ts = tokenParser(ts, token.TYPE)
 	multi := tokenParser(ts, token.LPAREN)

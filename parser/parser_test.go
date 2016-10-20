@@ -684,6 +684,30 @@ func TestTypeAssertion(t *testing.T) {
 	})
 }
 
+func TestTypeCaseClause(t *testing.T) {
+	remaining(t, TypeCaseClause, map[string][][]*Token{
+		`case a:`: {{}, {}},
+		`case a: b()`: {{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `b`}},
+			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `b`}},
+			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}}, {semi}, {}, {}},
+		`default: a()`: {{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `a`}},
+			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `a`}},
+			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}}, {semi}, {}, {}},
+		`case a, b: c(); d()`: {
+			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `d`}, {tok: token.SEMICOLON, lit: `;`},
+				{tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `c`}},
+			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `d`}, {tok: token.SEMICOLON, lit: `;`},
+				{tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `c`}},
+			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `d`}, {tok: token.SEMICOLON, lit: `;`},
+				{tok: token.RPAREN}, {tok: token.LPAREN}},
+			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `d`}, {tok: token.SEMICOLON, lit: `;`}},
+			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `d`}},
+			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}}, {semi}, {},
+			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `d`}}, {},
+		},
+	})
+}
+
 func TestTypeDecl(t *testing.T) {
 	remaining(t, TypeDecl, map[string][][]*Token{
 		`type a int`:           semiSlice,
