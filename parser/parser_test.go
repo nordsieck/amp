@@ -187,7 +187,7 @@ func TestExprCaseClause(t *testing.T) {
 	remaining(t, ExprCaseClause, map[string][][]*Token{
 		`default: a()`: {{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `a`}},
 			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `a`}},
-			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}}, {semi}, {}, {}},
+			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}}, {semi}, {}},
 	})
 }
 
@@ -234,7 +234,7 @@ func TestExprSwitchStmt(t *testing.T) {
 		`switch a := 1; a {default:}`:                            {{semi}, {semi}},
 		`switch {case true:}`:                                    {{semi}, {semi}},
 		`switch {case true: a()}`:                                semiSlice,
-		`switch{ case true: a(); case false: b(); default: c()}`: {{semi}, {semi}, {semi}, {semi}},
+		`switch{ case true: a(); case false: b(); default: c()}`: {{semi}},
 	})
 }
 
@@ -640,15 +640,14 @@ func TestStatement(t *testing.T) {
 
 func TestStatementList(t *testing.T) {
 	remaining(t, StatementList, map[string][][]*Token{
-		`fallthrough`: {{semi, {tok: token.FALLTHROUGH, lit: `fallthrough`}}, {semi, {tok: token.FALLTHROUGH, lit: `fallthrough`}}, {semi}, {}, {}},
+		`fallthrough`: {{semi, {tok: token.FALLTHROUGH, lit: `fallthrough`}}, {semi, {tok: token.FALLTHROUGH, lit: `fallthrough`}}, {semi}, {}},
 		`fallthrough;`: {{{tok: token.SEMICOLON, lit: `;`}, {tok: token.FALLTHROUGH, lit: `fallthrough`}},
 			{{tok: token.SEMICOLON, lit: `;`}, {tok: token.FALLTHROUGH, lit: `fallthrough`}},
-			{{tok: token.SEMICOLON, lit: `;`}}, {}, {}},
-		`fallthrough; fallthrough;`: {{{tok: token.SEMICOLON, lit: `;`}, {tok: token.FALLTHROUGH, lit: `fallthrough`}, {tok: token.SEMICOLON, lit: `;`}, {tok: token.FALLTHROUGH, lit: `fallthrough`}},
-			{{tok: token.SEMICOLON, lit: `;`}, {tok: token.FALLTHROUGH, lit: `fallthrough`}, {tok: token.SEMICOLON, lit: `;`}, {tok: token.FALLTHROUGH, lit: `fallthrough`}},
-			{{tok: token.SEMICOLON, lit: `;`}, {tok: token.FALLTHROUGH, lit: `fallthrough`}, {tok: token.SEMICOLON, lit: `;`}},
-			{{tok: token.SEMICOLON, lit: `;`}, {tok: token.FALLTHROUGH, lit: `fallthrough`}}, {{tok: token.SEMICOLON, lit: `;`}}, {},
-			{{tok: token.SEMICOLON, lit: `;`}, {tok: token.FALLTHROUGH, lit: `fallthrough`}}, {}},
+			{{tok: token.SEMICOLON, lit: `;`}}, {}},
+		`fallthrough; fallthrough`: {{semi, {tok: token.FALLTHROUGH, lit: `fallthrough`}, {tok: token.SEMICOLON, lit: `;`}, {tok: token.FALLTHROUGH, lit: `fallthrough`}},
+			{semi, {tok: token.FALLTHROUGH, lit: `fallthrough`}, {tok: token.SEMICOLON, lit: `;`}, {tok: token.FALLTHROUGH, lit: `fallthrough`}},
+			{semi, {tok: token.FALLTHROUGH, lit: `fallthrough`}, {tok: token.SEMICOLON, lit: `;`}},
+			{semi, {tok: token.FALLTHROUGH, lit: `fallthrough`}}, {semi}, {}},
 	})
 }
 
@@ -689,22 +688,19 @@ func TestTypeCaseClause(t *testing.T) {
 		`case a:`: {{}, {}},
 		`case a: b()`: {{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `b`}},
 			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `b`}},
-			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}}, {semi}, {}, {}},
+			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}}, {semi}, {}},
 		`default: a()`: {{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `a`}},
 			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `a`}},
-			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}}, {semi}, {}, {}},
-		`case a, b: c(); d()`: {
-			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `d`}, {tok: token.SEMICOLON, lit: `;`},
-				{tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `c`}},
+			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}}, {semi}, {}},
+		`case a, b: c(); d()`: {{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `d`}, {tok: token.SEMICOLON, lit: `;`},
+			{tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `c`}},
 			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `d`}, {tok: token.SEMICOLON, lit: `;`},
 				{tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `c`}},
 			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `d`}, {tok: token.SEMICOLON, lit: `;`},
 				{tok: token.RPAREN}, {tok: token.LPAREN}},
 			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `d`}, {tok: token.SEMICOLON, lit: `;`}},
 			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `d`}},
-			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}}, {semi}, {},
-			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `d`}}, {},
-		},
+			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}}, {semi}, {}},
 	})
 }
 
@@ -775,8 +771,10 @@ func TestTypeSwitchStmt(t *testing.T) {
 		`switch a.(type) {}`:                              semiSlice,
 		`switch a := 5; a := a.(type) {}`:                 semiSlice,
 		`switch a.(type) { case int: }`:                   {{semi}, {semi}},
+		`switch a.(type) { case int:; }`:                  {{semi}, {semi}, {semi}},
 		`switch a.(type) { case int: b() }`:               semiSlice,
-		`switch a.(type) { case int: b(); default: c() }`: {{semi}, {semi}},
+		`switch a.(type) { case int: b(); }`:              {{semi}, {semi}},
+		`switch a.(type) { case int: b(); default: c() }`: {{semi}},
 	})
 }
 

@@ -79,9 +79,12 @@ func BinaryOp(ts [][]*Token) [][]*Token {
 		MulOp(ts)...)
 }
 
+// bad spec
+// "{" StatementList [ ";" ] "}"
 func Block(ts [][]*Token) [][]*Token {
 	ts = tokenParser(ts, token.LBRACE)
 	ts = StatementList(ts)
+	ts = append(ts, tokenParser(ts, token.SEMICOLON)...)
 	return tokenParser(ts, token.RBRACE)
 }
 
@@ -214,6 +217,8 @@ func ExprSwitchCase(ts [][]*Token) [][]*Token {
 	return append(tokenParser(ts, token.DEFAULT), cas...)
 }
 
+// bad spec
+// "switch" [ SimpleStmt ";" ] [ Expression ] "{" [ ExprCaseClause { ";" ExprCaseClause } [ ";" ]] "}"
 func ExprSwitchStmt(ts [][]*Token) [][]*Token {
 	ts = tokenParser(ts, token.SWITCH)
 	stmt := SimpleStmt(ts)
@@ -223,11 +228,16 @@ func ExprSwitchStmt(ts [][]*Token) [][]*Token {
 	}
 	ts = append(ts, Expression(ts)...)
 	ts = tokenParser(ts, token.LBRACE)
-	next := ts
+	list := ExprCaseClause(ts)
+	next := list
 	for len(next) != 0 {
-		next = ExprCaseClause(next)
-		ts = append(ts, next...)
+		current := tokenParser(next, token.SEMICOLON)
+		current = ExprCaseClause(current)
+		list = append(list, current...)
+		next = current
 	}
+	list = append(list, tokenParser(list, token.SEMICOLON)...)
+	ts = append(ts, list...)
 	return tokenParser(ts, token.RBRACE)
 }
 
@@ -577,6 +587,8 @@ func Statement(ts [][]*Token) [][]*Token {
 		append(append(FallthroughStmt(ts), Block(ts)...), IfStmt(ts)...)...)
 }
 
+// bad spec
+// [ Statement { ";" Statement } ]
 func StatementList(ts [][]*Token) [][]*Token {
 	if len(ts) == 0 {
 		return nil
@@ -589,7 +601,6 @@ func StatementList(ts [][]*Token) [][]*Token {
 		list = append(list, current...)
 		next = current
 	}
-	list = append(list, tokenParser(list, token.SEMICOLON)...)
 	return append(ts, list...)
 }
 
@@ -696,18 +707,24 @@ func TypeSwitchGuard(ts [][]*Token) [][]*Token {
 	return tokenParser(ts, token.RPAREN)
 }
 
+// bad spec
+// "switch" [ SimpleStmt ";" ] TypeSwitchGuard "{" [ TypeCaseClause { ";" TypeCaseClause } [ ";" ]] "}"
 func TypeSwitchStmt(ts [][]*Token) [][]*Token {
 	ts = tokenParser(ts, token.SWITCH)
 	stmt := SimpleStmt(ts)
 	ts = append(ts, tokenParser(stmt, token.SEMICOLON)...)
 	ts = TypeSwitchGuard(ts)
 	ts = tokenParser(ts, token.LBRACE)
-	next := ts
+	clauses := TypeCaseClause(ts)
+	next := clauses
 	for len(next) != 0 {
-		next = TypeCaseClause(next)
-		ts = append(ts, next...)
-
+		current := tokenParser(next, token.SEMICOLON)
+		current = TypeCaseClause(current)
+		clauses = append(clauses, current...)
+		next = current
 	}
+	clauses = append(clauses, tokenParser(clauses, token.SEMICOLON)...)
+	ts = append(ts, clauses...)
 	return tokenParser(ts, token.RBRACE)
 }
 
