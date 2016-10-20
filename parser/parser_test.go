@@ -122,6 +122,28 @@ func TestCommCase(t *testing.T) {
 	})
 }
 
+func TestCommClause(t *testing.T) {
+	remaining(t, CommClause, map[string][][]*Token{
+		`default:`:   {{}, {}},
+		`case <-a:`:  {{}, {}},
+		`case a<-5:`: {{}, {}},
+		`default: a()`: {{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `a`}},
+			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `a`}},
+			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}}, {semi}, {}},
+		`case <-a: b(); c()`: {
+			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `c`}, {tok: token.SEMICOLON, lit: `;`},
+				{tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `b`}},
+			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `c`}, {tok: token.SEMICOLON, lit: `;`},
+				{tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `b`}},
+			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `c`}, {tok: token.SEMICOLON, lit: `;`},
+				{tok: token.RPAREN}, {tok: token.LPAREN}},
+			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `c`}, {tok: token.SEMICOLON, lit: `;`}},
+			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `c`}},
+			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}}, {semi}, {},
+		},
+	})
+}
+
 func TestConstDecl(t *testing.T) {
 	remaining(t, ConstDecl, map[string][][]*Token{
 		`const a = 1`:                         semiSlice,

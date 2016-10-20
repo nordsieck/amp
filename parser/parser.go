@@ -111,6 +111,12 @@ func CommCase(ts [][]*Token) [][]*Token {
 	return append(cas, tokenParser(ts, token.DEFAULT)...)
 }
 
+func CommClause(ts [][]*Token) [][]*Token {
+	ts = CommCase(ts)
+	ts = tokenParser(ts, token.COLON)
+	return StatementList(ts)
+}
+
 func CompositeLit(ts [][]*Token) [][]*Token {
 	ts = LiteralType(ts)
 	return LiteralValue(ts)
