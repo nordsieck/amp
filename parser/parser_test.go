@@ -7,13 +7,15 @@ import (
 	"github.com/nordsieck/defect"
 )
 
+type Tmap map[string][][]*Token
+
 var (
 	empty = [][]*Token(nil)
 	semi  = &Token{tok: token.SEMICOLON, lit: "\n"}
 )
 
 func TestAddOp(t *testing.T) {
-	remaining(t, AddOp, map[string][][]*Token{
+	remaining(t, AddOp, Tmap{
 		`+`: {{}},
 		`-`: {{}},
 		`|`: {{}},
@@ -23,14 +25,14 @@ func TestAddOp(t *testing.T) {
 }
 
 func TestAnonymousField(t *testing.T) {
-	remaining(t, AnonymousField, map[string][][]*Token{
+	remaining(t, AnonymousField, Tmap{
 		`a.a`:  {{semi}, {semi, {tok: token.IDENT, lit: `a`}, {tok: token.PERIOD}}},
 		`*a.a`: {{semi}, {semi, {tok: token.IDENT, lit: `a`}, {tok: token.PERIOD}}},
 	})
 }
 
 func TestArguments(t *testing.T) {
-	remaining(t, Arguments, map[string][][]*Token{
+	remaining(t, Arguments, Tmap{
 		`()`:        {{semi}},
 		`(a)`:       {{semi}},
 		`(a,a)`:     {{semi}},
@@ -40,18 +42,18 @@ func TestArguments(t *testing.T) {
 }
 
 func TestArrayType(t *testing.T) {
-	remaining(t, ArrayType, map[string][][]*Token{
+	remaining(t, ArrayType, Tmap{
 		`[1]int`: {{semi}},
 		`[a]int`: {{semi}},
 	})
 }
 
 func TestAssignment(t *testing.T) {
-	remaining(t, Assignment, map[string][][]*Token{`a = 1`: {{semi}}})
+	remaining(t, Assignment, Tmap{`a = 1`: {{semi}}})
 }
 
 func TestAssignOp(t *testing.T) {
-	remaining(t, AssignOp, map[string][][]*Token{
+	remaining(t, AssignOp, Tmap{
 		`+=`: {{}}, `-=`: {{}}, `*=`: {{}}, `/=`: {{}},
 		`%=`: {{}}, `&=`: {{}}, `|=`: {{}}, `^=`: {{}},
 		`<<=`: {{}}, `>>=`: {{}}, `&^=`: {{}}, `=`: {{}},
@@ -59,7 +61,7 @@ func TestAssignOp(t *testing.T) {
 }
 
 func TestBasicLit(t *testing.T) {
-	remaining(t, BasicLit, map[string][][]*Token{
+	remaining(t, BasicLit, Tmap{
 		``:    empty,
 		`1`:   {{semi}},
 		`1.1`: {{semi}},
@@ -72,7 +74,7 @@ func TestBasicLit(t *testing.T) {
 }
 
 func TestBinaryOp(t *testing.T) {
-	remaining(t, BinaryOp, map[string][][]*Token{
+	remaining(t, BinaryOp, Tmap{
 		`==`: {{}},
 		`+`:  {{}},
 		`*`:  {{}},
@@ -83,7 +85,7 @@ func TestBinaryOp(t *testing.T) {
 }
 
 func TestBlock(t *testing.T) {
-	remaining(t, Block, map[string][][]*Token{
+	remaining(t, Block, Tmap{
 		`{a()}`:     {{semi}},
 		`{a();}`:    {{semi}, {semi}},
 		`{a();b()}`: {{semi}},
@@ -91,14 +93,14 @@ func TestBlock(t *testing.T) {
 }
 
 func TestBreakStmt(t *testing.T) {
-	remaining(t, BreakStmt, map[string][][]*Token{
+	remaining(t, BreakStmt, Tmap{
 		`break a`: {{semi, {tok: token.IDENT, lit: `a`}}, {semi}},
 		`a`:       empty,
 	})
 }
 
 func TestChannelType(t *testing.T) {
-	remaining(t, ChannelType, map[string][][]*Token{
+	remaining(t, ChannelType, Tmap{
 		`chan int`:   {{semi}},
 		`<-chan int`: {{semi}},
 		`chan<- int`: {{semi}},
@@ -107,14 +109,14 @@ func TestChannelType(t *testing.T) {
 }
 
 func TestCompositeLit(t *testing.T) {
-	remaining(t, CompositeLit, map[string][][]*Token{
+	remaining(t, CompositeLit, Tmap{
 		`T{1}`: {{semi}},
 		`T{foo: "bar", baz: "quux",}`: {{semi}, {semi}, {semi}, {semi}},
 	})
 }
 
 func TestCommCase(t *testing.T) {
-	remaining(t, CommCase, map[string][][]*Token{
+	remaining(t, CommCase, Tmap{
 		`default`:   {{}},
 		`case <-a`:  {{semi}},
 		`case a<-5`: {{semi}, {semi, {tok: token.INT, lit: `5`}, {tok: token.ARROW}}},
@@ -122,7 +124,7 @@ func TestCommCase(t *testing.T) {
 }
 
 func TestCommClause(t *testing.T) {
-	remaining(t, CommClause, map[string][][]*Token{
+	remaining(t, CommClause, Tmap{
 		`default:`:   {{}, {}},
 		`case <-a:`:  {{}, {}},
 		`case a<-5:`: {{}, {}},
@@ -144,7 +146,7 @@ func TestCommClause(t *testing.T) {
 }
 
 func TestConstDecl(t *testing.T) {
-	remaining(t, ConstDecl, map[string][][]*Token{
+	remaining(t, ConstDecl, Tmap{
 		`const a = 1`:                         {{semi}},
 		`const a int = 1`:                     {{semi}},
 		`const (a = 1)`:                       {{semi}},
@@ -154,7 +156,7 @@ func TestConstDecl(t *testing.T) {
 }
 
 func TestConstSpec(t *testing.T) {
-	remaining(t, ConstSpec, map[string][][]*Token{
+	remaining(t, ConstSpec, Tmap{
 		`a = 1`:     {{semi}},
 		`a int = 1`: {{semi}},
 		`a, b int = 1, 2`: [][]*Token{
@@ -164,14 +166,14 @@ func TestConstSpec(t *testing.T) {
 }
 
 func TestContinueStmt(t *testing.T) {
-	remaining(t, ContinueStmt, map[string][][]*Token{
+	remaining(t, ContinueStmt, Tmap{
 		`continue a`: {{semi, {tok: token.IDENT, lit: `a`}}, {semi}},
 		`a`:          empty,
 	})
 }
 
 func TestConversion(t *testing.T) {
-	remaining(t, Conversion, map[string][][]*Token{
+	remaining(t, Conversion, Tmap{
 		`float(1)`:   {{semi}},
 		`(int)(5,)`:  {{semi}},
 		`a.a("foo")`: {{semi}},
@@ -179,7 +181,7 @@ func TestConversion(t *testing.T) {
 }
 
 func TestDeclaration(t *testing.T) {
-	remaining(t, Declaration, map[string][][]*Token{
+	remaining(t, Declaration, Tmap{
 		`const a = 1`: {{semi}},
 		`type a int`:  {{semi}},
 		`var a int`:   {{semi}},
@@ -187,7 +189,7 @@ func TestDeclaration(t *testing.T) {
 }
 
 func TestDeferStmt(t *testing.T) {
-	remaining(t, DeferStmt, map[string][][]*Token{
+	remaining(t, DeferStmt, Tmap{
 		`defer a()`: {{semi, {tok: token.RPAREN}, {tok: token.LPAREN}}, {semi}},
 		`defer`:     empty,
 		`a()`:       empty,
@@ -195,14 +197,14 @@ func TestDeferStmt(t *testing.T) {
 }
 
 func TestElement(t *testing.T) {
-	remaining(t, Element, map[string][][]*Token{
+	remaining(t, Element, Tmap{
 		`1+1`:   {{semi, {tok: token.INT, lit: `1`}, {tok: token.ADD}}, {semi}},
 		`{1+1}`: {{semi}},
 	})
 }
 
 func TestElementList(t *testing.T) {
-	remaining(t, ElementList, map[string][][]*Token{
+	remaining(t, ElementList, Tmap{
 		`1:1`: {{semi, {tok: token.INT, lit: `1`}, {tok: token.COLON}}, {semi}},
 		`1:1, 1:1`: {{semi, {tok: token.INT, lit: `1`}, {tok: token.COLON}, {tok: token.INT, lit: `1`},
 			{tok: token.COMMA}, {tok: token.INT, lit: `1`}, {tok: token.COLON}},
@@ -213,15 +215,15 @@ func TestElementList(t *testing.T) {
 }
 
 func TestEllipsisArrayType(t *testing.T) {
-	remaining(t, EllipsisArrayType, map[string][][]*Token{`[...]int`: {{semi}}})
+	remaining(t, EllipsisArrayType, Tmap{`[...]int`: {{semi}}})
 }
 
 func TestEmptyStmt(t *testing.T) {
-	remaining(t, EmptyStmt, map[string][][]*Token{`1`: {{semi, {tok: token.INT, lit: `1`}}}})
+	remaining(t, EmptyStmt, Tmap{`1`: {{semi, {tok: token.INT, lit: `1`}}}})
 }
 
 func TestExprCaseClause(t *testing.T) {
-	remaining(t, ExprCaseClause, map[string][][]*Token{
+	remaining(t, ExprCaseClause, Tmap{
 		`default: a()`: {{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `a`}},
 			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `a`}},
 			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}}, {semi}, {}},
@@ -229,7 +231,7 @@ func TestExprCaseClause(t *testing.T) {
 }
 
 func TestExpression(t *testing.T) {
-	remaining(t, Expression, map[string][][]*Token{
+	remaining(t, Expression, Tmap{
 		`1`: {{semi}},
 		`1+1`: [][]*Token{
 			{semi, {tok: token.INT, lit: `1`}, {tok: token.ADD}},
@@ -243,18 +245,18 @@ func TestExpression(t *testing.T) {
 }
 
 func TestExpressionList(t *testing.T) {
-	remaining(t, ExpressionList, map[string][][]*Token{
+	remaining(t, ExpressionList, Tmap{
 		`1`:   {{semi}},
 		`1,1`: {{semi, {tok: token.INT, lit: `1`}, {tok: token.COMMA}}, {semi}},
 	})
 }
 
 func TestExpressionStmt(t *testing.T) {
-	remaining(t, ExpressionStmt, map[string][][]*Token{`1`: {{semi}}})
+	remaining(t, ExpressionStmt, Tmap{`1`: {{semi}}})
 }
 
 func TestExprSwitchCase(t *testing.T) {
-	remaining(t, ExprSwitchCase, map[string][][]*Token{
+	remaining(t, ExprSwitchCase, Tmap{
 		`case 1`:    {{semi}},
 		`case 1, 1`: {{semi, {tok: token.INT, lit: `1`}, {tok: token.COMMA}}, {semi}},
 		`default`:   {{}},
@@ -262,7 +264,7 @@ func TestExprSwitchCase(t *testing.T) {
 }
 
 func TestExprSwitchStmt(t *testing.T) {
-	remaining(t, ExprSwitchStmt, map[string][][]*Token{
+	remaining(t, ExprSwitchStmt, Tmap{
 		`switch{}`:                                               {{semi}},
 		`switch{default:}`:                                       {{semi}, {semi}},
 		`switch a := 1; {}`:                                      {{semi}},
@@ -276,14 +278,14 @@ func TestExprSwitchStmt(t *testing.T) {
 }
 
 func TestFallthroughStmt(t *testing.T) {
-	remaining(t, FallthroughStmt, map[string][][]*Token{
+	remaining(t, FallthroughStmt, Tmap{
 		`fallthrough`: {{semi}},
 		`a`:           empty,
 	})
 }
 
 func TestFieldDecl(t *testing.T) {
-	remaining(t, FieldDecl, map[string][][]*Token{
+	remaining(t, FieldDecl, Tmap{
 		`a,a int`:    {{semi, {tok: token.IDENT, lit: `int`}, {tok: token.IDENT, lit: `a`}, {tok: token.COMMA}}, {semi}},
 		`*int`:       {{semi}},
 		`*int "foo"`: {{semi, {tok: token.STRING, lit: `"foo"`}}, {semi}},
@@ -291,7 +293,7 @@ func TestFieldDecl(t *testing.T) {
 }
 
 func TestForClause(t *testing.T) {
-	remaining(t, ForClause, map[string][][]*Token{
+	remaining(t, ForClause, Tmap{
 		`;;`:       {{}, {}, {}, {}},
 		`a := 1;;`: {{}, {}},
 		`; a < 5;`: {{}, {}, {}, {}},
@@ -307,7 +309,7 @@ func TestForClause(t *testing.T) {
 }
 
 func TestForStmt(t *testing.T) {
-	remaining(t, ForStmt, map[string][][]*Token{
+	remaining(t, ForStmt, Tmap{
 		`for {}`:                               {{semi}, {semi}},
 		`for true {}`:                          {{semi}, {semi}},
 		`for a := 0; a < 5; a++ {}`:            {{semi}, {semi}},
@@ -320,7 +322,7 @@ func TestForStmt(t *testing.T) {
 }
 
 func TestFunctionType(t *testing.T) {
-	remaining(t, FunctionType, map[string][][]*Token{
+	remaining(t, FunctionType, Tmap{
 		`func()`:             {{semi}},
 		`func()()`:           {{semi, {tok: token.RPAREN}, {tok: token.LPAREN}}, {semi}},
 		`func(int, int) int`: {{semi, {tok: token.IDENT, lit: `int`}}, {semi}},
@@ -328,15 +330,15 @@ func TestFunctionType(t *testing.T) {
 }
 
 func TestGoStmt(t *testing.T) {
-	remaining(t, GoStmt, map[string][][]*Token{`go a()`: {{semi, {tok: token.RPAREN}, {tok: token.LPAREN}}, {semi}}})
+	remaining(t, GoStmt, Tmap{`go a()`: {{semi, {tok: token.RPAREN}, {tok: token.LPAREN}}, {semi}}})
 }
 
 func TestGotoStmt(t *testing.T) {
-	remaining(t, GotoStmt, map[string][][]*Token{`goto a`: {{semi}}, `goto`: empty, `a`: empty})
+	remaining(t, GotoStmt, Tmap{`goto a`: {{semi}}, `goto`: empty, `a`: empty})
 }
 
 func TestIdentifierList(t *testing.T) {
-	remaining(t, IdentifierList, map[string][][]*Token{
+	remaining(t, IdentifierList, Tmap{
 		`a`:   {{semi}},
 		`a,a`: {{semi, {tok: token.IDENT, lit: `a`}, {tok: token.COMMA}}, {semi}},
 		`1`:   empty,
@@ -345,7 +347,7 @@ func TestIdentifierList(t *testing.T) {
 }
 
 func TestIfStmt(t *testing.T) {
-	remaining(t, IfStmt, map[string][][]*Token{
+	remaining(t, IfStmt, Tmap{
 		`if a {}`:             {{semi}, {semi}},
 		`if a := false; a {}`: {{semi}, {semi}},
 		`if a {} else {}`: {{semi, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.ELSE, lit: `else`}},
@@ -371,21 +373,21 @@ func TestIfStmt(t *testing.T) {
 }
 
 func TestIncDecStmt(t *testing.T) {
-	remaining(t, IncDecStmt, map[string][][]*Token{
+	remaining(t, IncDecStmt, Tmap{
 		`a++`: {{semi}},
 		`a--`: {{semi}},
 	})
 }
 
 func TestIndex(t *testing.T) {
-	remaining(t, Index, map[string][][]*Token{
+	remaining(t, Index, Tmap{
 		`[a]`: {{semi}},
 		`[1]`: {{semi}},
 	})
 }
 
 func TestInterfaceType(t *testing.T) {
-	remaining(t, InterfaceType, map[string][][]*Token{
+	remaining(t, InterfaceType, Tmap{
 		`interface{}`:       {{semi}},
 		`interface{a}`:      {{semi}},
 		`interface{a()}`:    {{semi}},
@@ -394,7 +396,7 @@ func TestInterfaceType(t *testing.T) {
 }
 
 func TestKey(t *testing.T) {
-	remaining(t, Key, map[string][][]*Token{
+	remaining(t, Key, Tmap{
 		`a`:     {{semi}, {semi}},
 		`1+a`:   {{semi, {tok: token.IDENT, lit: `a`}, {tok: token.ADD}}, {semi}},
 		`"foo"`: {{semi}},
@@ -402,20 +404,20 @@ func TestKey(t *testing.T) {
 }
 
 func TestKeyedElement(t *testing.T) {
-	remaining(t, KeyedElement, map[string][][]*Token{
+	remaining(t, KeyedElement, Tmap{
 		`1`:   {{semi}},
 		`1:1`: {{semi, {tok: token.INT, lit: `1`}, {tok: token.COLON}}, {semi}},
 	})
 }
 
 func TestLabeledStmt(t *testing.T) {
-	remaining(t, LabeledStmt, map[string][][]*Token{
+	remaining(t, LabeledStmt, Tmap{
 		`a: var b int`: {{semi}, {semi, {tok: token.IDENT, lit: `int`}, {tok: token.IDENT, lit: `b`}, {tok: token.VAR, lit: `var`}}},
 	})
 }
 
 func TestLiteral(t *testing.T) {
-	remaining(t, Literal, map[string][][]*Token{
+	remaining(t, Literal, Tmap{
 		`1`:    {{semi}},
 		`T{1}`: {{semi}},
 		`a`:    empty,
@@ -424,7 +426,7 @@ func TestLiteral(t *testing.T) {
 }
 
 func TestLiteralType(t *testing.T) {
-	remaining(t, LiteralType, map[string][][]*Token{
+	remaining(t, LiteralType, Tmap{
 		`struct{}`:    {{semi}},
 		`[1]int`:      {{semi}},
 		`[...]int`:    {{semi}},
@@ -435,18 +437,18 @@ func TestLiteralType(t *testing.T) {
 }
 
 func TestLiteralValue(t *testing.T) {
-	remaining(t, LiteralValue, map[string][][]*Token{
+	remaining(t, LiteralValue, Tmap{
 		`{1}`:           {{semi}},
 		`{0: 1, 1: 2,}`: {{semi}},
 	})
 }
 
 func TestMapType(t *testing.T) {
-	remaining(t, MapType, map[string][][]*Token{`map[int]int`: {{semi}}})
+	remaining(t, MapType, Tmap{`map[int]int`: {{semi}}})
 }
 
 func TestMethodExpr(t *testing.T) {
-	remaining(t, MethodExpr, map[string][][]*Token{
+	remaining(t, MethodExpr, Tmap{
 		`1`:        empty,
 		`a.a`:      {{semi}},
 		`a.a.a`:    {{semi}, {semi, {tok: token.IDENT, lit: `a`}, {tok: token.PERIOD}}},
@@ -457,7 +459,7 @@ func TestMethodExpr(t *testing.T) {
 }
 
 func TestMethodSpec(t *testing.T) {
-	remaining(t, MethodSpec, map[string][][]*Token{
+	remaining(t, MethodSpec, Tmap{
 		`a()`: {{semi}, {semi, {tok: token.RPAREN}, {tok: token.LPAREN}}},
 		`a`:   {{semi}},
 		`a.a()`: {{semi, {tok: token.RPAREN}, {tok: token.LPAREN}},
@@ -466,7 +468,7 @@ func TestMethodSpec(t *testing.T) {
 }
 
 func TestMulOp(t *testing.T) {
-	remaining(t, MulOp, map[string][][]*Token{
+	remaining(t, MulOp, Tmap{
 		`*`:  {{}},
 		`/`:  {{}},
 		`%`:  {{}},
@@ -479,7 +481,7 @@ func TestMulOp(t *testing.T) {
 }
 
 func TestOperand(t *testing.T) {
-	remaining(t, Operand, map[string][][]*Token{
+	remaining(t, Operand, Tmap{
 		`1`:     {{semi}},
 		`a.a`:   {{semi, {tok: token.IDENT, lit: `a`}, {tok: token.PERIOD}}, {semi}, {semi}},
 		`(a.a)`: {{semi}, {semi}, {semi}},
@@ -487,7 +489,7 @@ func TestOperand(t *testing.T) {
 }
 
 func TestOperandName(t *testing.T) {
-	remaining(t, OperandName, map[string][][]*Token{
+	remaining(t, OperandName, Tmap{
 		`1`:   empty,
 		`_`:   {{semi}},
 		`a`:   {{semi}},
@@ -496,7 +498,7 @@ func TestOperandName(t *testing.T) {
 }
 
 func TestPackageName(t *testing.T) {
-	remaining(t, PackageName, map[string][][]*Token{
+	remaining(t, PackageName, Tmap{
 		`a`: {{semi}},
 		`1`: empty,
 		`_`: empty,
@@ -504,7 +506,7 @@ func TestPackageName(t *testing.T) {
 }
 
 func TestParameterDecl(t *testing.T) {
-	remaining(t, ParameterDecl, map[string][][]*Token{
+	remaining(t, ParameterDecl, Tmap{
 		`int`:      {{semi}},
 		`...int`:   {{semi}},
 		`a, b int`: {{semi, {tok: token.IDENT, lit: `int`}, {tok: token.IDENT, lit: `b`}, {tok: token.COMMA}}, {semi}},
@@ -513,7 +515,7 @@ func TestParameterDecl(t *testing.T) {
 }
 
 func TestParameterList(t *testing.T) {
-	remaining(t, ParameterList, map[string][][]*Token{
+	remaining(t, ParameterList, Tmap{
 		`int`:      {{semi}},
 		`int, int`: {{semi, {tok: token.IDENT, lit: `int`}, {tok: token.COMMA}}, {semi}},
 		`a, b int, c, d int`: [][]*Token{
@@ -532,7 +534,7 @@ func TestParameterList(t *testing.T) {
 }
 
 func TestParameters(t *testing.T) {
-	remaining(t, Parameters, map[string][][]*Token{
+	remaining(t, Parameters, Tmap{
 		`(int)`:                {{semi}},
 		`(int, int)`:           {{semi}},
 		`(int, int,)`:          {{semi}},
@@ -542,14 +544,14 @@ func TestParameters(t *testing.T) {
 }
 
 func TestPointerType(t *testing.T) {
-	remaining(t, PointerType, map[string][][]*Token{
+	remaining(t, PointerType, Tmap{
 		`*int`: {{semi}},
 		`int`:  empty,
 	})
 }
 
 func TestPrimaryExpr(t *testing.T) {
-	remaining(t, PrimaryExpr, map[string][][]*Token{
+	remaining(t, PrimaryExpr, Tmap{
 		`1`: {{semi}},
 		`(a.a)("foo")`: [][]*Token{
 			{semi, {tok: token.RPAREN}, {tok: token.STRING, lit: `"foo"`}, {tok: token.LPAREN}},
@@ -582,7 +584,7 @@ func TestPrimaryExpr(t *testing.T) {
 }
 
 func TestQualifiedIdent(t *testing.T) {
-	remaining(t, QualifiedIdent, map[string][][]*Token{
+	remaining(t, QualifiedIdent, Tmap{
 		`1`:   empty,
 		`a`:   empty,
 		`a.a`: {{semi}},
@@ -593,7 +595,7 @@ func TestQualifiedIdent(t *testing.T) {
 }
 
 func TestRangeClause(t *testing.T) {
-	remaining(t, RangeClause, map[string][][]*Token{
+	remaining(t, RangeClause, Tmap{
 		`range a`:              {{semi}},
 		`a[0], a[1] = range b`: {{semi}},
 		`k, v := range a`:      {{semi}},
@@ -601,7 +603,7 @@ func TestRangeClause(t *testing.T) {
 }
 
 func TestReceiverType(t *testing.T) {
-	remaining(t, ReceiverType, map[string][][]*Token{
+	remaining(t, ReceiverType, Tmap{
 		`1`:      empty,
 		`a.a`:    {{semi}, {semi, {tok: token.IDENT, lit: `a`}, {tok: token.PERIOD}}},
 		`(a.a)`:  {{semi}},
@@ -610,7 +612,7 @@ func TestReceiverType(t *testing.T) {
 }
 
 func TestRecvStmt(t *testing.T) {
-	remaining(t, RecvStmt, map[string][][]*Token{
+	remaining(t, RecvStmt, Tmap{
 		`<-a`: {{semi}},
 		`a[0], b = <-c`: {{semi, {tok: token.IDENT, lit: `c`}, {tok: token.ARROW}, {tok: token.ASSIGN}, {tok: token.IDENT, lit: `b`}, {tok: token.COMMA},
 			{tok: token.RBRACK}, {tok: token.INT, lit: `0`}, {tok: token.LBRACK}},
@@ -623,7 +625,7 @@ func TestRecvStmt(t *testing.T) {
 }
 
 func TestRelOp(t *testing.T) {
-	remaining(t, RelOp, map[string][][]*Token{
+	remaining(t, RelOp, Tmap{
 		`==`: {{}},
 		`!=`: {{}},
 		`>`:  {{}},
@@ -635,14 +637,14 @@ func TestRelOp(t *testing.T) {
 }
 
 func TestResult(t *testing.T) {
-	remaining(t, Result, map[string][][]*Token{
+	remaining(t, Result, Tmap{
 		`int`:        {{semi}},
 		`(int, int)`: {{semi}},
 	})
 }
 
 func TestReturnStmt(t *testing.T) {
-	remaining(t, ReturnStmt, map[string][][]*Token{
+	remaining(t, ReturnStmt, Tmap{
 		`return 1`: {{semi, {tok: token.INT, lit: `1`}}, {semi}},
 		`return 1, 2`: {{semi, {tok: token.INT, lit: `2`}, {tok: token.COMMA}, {tok: token.INT, lit: `1`}},
 			{semi, {tok: token.INT, lit: `2`}, {tok: token.COMMA}}, {semi}},
@@ -650,7 +652,7 @@ func TestReturnStmt(t *testing.T) {
 }
 
 func TestSelector(t *testing.T) {
-	remaining(t, Selector, map[string][][]*Token{
+	remaining(t, Selector, Tmap{
 		`1`:  empty,
 		`a`:  empty,
 		`.a`: {{semi}},
@@ -658,7 +660,7 @@ func TestSelector(t *testing.T) {
 }
 
 func TestSelectStmt(t *testing.T) {
-	remaining(t, SelectStmt, map[string][][]*Token{
+	remaining(t, SelectStmt, Tmap{
 		`select {}`:                                            {{semi}},
 		`select {default:}`:                                    {{semi}, {semi}},
 		`select {default: a()}`:                                {{semi}},
@@ -669,18 +671,18 @@ func TestSelectStmt(t *testing.T) {
 }
 
 func TestSendStmt(t *testing.T) {
-	remaining(t, SendStmt, map[string][][]*Token{`a <- 1`: {{semi}}})
+	remaining(t, SendStmt, Tmap{`a <- 1`: {{semi}}})
 }
 
 func TestShortVarDecl(t *testing.T) {
-	remaining(t, ShortVarDecl, map[string][][]*Token{
+	remaining(t, ShortVarDecl, Tmap{
 		`a := 1`:       {{semi}},
 		`a, b := 1, 2`: {{semi, {tok: token.INT, lit: `2`}, {tok: token.COMMA}}, {semi}},
 	})
 }
 
 func TestSignature(t *testing.T) {
-	remaining(t, Signature, map[string][][]*Token{
+	remaining(t, Signature, Tmap{
 		`()`:             {{semi}},
 		`()()`:           {{semi, {tok: token.RPAREN}, {tok: token.LPAREN}}, {semi}},
 		`(int, int) int`: {{semi, {tok: token.IDENT, lit: `int`}}, {semi}},
@@ -688,7 +690,7 @@ func TestSignature(t *testing.T) {
 }
 
 func TestSimpleStmt(t *testing.T) {
-	remaining(t, SimpleStmt, map[string][][]*Token{
+	remaining(t, SimpleStmt, Tmap{
 		`1`: {{semi, {tok: token.INT, lit: `1`}}, {semi}},
 		`a <- 1`: {{semi, {tok: token.INT, lit: `1`}, {tok: token.ARROW}, {tok: token.IDENT, lit: `a`}},
 			{semi, {tok: token.INT, lit: `1`}, {tok: token.ARROW}}, {semi}},
@@ -701,7 +703,7 @@ func TestSimpleStmt(t *testing.T) {
 }
 
 func TestSlice(t *testing.T) {
-	remaining(t, Slice, map[string][][]*Token{
+	remaining(t, Slice, Tmap{
 		`[:]`:     {{semi}},
 		`[1:]`:    {{semi}},
 		`[:1]`:    {{semi}},
@@ -712,11 +714,11 @@ func TestSlice(t *testing.T) {
 }
 
 func TestSliceType(t *testing.T) {
-	remaining(t, SliceType, map[string][][]*Token{`[]int`: {{semi}}})
+	remaining(t, SliceType, Tmap{`[]int`: {{semi}}})
 }
 
 func TestStatement(t *testing.T) {
-	remaining(t, Statement, map[string][][]*Token{
+	remaining(t, Statement, Tmap{
 		`var a int`: {{semi}, {semi, {tok: token.IDENT, lit: `int`}, {tok: token.IDENT, lit: `a`}, {tok: token.VAR, lit: `var`}}},
 		`a: var b int`: {{semi},
 			{semi, {tok: token.IDENT, lit: `int`}, {tok: token.IDENT, lit: `b`}, {tok: token.VAR, lit: `var`}},
@@ -742,7 +744,7 @@ func TestStatement(t *testing.T) {
 }
 
 func TestStatementList(t *testing.T) {
-	remaining(t, StatementList, map[string][][]*Token{
+	remaining(t, StatementList, Tmap{
 		`fallthrough`: {{semi, {tok: token.FALLTHROUGH, lit: `fallthrough`}}, {semi, {tok: token.FALLTHROUGH, lit: `fallthrough`}}, {semi}, {}},
 		`fallthrough;`: {{{tok: token.SEMICOLON, lit: `;`}, {tok: token.FALLTHROUGH, lit: `fallthrough`}},
 			{{tok: token.SEMICOLON, lit: `;`}, {tok: token.FALLTHROUGH, lit: `fallthrough`}},
@@ -755,7 +757,7 @@ func TestStatementList(t *testing.T) {
 }
 
 func TestStructType(t *testing.T) {
-	remaining(t, StructType, map[string][][]*Token{
+	remaining(t, StructType, Tmap{
 		`struct{}`:                      {{semi}},
 		`struct{int}`:                   {{semi}},
 		`struct{int;}`:                  {{semi}},
@@ -768,14 +770,14 @@ func TestStructType(t *testing.T) {
 }
 
 func TestSwitchStmt(t *testing.T) {
-	remaining(t, SwitchStmt, map[string][][]*Token{
+	remaining(t, SwitchStmt, Tmap{
 		`switch {}`:          {{semi}},
 		`switch a.(type) {}`: {{semi}},
 	})
 }
 
 func TestType(t *testing.T) {
-	remaining(t, Type, map[string][][]*Token{
+	remaining(t, Type, Tmap{
 		`a`:        {{semi}},
 		`a.a`:      {{semi}, {semi, {tok: token.IDENT, lit: "a"}, {tok: token.PERIOD}}},
 		`1`:        empty,
@@ -787,14 +789,14 @@ func TestType(t *testing.T) {
 }
 
 func TestTypeAssertion(t *testing.T) {
-	remaining(t, TypeAssertion, map[string][][]*Token{
+	remaining(t, TypeAssertion, Tmap{
 		`.(int)`: {{semi}},
 		`1`:      empty,
 	})
 }
 
 func TestTypeCaseClause(t *testing.T) {
-	remaining(t, TypeCaseClause, map[string][][]*Token{
+	remaining(t, TypeCaseClause, Tmap{
 		`case a:`: {{}, {}},
 		`case a: b()`: {{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `b`}},
 			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `b`}},
@@ -815,7 +817,7 @@ func TestTypeCaseClause(t *testing.T) {
 }
 
 func TestTypeDecl(t *testing.T) {
-	remaining(t, TypeDecl, map[string][][]*Token{
+	remaining(t, TypeDecl, Tmap{
 		`type a int`:           {{semi}},
 		`type (a int)`:         {{semi}},
 		`type (a int;)`:        {{semi}},
@@ -825,7 +827,7 @@ func TestTypeDecl(t *testing.T) {
 }
 
 func TestTypeList(t *testing.T) {
-	remaining(t, TypeList, map[string][][]*Token{
+	remaining(t, TypeList, Tmap{
 		`a`:     {{semi}},
 		`a, b`:  {{semi, {tok: token.IDENT, lit: `b`}, {tok: token.COMMA}}, {semi}},
 		`a, b,`: {{{tok: token.COMMA}, {tok: token.IDENT, lit: `b`}, {tok: token.COMMA}}, {{tok: token.COMMA}}},
@@ -833,7 +835,7 @@ func TestTypeList(t *testing.T) {
 }
 
 func TestTypeLit(t *testing.T) {
-	remaining(t, TypeLit, map[string][][]*Token{
+	remaining(t, TypeLit, Tmap{
 		`[1]int`:      {{semi}},
 		`struct{}`:    {{semi}},
 		`*int`:        {{semi}},
@@ -846,7 +848,7 @@ func TestTypeLit(t *testing.T) {
 }
 
 func TestTypeName(t *testing.T) {
-	remaining(t, TypeName, map[string][][]*Token{
+	remaining(t, TypeName, Tmap{
 		`a`:   {{semi}},
 		`a.a`: {{semi}, {semi, {tok: token.IDENT, lit: "a"}, {tok: token.PERIOD}}},
 		`1`:   empty,
@@ -855,14 +857,14 @@ func TestTypeName(t *testing.T) {
 }
 
 func TestTypeSpec(t *testing.T) {
-	remaining(t, TypeSpec, map[string][][]*Token{
+	remaining(t, TypeSpec, Tmap{
 		`a int`: {{semi}},
 		`a`:     empty,
 	})
 }
 
 func TestTypeSwitchCase(t *testing.T) {
-	remaining(t, TypeSwitchCase, map[string][][]*Token{
+	remaining(t, TypeSwitchCase, Tmap{
 		`default`:   {{}},
 		`case a`:    {{semi}},
 		`case a, b`: {{semi, {tok: token.IDENT, lit: `b`}, {tok: token.COMMA}}, {semi}},
@@ -870,14 +872,14 @@ func TestTypeSwitchCase(t *testing.T) {
 }
 
 func TestTypeSwitchGuard(t *testing.T) {
-	remaining(t, TypeSwitchGuard, map[string][][]*Token{
+	remaining(t, TypeSwitchGuard, Tmap{
 		`a.(type)`:      {{semi}},
 		`a := a.(type)`: {{semi}},
 	})
 }
 
 func TestTypeSwitchStmt(t *testing.T) {
-	remaining(t, TypeSwitchStmt, map[string][][]*Token{
+	remaining(t, TypeSwitchStmt, Tmap{
 		`switch a.(type) {}`:                              {{semi}},
 		`switch a := 5; a := a.(type) {}`:                 {{semi}},
 		`switch a.(type) { case int: }`:                   {{semi}, {semi}},
@@ -889,7 +891,7 @@ func TestTypeSwitchStmt(t *testing.T) {
 }
 
 func TestUnaryExpr(t *testing.T) {
-	remaining(t, UnaryExpr, map[string][][]*Token{
+	remaining(t, UnaryExpr, Tmap{
 		`1`:  {{semi}},
 		`-1`: {{semi}},
 		`!a`: {{semi}},
@@ -897,7 +899,7 @@ func TestUnaryExpr(t *testing.T) {
 }
 
 func TestUnaryOp(t *testing.T) {
-	remaining(t, UnaryOp, map[string][][]*Token{
+	remaining(t, UnaryOp, Tmap{
 		`+`:  {{}},
 		`-`:  {{}},
 		`!`:  {{}},
@@ -910,7 +912,7 @@ func TestUnaryOp(t *testing.T) {
 }
 
 func TestVarDecl(t *testing.T) {
-	remaining(t, VarDecl, map[string][][]*Token{
+	remaining(t, VarDecl, Tmap{
 		`var a int`:                 {{semi}},
 		`var (a int)`:               {{semi}},
 		`var (a int;)`:              {{semi}},
@@ -920,7 +922,7 @@ func TestVarDecl(t *testing.T) {
 }
 
 func TestVarSpec(t *testing.T) {
-	remaining(t, VarSpec, map[string][][]*Token{
+	remaining(t, VarSpec, Tmap{
 		`a int`:       {{semi}},
 		`a int = 1`:   {{semi, {tok: token.INT, lit: `1`}, {tok: token.ASSIGN}}, {semi}},
 		`a = 1`:       {{semi}},
