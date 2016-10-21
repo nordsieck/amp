@@ -36,13 +36,11 @@ func Arguments(ts [][]*Token) [][]*Token {
 
 func ArrayType(ts [][]*Token) [][]*Token {
 	ts = tokenParser(ts, token.LBRACK)
-	if len(ts) != 0 {
-		ts = Expression(ts)
-	}
-	ts = tokenParser(ts, token.RBRACK)
 	if len(ts) == 0 {
 		return nil
 	}
+	ts = Expression(ts)
+	ts = tokenParser(ts, token.RBRACK)
 	return Type(ts)
 }
 
@@ -158,9 +156,10 @@ func ContinueStmt(ts [][]*Token) [][]*Token {
 func Conversion(ts [][]*Token) [][]*Token {
 	ts = Type(ts)
 	ts = tokenParser(ts, token.LPAREN)
-	if len(ts) != 0 {
-		ts = Expression(ts)
+	if len(ts) == 0 {
+		return nil
 	}
+	ts = Expression(ts)
 	ts = append(ts, tokenParser(ts, token.COMMA)...)
 	return tokenParser(ts, token.RPAREN)
 }
@@ -211,9 +210,10 @@ func ExprCaseClause(ts [][]*Token) [][]*Token {
 func Expression(ts [][]*Token) [][]*Token {
 	base := UnaryExpr(ts)
 	comp := BinaryOp(base)
-	if len(comp) != 0 {
-		comp = Expression(comp)
+	if len(comp) == 0 {
+		return base
 	}
+	comp = Expression(comp)
 	return append(base, comp...)
 }
 
@@ -341,9 +341,6 @@ func IfStmt(ts [][]*Token) [][]*Token {
 	ts = Expression(ts)
 	ts = Block(ts)
 	els := tokenParser(ts, token.ELSE)
-	if len(els) == 0 {
-		return ts
-	}
 	els = append(IfStmt(els), Block(els)...)
 	return append(ts, els...)
 }
@@ -382,9 +379,10 @@ func IncDecStmt(ts [][]*Token) [][]*Token {
 
 func Index(ts [][]*Token) [][]*Token {
 	ts = tokenParser(ts, token.LBRACK)
-	if len(ts) != 0 {
-		ts = Expression(ts)
+	if len(ts) == 0 {
+		return nil
 	}
+	ts = Expression(ts)
 	return tokenParser(ts, token.RBRACK)
 }
 
@@ -439,24 +437,23 @@ func LiteralType(ts [][]*Token) [][]*Token {
 
 func LiteralValue(ts [][]*Token) [][]*Token {
 	ts = tokenParser(ts, token.LBRACE)
-	if len(ts) != 0 {
-		list := ElementList(ts)
-		list = append(list, tokenParser(list, token.COMMA)...)
-		ts = append(ts, list...)
+	if len(ts) == 0 {
+		return nil
 	}
+	list := ElementList(ts)
+	list = append(list, tokenParser(list, token.COMMA)...)
+	ts = append(ts, list...)
 	return tokenParser(ts, token.RBRACE)
 }
 
 func MapType(ts [][]*Token) [][]*Token {
 	ts = tokenParser(ts, token.MAP)
 	ts = tokenParser(ts, token.LBRACK)
-	if len(ts) != 0 {
-		ts = Type(ts)
-	}
-	ts = tokenParser(ts, token.RBRACK)
 	if len(ts) == 0 {
 		return nil
 	}
+	ts = Type(ts)
+	ts = tokenParser(ts, token.RBRACK)
 	return Type(ts)
 }
 
@@ -496,14 +493,11 @@ func MulOp(ts [][]*Token) [][]*Token {
 
 func Operand(ts [][]*Token) [][]*Token {
 	xp := tokenParser(ts, token.LPAREN)
-	if len(xp) > 0 {
+	if len(xp) != 0 {
 		xp = Expression(xp)
 	}
 	xp = tokenParser(xp, token.RPAREN)
-
-	return append(
-		append(Literal(ts), OperandName(ts)...),
-		append(MethodExpr(ts), xp...)...)
+	return append(append(Literal(ts), OperandName(ts)...), append(MethodExpr(ts), xp...)...)
 }
 
 func OperandName(ts [][]*Token) [][]*Token {
@@ -622,11 +616,10 @@ func RelOp(ts [][]*Token) [][]*Token {
 }
 
 func Result(ts [][]*Token) [][]*Token {
-	var t [][]*Token
-	if len(ts) != 0 {
-		t = Type(ts)
+	if len(ts) == 0 {
+		return nil
 	}
-	return append(Parameters(ts), t...)
+	return append(Parameters(ts), Type(ts)...)
 }
 
 func ReturnStmt(ts [][]*Token) [][]*Token {
@@ -772,22 +765,21 @@ func TopLevelDecl(ts [][]*Token) [][]*Token {
 }
 
 func Type(ts [][]*Token) [][]*Token {
-	name := TypeName(ts)
-	lit := TypeLit(ts)
 	paren := tokenParser(ts, token.LPAREN)
 	if len(paren) != 0 {
 		paren = Type(paren)
 	}
 	paren = tokenParser(paren, token.RPAREN)
-	return append(append(name, paren...), lit...)
+	return append(append(TypeName(ts), TypeLit(ts)...), paren...)
 }
 
 func TypeAssertion(ts [][]*Token) [][]*Token {
 	ts = tokenParser(ts, token.PERIOD)
 	ts = tokenParser(ts, token.LPAREN)
-	if len(ts) != 0 {
-		ts = Expression(ts)
+	if len(ts) == 0 {
+		return nil
 	}
+	ts = Expression(ts)
 	return tokenParser(ts, token.RPAREN)
 }
 
@@ -881,10 +873,10 @@ func TypeSwitchStmt(ts [][]*Token) [][]*Token {
 
 func UnaryExpr(ts [][]*Token) [][]*Token {
 	uo := UnaryOp(ts)
-	if len(uo) != 0 {
-		uo = UnaryExpr(uo)
+	if len(uo) == 0 {
+		return PrimaryExpr(ts)
 	}
-	return append(PrimaryExpr(ts), uo...)
+	return append(PrimaryExpr(ts), UnaryExpr(uo)...)
 }
 
 func UnaryOp(ts [][]*Token) [][]*Token {
