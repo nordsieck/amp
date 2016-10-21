@@ -389,6 +389,15 @@ func TestIfStmt(t *testing.T) {
 	})
 }
 
+func TestImportSpec(t *testing.T) {
+	remaining(t, ImportSpec, Tmap{
+		`"a"`:   {{semi}},
+		`. "a"`: {{semi}},
+		`_ "a"`: {{semi}},
+		`a "a"`: {{semi}},
+	})
+}
+
 func TestIncDecStmt(t *testing.T) {
 	remaining(t, IncDecStmt, Tmap{
 		`a++`: {{semi}},

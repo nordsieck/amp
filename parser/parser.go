@@ -340,6 +340,14 @@ func IfStmt(ts [][]*Token) [][]*Token {
 	return append(ts, els...)
 }
 
+// bad spec
+// [ "." | "_" | PackageName ] ImportPath
+func ImportSpec(ts [][]*Token) [][]*Token {
+	names := append(tokenParser(ts, token.PERIOD), tokenParser(ts, token.IDENT)...)
+	ts = append(ts, names...)
+	return tokenParser(ts, token.STRING)
+}
+
 func IncDecStmt(ts [][]*Token) [][]*Token {
 	ts = Expression(ts)
 	return append(tokenParser(ts, token.INC), tokenParser(ts, token.DEC)...)
