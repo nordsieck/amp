@@ -341,6 +341,25 @@ func IfStmt(ts [][]*Token) [][]*Token {
 }
 
 // bad spec
+// "import" ( ImportSpec | "(" [ ImportSpec { ";" ImportSpec } [ ";" ]] ")" )
+func ImportDecl(ts [][]*Token) [][]*Token {
+	ts = tokenParser(ts, token.IMPORT)
+	group := tokenParser(ts, token.LPAREN)
+	elements := ImportSpec(group)
+	next := elements
+	for len(next) != 0 {
+		current := tokenParser(next, token.SEMICOLON)
+		current = ImportSpec(current)
+		elements = append(elements, current...)
+		next = current
+	}
+	elements = append(elements, tokenParser(elements, token.SEMICOLON)...)
+	group = append(group, elements...)
+	group = tokenParser(group, token.RPAREN)
+	return append(group, ImportSpec(ts)...)
+}
+
+// bad spec
 // [ "." | "_" | PackageName ] ImportPath
 func ImportSpec(ts [][]*Token) [][]*Token {
 	names := append(tokenParser(ts, token.PERIOD), tokenParser(ts, token.IDENT)...)
