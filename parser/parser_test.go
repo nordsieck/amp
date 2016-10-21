@@ -86,8 +86,9 @@ func TestBinaryOp(t *testing.T) {
 
 func TestBlock(t *testing.T) {
 	remaining(t, Block, Tmap{
+		`{}`:        {{semi}},
 		`{a()}`:     {{semi}},
-		`{a();}`:    {{semi}, {semi}},
+		`{a();}`:    {{semi}},
 		`{a();b()}`: {{semi}},
 	})
 }
@@ -125,15 +126,12 @@ func TestCommCase(t *testing.T) {
 
 func TestCommClause(t *testing.T) {
 	remaining(t, CommClause, Tmap{
-		`default:`:   {{}, {}},
-		`case <-a:`:  {{}, {}},
-		`case a<-5:`: {{}, {}},
+		`default:`:   {{}},
+		`case <-a:`:  {{}},
+		`case a<-5:`: {{}},
 		`default: a()`: {{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `a`}},
-			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `a`}},
 			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}}, {semi}, {}},
 		`case <-a: b(); c()`: {
-			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `c`}, {tok: token.SEMICOLON, lit: `;`},
-				{tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `b`}},
 			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `c`}, {tok: token.SEMICOLON, lit: `;`},
 				{tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `b`}},
 			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `c`}, {tok: token.SEMICOLON, lit: `;`},
@@ -225,7 +223,6 @@ func TestEmptyStmt(t *testing.T) {
 func TestExprCaseClause(t *testing.T) {
 	remaining(t, ExprCaseClause, Tmap{
 		`default: a()`: {{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `a`}},
-			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `a`}},
 			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}}, {semi}, {}},
 	})
 }
@@ -266,12 +263,12 @@ func TestExprSwitchCase(t *testing.T) {
 func TestExprSwitchStmt(t *testing.T) {
 	remaining(t, ExprSwitchStmt, Tmap{
 		`switch{}`:                                               {{semi}},
-		`switch{default:}`:                                       {{semi}, {semi}},
+		`switch{default:}`:                                       {{semi}},
 		`switch a := 1; {}`:                                      {{semi}},
 		`switch a {}`:                                            {{semi}},
 		`switch a := 1; a {}`:                                    {{semi}},
-		`switch a := 1; a {default:}`:                            {{semi}, {semi}},
-		`switch {case true:}`:                                    {{semi}, {semi}},
+		`switch a := 1; a {default:}`:                            {{semi}},
+		`switch {case true:}`:                                    {{semi}},
 		`switch {case true: a()}`:                                {{semi}},
 		`switch{ case true: a(); case false: b(); default: c()}`: {{semi}},
 	})
@@ -310,21 +307,21 @@ func TestForClause(t *testing.T) {
 
 func TestForStmt(t *testing.T) {
 	remaining(t, ForStmt, Tmap{
-		`for {}`:                               {{semi}, {semi}},
-		`for true {}`:                          {{semi}, {semi}},
-		`for a := 0; a < 5; a++ {}`:            {{semi}, {semi}},
-		`for range a {}`:                       {{semi}, {semi}},
+		`for {}`:                               {{semi}},
+		`for true {}`:                          {{semi}},
+		`for a := 0; a < 5; a++ {}`:            {{semi}},
+		`for range a {}`:                       {{semi}},
 		`for { a() }`:                          {{semi}},
-		`for { a(); }`:                         {{semi}, {semi}},
+		`for { a(); }`:                         {{semi}},
 		`for { a(); b() }`:                     {{semi}},
-		`for a := 0; a < 5; a++ { a(); b(); }`: {{semi}, {semi}},
+		`for a := 0; a < 5; a++ { a(); b(); }`: {{semi}},
 	})
 }
 
 func TestFunction(t *testing.T) {
 	remaining(t, Function, Tmap{
-		`(){}`:                 {{semi}, {semi}},
-		`()(){}`:               {{semi}, {semi}},
+		`(){}`:                 {{semi}},
+		`()(){}`:               {{semi}},
 		`(int)int{ return 0 }`: {{semi}},
 		`(){ a() }`:            {{semi}},
 	})
@@ -332,15 +329,15 @@ func TestFunction(t *testing.T) {
 
 func TestFunctionDecl(t *testing.T) {
 	remaining(t, FunctionDecl, Tmap{
-		`func f(){}`:                        {{semi}, {semi}},
-		`func f()(){}`:                      {{semi}, {semi}},
+		`func f(){}`:                        {{semi}},
+		`func f()(){}`:                      {{semi}},
 		`func f(int)int{ a(); return b() }`: {{semi}},
 	})
 }
 
 func TestFunctionLit(t *testing.T) {
 	remaining(t, FunctionLit, Tmap{
-		`func(){}`: {{semi}, {semi}},
+		`func(){}`: {{semi}},
 	})
 }
 
@@ -371,26 +368,15 @@ func TestIdentifierList(t *testing.T) {
 
 func TestIfStmt(t *testing.T) {
 	remaining(t, IfStmt, Tmap{
-		`if a {}`:             {{semi}, {semi}},
-		`if a := false; a {}`: {{semi}, {semi}},
-		`if a {} else {}`: {{semi, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.ELSE, lit: `else`}},
-			{semi, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.ELSE, lit: `else`}},
-			{semi}, {semi}, {semi}, {semi}},
-		`if a {} else if b {}`: {
-			{semi, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.IDENT, lit: `b`}, {tok: token.IF, lit: `if`}, {tok: token.ELSE, lit: `else`}},
-			{semi, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.IDENT, lit: `b`}, {tok: token.IF, lit: `if`}, {tok: token.ELSE, lit: `else`}},
-			{semi}, {semi}, {semi}, {semi}},
-		`if a := false; a {} else if b {} else {}`: {
-			{semi, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.ELSE, lit: `else`}, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.IDENT, lit: `b`},
-				{tok: token.IF, lit: `if`}, {tok: token.ELSE, lit: `else`}},
-			{semi, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.ELSE, lit: `else`}, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.IDENT, lit: `b`},
-				{tok: token.IF, lit: `if`}, {tok: token.ELSE, lit: `else`}},
-			{semi, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.ELSE, lit: `else`}},
-			{semi, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.ELSE, lit: `else`}},
-			{semi, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.ELSE, lit: `else`}},
-			{semi, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.ELSE, lit: `else`}},
-			{semi}, {semi}, {semi}, {semi}, {semi}, {semi}, {semi}, {semi},
-		},
+		`if a {}`:             {{semi}},
+		`if a := false; a {}`: {{semi}},
+		`if a {} else {}`:     {{semi, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.ELSE, lit: `else`}}, {semi}},
+		`if a {} else if b {}`: {{semi, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.IDENT, lit: `b`},
+			{tok: token.IF, lit: `if`}, {tok: token.ELSE, lit: `else`}}, {semi}},
+		`if a := false; a {} else if b {} else {}`: {{semi, {tok: token.RBRACE}, {tok: token.LBRACE},
+			{tok: token.ELSE, lit: `else`}, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.IDENT, lit: `b`},
+			{tok: token.IF, lit: `if`}, {tok: token.ELSE, lit: `else`}},
+			{semi, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.ELSE, lit: `else`}}, {semi}},
 		`if a { b() }`: {{semi}},
 	})
 }
@@ -465,7 +451,7 @@ func TestLiteral(t *testing.T) {
 		`T{1}`:     {{semi}},
 		`a`:        empty,
 		`_`:        empty,
-		`func(){}`: {{semi}, {semi}},
+		`func(){}`: {{semi}},
 	})
 }
 
@@ -493,10 +479,10 @@ func TestMapType(t *testing.T) {
 
 func TestMethodDecl(t *testing.T) {
 	remaining(t, MethodDecl, Tmap{
-		`func (m M) f(){}`:                 {{semi}, {semi}},
-		`func (m M) f()(){}`:               {{semi}, {semi}},
+		`func (m M) f(){}`:                 {{semi}},
+		`func (m M) f()(){}`:               {{semi}},
 		`func (m M) f(int)int{ return 0 }`: {{semi}},
-		`func (m *M) f() { a(); b(); }`:    {{semi}, {semi}},
+		`func (m *M) f() { a(); b(); }`:    {{semi}},
 	})
 }
 
@@ -724,10 +710,10 @@ func TestSelector(t *testing.T) {
 func TestSelectStmt(t *testing.T) {
 	remaining(t, SelectStmt, Tmap{
 		`select {}`:                                            {{semi}},
-		`select {default:}`:                                    {{semi}, {semi}},
+		`select {default:}`:                                    {{semi}},
 		`select {default: a()}`:                                {{semi}},
 		`select {default: a();}`:                               {{semi}, {semi}},
-		`select {case <-a: ;default:}`:                         {{semi}, {semi}, {semi}, {semi}},
+		`select {case <-a: ;default:}`:                         {{semi}},
 		`select {case <-a: b(); case c<-d: e(); default: f()}`: {{semi}},
 	})
 }
@@ -815,10 +801,10 @@ func TestStatement(t *testing.T) {
 		`goto a`:      {{semi, {tok: token.IDENT, lit: `a`}, {tok: token.GOTO, lit: `goto`}}, {semi}},
 		`fallthrough`: {{semi, {tok: token.FALLTHROUGH, lit: `fallthrough`}}, {semi}},
 		`{a()}`:       {{semi, {tok: token.RBRACE}, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `a`}, {tok: token.LBRACE}}, {semi}},
-		`if a {}`:     {{semi, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.IDENT, lit: `a`}, {tok: token.IF, lit: `if`}}, {semi}, {semi}},
+		`if a {}`:     {{semi, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.IDENT, lit: `a`}, {tok: token.IF, lit: `if`}}, {semi}},
 		`switch {}`:   {{semi, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.SWITCH, lit: `switch`}}, {semi}},
 		`select {}`:   {{semi, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.SELECT, lit: `select`}}, {semi}},
-		`for {}`:      {{semi, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.FOR, lit: `for`}}, {semi}, {semi}},
+		`for {}`:      {{semi, {tok: token.RBRACE}, {tok: token.LBRACE}, {tok: token.FOR, lit: `for`}}, {semi}},
 		`defer a()`: {{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `a`}, {tok: token.DEFER, lit: `defer`}},
 			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}}, {semi}},
 	})
@@ -826,12 +812,10 @@ func TestStatement(t *testing.T) {
 
 func TestStatementList(t *testing.T) {
 	remaining(t, StatementList, Tmap{
-		`fallthrough`: {{semi, {tok: token.FALLTHROUGH, lit: `fallthrough`}}, {semi, {tok: token.FALLTHROUGH, lit: `fallthrough`}}, {semi}, {}},
+		`fallthrough`: {{semi, {tok: token.FALLTHROUGH, lit: `fallthrough`}}, {semi}, {}},
 		`fallthrough;`: {{{tok: token.SEMICOLON, lit: `;`}, {tok: token.FALLTHROUGH, lit: `fallthrough`}},
-			{{tok: token.SEMICOLON, lit: `;`}, {tok: token.FALLTHROUGH, lit: `fallthrough`}},
 			{{tok: token.SEMICOLON, lit: `;`}}, {}},
 		`fallthrough; fallthrough`: {{semi, {tok: token.FALLTHROUGH, lit: `fallthrough`}, {tok: token.SEMICOLON, lit: `;`}, {tok: token.FALLTHROUGH, lit: `fallthrough`}},
-			{semi, {tok: token.FALLTHROUGH, lit: `fallthrough`}, {tok: token.SEMICOLON, lit: `;`}, {tok: token.FALLTHROUGH, lit: `fallthrough`}},
 			{semi, {tok: token.FALLTHROUGH, lit: `fallthrough`}, {tok: token.SEMICOLON, lit: `;`}},
 			{semi, {tok: token.FALLTHROUGH, lit: `fallthrough`}}, {semi}, {}},
 	})
@@ -860,8 +844,8 @@ func TestSwitchStmt(t *testing.T) {
 func TestTopLevelDecl(t *testing.T) {
 	remaining(t, TopLevelDecl, Tmap{
 		`var a int`:        {{semi}},
-		`func f(){}`:       {{semi}, {semi}},
-		`func (m M) f(){}`: {{semi}, {semi}},
+		`func f(){}`:       {{semi}},
+		`func (m M) f(){}`: {{semi}},
 	})
 }
 
@@ -886,17 +870,13 @@ func TestTypeAssertion(t *testing.T) {
 
 func TestTypeCaseClause(t *testing.T) {
 	remaining(t, TypeCaseClause, Tmap{
-		`case a:`: {{}, {}},
+		`case a:`: {{}},
 		`case a: b()`: {{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `b`}},
-			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `b`}},
 			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}}, {semi}, {}},
 		`default: a()`: {{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `a`}},
-			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `a`}},
 			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}}, {semi}, {}},
 		`case a, b: c(); d()`: {{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `d`}, {tok: token.SEMICOLON, lit: `;`},
 			{tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `c`}},
-			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `d`}, {tok: token.SEMICOLON, lit: `;`},
-				{tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `c`}},
 			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `d`}, {tok: token.SEMICOLON, lit: `;`},
 				{tok: token.RPAREN}, {tok: token.LPAREN}},
 			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `d`}, {tok: token.SEMICOLON, lit: `;`}},
@@ -971,8 +951,8 @@ func TestTypeSwitchStmt(t *testing.T) {
 	remaining(t, TypeSwitchStmt, Tmap{
 		`switch a.(type) {}`:                              {{semi}},
 		`switch a := 5; a := a.(type) {}`:                 {{semi}},
-		`switch a.(type) { case int: }`:                   {{semi}, {semi}},
-		`switch a.(type) { case int:; }`:                  {{semi}, {semi}, {semi}},
+		`switch a.(type) { case int: }`:                   {{semi}},
+		`switch a.(type) { case int:; }`:                  {{semi}, {semi}},
 		`switch a.(type) { case int: b() }`:               {{semi}},
 		`switch a.(type) { case int: b(); }`:              {{semi}, {semi}},
 		`switch a.(type) { case int: b(); default: c() }`: {{semi}},

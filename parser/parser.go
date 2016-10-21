@@ -82,10 +82,10 @@ func BinaryOp(ts [][]*Token) [][]*Token {
 
 // bad spec
 // "{" StatementList [ ";" ] "}"
+// force empty stmt
 func Block(ts [][]*Token) [][]*Token {
 	ts = tokenParser(ts, token.LBRACE)
 	ts = StatementList(ts)
-	ts = append(ts, tokenParser(ts, token.SEMICOLON)...)
 	return tokenParser(ts, token.RBRACE)
 }
 
@@ -731,20 +731,21 @@ func Statement(ts [][]*Token) [][]*Token {
 }
 
 // bad spec
-// [ Statement { ";" Statement } ]
+// Statement { ";" Statement }
+// force empty stmt
 func StatementList(ts [][]*Token) [][]*Token {
 	if len(ts) == 0 {
 		return nil
 	}
-	list := Statement(ts)
-	next := list
+	ts = Statement(ts)
+	next := ts
 	for len(next) != 0 {
 		current := tokenParser(next, token.SEMICOLON)
 		current = Statement(current)
-		list = append(list, current...)
+		ts = append(ts, current...)
 		next = current
 	}
-	return append(ts, list...)
+	return ts
 }
 
 // bad spec
