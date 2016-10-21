@@ -531,6 +531,15 @@ func TestPackageName(t *testing.T) {
 	})
 }
 
+func TestPackageClause(t *testing.T) {
+	remaining(t, PackageClause, Tmap{
+		`package a`: {{semi}},
+		`package _`: empty,
+		`package`:   empty,
+		`a`:         empty,
+	})
+}
+
 func TestParameterDecl(t *testing.T) {
 	remaining(t, ParameterDecl, Tmap{
 		`int`:      {{semi}},

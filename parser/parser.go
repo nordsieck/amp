@@ -475,6 +475,11 @@ func OperandName(ts [][]*Token) [][]*Token {
 	return append(tokenParser(ts, token.IDENT), QualifiedIdent(ts)...)
 }
 
+func PackageClause(ts [][]*Token) [][]*Token {
+	ts = tokenParser(ts, token.PACKAGE)
+	return PackageName(ts)
+}
+
 func PackageName(ts [][]*Token) [][]*Token { return nonBlankIdent(ts) }
 
 func ParameterDecl(ts [][]*Token) [][]*Token {
