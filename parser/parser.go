@@ -24,7 +24,8 @@ func AnonymousField(ts [][]*Token) [][]*Token {
 	return TypeName(ts)
 }
 
-// spec is wrong, maybe
+// bad spec
+// "(" [ ExpressionList [ "..." ] [ "," ]] ")"
 func Arguments(ts [][]*Token) [][]*Token {
 	ts = tokenParser(ts, token.LPAREN)
 	newTs := ExpressionList(ts)
@@ -122,7 +123,8 @@ func CompositeLit(ts [][]*Token) [][]*Token {
 	return LiteralValue(ts)
 }
 
-// spec is wrong
+// bad spec
+// "const" ( ConstSpec | "(" [ ConstSpec { ";" ConstSpec } [ ";" ]] ")" )
 func ConstDecl(ts [][]*Token) [][]*Token {
 	ts = tokenParser(ts, token.CONST)
 	paren := tokenParser(ts, token.LPAREN)
@@ -139,7 +141,8 @@ func ConstDecl(ts [][]*Token) [][]*Token {
 	return append(paren, ConstSpec(ts)...)
 }
 
-// spec is wrong
+// bad spec
+// IdentifierLit [ Type ] "=" ExpressionList
 func ConstSpec(ts [][]*Token) [][]*Token {
 	ts = IdentifierList(ts)
 	ts = append(ts, Type(ts)...)
@@ -386,6 +389,7 @@ func Index(ts [][]*Token) [][]*Token {
 }
 
 // bad spec
+// "interface" "{" [ MethodSpec { ";" MethodSpec } [ ";" ]] "}"
 func InterfaceType(ts [][]*Token) [][]*Token {
 	ts = tokenParser(ts, token.INTERFACE)
 	ts = tokenParser(ts, token.LBRACE)
@@ -743,7 +747,8 @@ func StatementList(ts [][]*Token) [][]*Token {
 	return append(ts, list...)
 }
 
-// spec is wrong here - trailing semicolon is optional not mandatory
+// bad spec
+// "struct" "{" [ FieldDecl { ";" FieldDecl } [ ";" ]] "}"
 func StructType(ts [][]*Token) [][]*Token {
 	ts = tokenParser(ts, token.STRUCT)
 	ts = tokenParser(ts, token.LBRACE)
