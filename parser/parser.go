@@ -696,6 +696,24 @@ func SliceType(ts [][]*Token) [][]*Token {
 	return Type(ts)
 }
 
+func SourceFile(ts [][]*Token) [][]*Token {
+	ts = PackageClause(ts)
+	ts = tokenParser(ts, token.SEMICOLON)
+	next := ts
+	for len(next) != 0 {
+		next = ImportDecl(next)
+		next = tokenParser(next, token.SEMICOLON)
+		ts = append(ts, next...)
+	}
+	next = ts
+	for len(next) != 0 {
+		next = TopLevelDecl(next)
+		next = tokenParser(next, token.SEMICOLON)
+		ts = append(ts, next...)
+	}
+	return ts
+}
+
 func Statement(ts [][]*Token) [][]*Token {
 	return append(
 		append(append(append(Declaration(ts), LabeledStmt(ts)...), append(SimpleStmt(ts), GoStmt(ts)...)...),

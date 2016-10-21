@@ -772,6 +772,25 @@ func TestSliceType(t *testing.T) {
 	remaining(t, SliceType, Tmap{`[]int`: {{semi}}})
 }
 
+func TestSourceFile(t *testing.T) {
+	remaining(t, SourceFile, Tmap{
+		`package p`:             {{}},
+		`package p; import "a"`: {{semi, {tok: token.STRING, lit: `"a"`}, {tok: token.IMPORT, lit: `import`}}, {}},
+		`package p; var a int`:  {{semi, {tok: token.IDENT, lit: `int`}, {tok: token.IDENT, lit: `a`}, {tok: token.VAR, lit: `var`}}, {}},
+		`package p; import "a"; import "b"; var c int; var d int`: {
+			{semi, {tok: token.IDENT, lit: `int`}, {tok: token.IDENT, lit: `d`}, {tok: token.VAR, lit: `var`}, {tok: token.SEMICOLON, lit: `;`},
+				{tok: token.IDENT, lit: `int`}, {tok: token.IDENT, lit: `c`}, {tok: token.VAR, lit: `var`}, {tok: token.SEMICOLON, lit: `;`},
+				{tok: token.STRING, lit: `"b"`}, {tok: token.IMPORT, lit: `import`}, {tok: token.SEMICOLON, lit: `;`},
+				{tok: token.STRING, lit: `"a"`}, {tok: token.IMPORT, lit: `import`}},
+			{semi, {tok: token.IDENT, lit: `int`}, {tok: token.IDENT, lit: `d`}, {tok: token.VAR, lit: `var`}, {tok: token.SEMICOLON, lit: `;`},
+				{tok: token.IDENT, lit: `int`}, {tok: token.IDENT, lit: `c`}, {tok: token.VAR, lit: `var`}, {tok: token.SEMICOLON, lit: `;`},
+				{tok: token.STRING, lit: `"b"`}, {tok: token.IMPORT, lit: `import`}},
+			{semi, {tok: token.IDENT, lit: `int`}, {tok: token.IDENT, lit: `d`}, {tok: token.VAR, lit: `var`}, {tok: token.SEMICOLON, lit: `;`},
+				{tok: token.IDENT, lit: `int`}, {tok: token.IDENT, lit: `c`}, {tok: token.VAR, lit: `var`}},
+			{semi, {tok: token.IDENT, lit: `int`}, {tok: token.IDENT, lit: `d`}, {tok: token.VAR, lit: `var`}}, {}},
+	})
+}
+
 func TestStatement(t *testing.T) {
 	remaining(t, Statement, Tmap{
 		`var a int`: {{semi}, {semi, {tok: token.IDENT, lit: `int`}, {tok: token.IDENT, lit: `a`}, {tok: token.VAR, lit: `var`}}},
