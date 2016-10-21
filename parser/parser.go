@@ -296,6 +296,11 @@ func FunctionDecl(ts [][]*Token) [][]*Token {
 	return Function(ts)
 }
 
+func FunctionLit(ts [][]*Token) [][]*Token {
+	ts = tokenParser(ts, token.FUNC)
+	return Function(ts)
+}
+
 func FunctionType(ts [][]*Token) [][]*Token {
 	ts = tokenParser(ts, token.FUNC)
 	return Signature(ts)
@@ -417,8 +422,7 @@ func LabeledStmt(ts [][]*Token) [][]*Token {
 }
 
 func Literal(ts [][]*Token) [][]*Token {
-	return append(BasicLit(ts), CompositeLit(ts)...)
-	// FunctionLit
+	return append(append(BasicLit(ts), CompositeLit(ts)...), FunctionLit(ts)...)
 }
 
 func LiteralType(ts [][]*Token) [][]*Token {

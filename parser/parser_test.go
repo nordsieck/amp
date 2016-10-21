@@ -338,6 +338,12 @@ func TestFunctionDecl(t *testing.T) {
 	})
 }
 
+func TestFunctionLit(t *testing.T) {
+	remaining(t, FunctionLit, Tmap{
+		`func(){}`: {{semi}, {semi}},
+	})
+}
+
 func TestFunctionType(t *testing.T) {
 	remaining(t, FunctionType, Tmap{
 		`func()`:             {{semi}},
@@ -455,10 +461,11 @@ func TestLabeledStmt(t *testing.T) {
 
 func TestLiteral(t *testing.T) {
 	remaining(t, Literal, Tmap{
-		`1`:    {{semi}},
-		`T{1}`: {{semi}},
-		`a`:    empty,
-		`_`:    empty,
+		`1`:        {{semi}},
+		`T{1}`:     {{semi}},
+		`a`:        empty,
+		`_`:        empty,
+		`func(){}`: {{semi}, {semi}},
 	})
 }
 
