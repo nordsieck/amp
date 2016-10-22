@@ -10,7 +10,7 @@ type Token struct {
 
 func (t *Token) String() string { return "{" + t.tok.String() + " " + t.lit + "}" }
 
-func pop(t *[]*Token) *Token {
+func pop(t *State) *Token {
 	if len(*t) == 0 {
 		return nil
 	}

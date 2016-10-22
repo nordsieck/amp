@@ -7,10 +7,10 @@ import (
 	"github.com/nordsieck/defect"
 )
 
-type Tmap map[string][][]*Token
+type Tmap map[string][]State
 
 var (
-	empty = [][]*Token(nil)
+	empty = []State(nil)
 	semi  = &Token{tok: token.SEMICOLON, lit: "\n"}
 )
 
@@ -157,7 +157,7 @@ func TestConstSpec(t *testing.T) {
 	remaining(t, ConstSpec, Tmap{
 		`a = 1`:     {{semi}},
 		`a int = 1`: {{semi}},
-		`a, b int = 1, 2`: [][]*Token{
+		`a, b int = 1, 2`: {
 			{semi, {tok: token.INT, lit: `2`}, {tok: token.COMMA}}, {semi},
 		},
 	})
@@ -230,8 +230,8 @@ func TestExprCaseClause(t *testing.T) {
 func TestExpression(t *testing.T) {
 	remaining(t, Expression, Tmap{
 		`1`:    {{semi}},
-		`1+1`:  [][]*Token{{semi, {tok: token.INT, lit: `1`}, {tok: token.ADD}}, {semi}},
-		`1+-1`: [][]*Token{{semi, {tok: token.INT, lit: `1`}, {tok: token.SUB}, {tok: token.ADD}}, {semi}},
+		`1+1`:  {{semi, {tok: token.INT, lit: `1`}, {tok: token.ADD}}, {semi}},
+		`1+-1`: {{semi, {tok: token.INT, lit: `1`}, {tok: token.SUB}, {tok: token.ADD}}, {semi}},
 	})
 }
 
@@ -560,7 +560,7 @@ func TestParameterList(t *testing.T) {
 	remaining(t, ParameterList, Tmap{
 		`int`:      {{semi}},
 		`int, int`: {{semi, {tok: token.IDENT, lit: `int`}, {tok: token.COMMA}}, {semi}},
-		`a, b int, c, d int`: [][]*Token{
+		`a, b int, c, d int`: {
 			{semi, {tok: token.IDENT, lit: `int`}, {tok: token.IDENT, lit: `d`}, {tok: token.COMMA}, {tok: token.IDENT, lit: `c`}, {tok: token.COMMA},
 				{tok: token.IDENT, lit: `int`}, {tok: token.IDENT, lit: `b`}, {tok: token.COMMA}},
 			{semi, {tok: token.IDENT, lit: `int`}, {tok: token.IDENT, lit: `d`}, {tok: token.COMMA}, {tok: token.IDENT, lit: `c`}, {tok: token.COMMA}},
@@ -595,28 +595,28 @@ func TestPointerType(t *testing.T) {
 func TestPrimaryExpr(t *testing.T) {
 	remaining(t, PrimaryExpr, Tmap{
 		`1`: {{semi}},
-		`(a.a)("foo")`: [][]*Token{
+		`(a.a)("foo")`: {
 			{semi, {tok: token.RPAREN}, {tok: token.STRING, lit: `"foo"`}, {tok: token.LPAREN}},
 			{semi, {tok: token.RPAREN}, {tok: token.STRING, lit: `"foo"`}, {tok: token.LPAREN}},
 			{semi, {tok: token.RPAREN}, {tok: token.STRING, lit: `"foo"`}, {tok: token.LPAREN}},
 			{semi}, {semi}, {semi}, {semi},
 		},
-		`a.a`: [][]*Token{
+		`a.a`: {
 			{semi, {tok: token.IDENT, lit: `a`}, {tok: token.PERIOD}}, {semi}, {semi}, {semi},
 		},
-		`a[1]`: [][]*Token{
+		`a[1]`: {
 			{semi, {tok: token.RBRACK}, {tok: token.INT, lit: `1`}, {tok: token.LBRACK}}, {semi},
 		},
-		`a[:]`: [][]*Token{
+		`a[:]`: {
 			{semi, {tok: token.RBRACK}, {tok: token.COLON}, {tok: token.LBRACK}}, {semi},
 		},
-		`a.(int)`: [][]*Token{
+		`a.(int)`: {
 			{semi, {tok: token.RPAREN}, {tok: token.IDENT, lit: `int`}, {tok: token.LPAREN}, {tok: token.PERIOD}}, {semi},
 		},
-		`a(b...)`: [][]*Token{
+		`a(b...)`: {
 			{semi, {tok: token.RPAREN}, {tok: token.ELLIPSIS}, {tok: token.IDENT, lit: `b`}, {tok: token.LPAREN}}, {semi},
 		},
-		`a(b...)[:]`: [][]*Token{
+		`a(b...)[:]`: {
 			{semi, {tok: token.RBRACK}, {tok: token.COLON}, {tok: token.LBRACK},
 				{tok: token.RPAREN}, {tok: token.ELLIPSIS}, {tok: token.IDENT, lit: `b`}, {tok: token.LPAREN}},
 			{semi, {tok: token.RBRACK}, {tok: token.COLON}, {tok: token.LBRACK}},
@@ -994,9 +994,9 @@ func TestVarSpec(t *testing.T) {
 }
 
 func TestTokenParser(t *testing.T) {
-	toks := [][]*Token{
+	toks := []State{
 		{semi, {tok: token.RPAREN}},
 		{semi, {tok: token.RPAREN}, {tok: token.IDENT, lit: `a`}, {tok: token.PERIOD}},
 	}
-	defect.DeepEqual(t, tokenParser(toks, token.RPAREN), [][]*Token{{semi}})
+	defect.DeepEqual(t, tokenParser(toks, token.RPAREN), []State{{semi}})
 }
