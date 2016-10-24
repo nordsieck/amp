@@ -36,7 +36,7 @@ func remaining(t *testing.T, r Reader, m Tmap) {
 func result(t *testing.T, p Parser, m Tmap) {
 	for raw, left := range m {
 		toks := [][]*Token{Scan(newScanner(raw))}
-		tree, state := p(nil, toks)
+		tree, state := p(toks)
 		defect.DeepEqual(t, state, left)
 		defect.Equal(t, len(tree), len(state))
 	}

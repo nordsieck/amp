@@ -74,7 +74,7 @@ func TestBasicLit(t *testing.T) {
 }
 
 func TestBinaryOp(t *testing.T) {
-	remaining(t, BinaryOp, Tmap{
+	result(t, BinaryOp, Tmap{
 		`==`: {{}},
 		`+`:  {{}},
 		`*`:  {{}},

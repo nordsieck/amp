@@ -7,10 +7,10 @@ import (
 
 type (
 	Reader func([][]*Token) [][]*Token
-	Parser func([]interface{}, [][]*Token) ([]interface{}, [][]*Token)
+	Parser func([][]*Token) ([]interface{}, [][]*Token)
 )
 
-func AddOp(i []interface{}, ts [][]*Token) ([]interface{}, [][]*Token) {
+func AddOp(ts [][]*Token) ([]interface{}, [][]*Token) {
 	var result [][]*Token
 	var tree []interface{}
 	for _, t := range ts {
@@ -76,14 +76,16 @@ func BasicLit(ts [][]*Token) [][]*Token {
 		tokenReader(ts, token.STRING)...)
 }
 
-func BinaryOp(ts [][]*Token) [][]*Token {
-	_, addOp := AddOp(nil, ts)
-	_, relOp := RelOp(nil, ts)
-	_, mulOp := MulOp(nil, ts)
+func BinaryOp(ts [][]*Token) ([]interface{}, [][]*Token) {
+	addT, addS := AddOp(ts)
+	relT, relS := RelOp(ts)
+	mulT, mulS := MulOp(ts)
+	landT, landS := tokenParser(ts, token.LAND)
+	lorT, lorS := tokenParser(ts, token.LOR)
 
-	return append(
-		append(append(tokenReader(ts, token.LAND), tokenReader(ts, token.LOR)...),
-			append(relOp, addOp...)...), mulOp...)
+	t := append(append(append(addT, relT...), append(mulT, landT...)...), lorT...)
+	s := append(append(append(addS, relS...), append(mulS, landS...)...), lorS...)
+	return t, s
 }
 
 // bad spec
@@ -217,7 +219,7 @@ func ExprCaseClause(ts [][]*Token) [][]*Token {
 
 func Expression(ts [][]*Token) [][]*Token {
 	base := UnaryExpr(ts)
-	comp := BinaryOp(base)
+	_, comp := BinaryOp(base)
 	if len(comp) == 0 {
 		return base
 	}
@@ -486,7 +488,7 @@ func MethodSpec(ts [][]*Token) [][]*Token {
 	return append(sig, TypeName(ts)...)
 }
 
-func MulOp(i []interface{}, ts [][]*Token) ([]interface{}, [][]*Token) {
+func MulOp(ts [][]*Token) ([]interface{}, [][]*Token) {
 	var result [][]*Token
 	var tree []interface{}
 	for _, t := range ts {
@@ -612,7 +614,7 @@ func RecvStmt(ts [][]*Token) [][]*Token {
 	return Expression(append(ts, append(expr, ident...)...))
 }
 
-func RelOp(i []interface{}, ts [][]*Token) ([]interface{}, [][]*Token) {
+func RelOp(ts [][]*Token) ([]interface{}, [][]*Token) {
 	var result [][]*Token
 	var tree []interface{}
 	for _, t := range ts {
