@@ -667,7 +667,7 @@ func TestRecvStmt(t *testing.T) {
 }
 
 func TestRelOp(t *testing.T) {
-	remaining(t, RelOp, Tmap{
+	result(t, RelOp, Tmap{
 		`==`: {{}},
 		`!=`: {{}},
 		`>`:  {{}},

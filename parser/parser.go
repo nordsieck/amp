@@ -78,10 +78,11 @@ func BasicLit(ts [][]*Token) [][]*Token {
 
 func BinaryOp(ts [][]*Token) [][]*Token {
 	_, addOp := AddOp(nil, ts)
+	_, relOp := RelOp(nil, ts)
 
 	return append(
 		append(append(tokenParser(ts, token.LAND), tokenParser(ts, token.LOR)...),
-			append(RelOp(ts), addOp...)...),
+			append(relOp, addOp...)...),
 		MulOp(ts)...)
 }
 
@@ -609,17 +610,19 @@ func RecvStmt(ts [][]*Token) [][]*Token {
 	return Expression(append(ts, append(expr, ident...)...))
 }
 
-func RelOp(ts [][]*Token) [][]*Token {
+func RelOp(i []interface{}, ts [][]*Token) ([]interface{}, [][]*Token) {
 	var result [][]*Token
+	var tree []interface{}
 	for _, t := range ts {
 		switch p := pop(&t); true {
 		case p == nil:
 		case p.tok == token.EQL, p.tok == token.NEQ, p.tok == token.LSS,
 			p.tok == token.LEQ, p.tok == token.GTR, p.tok == token.GEQ:
 			result = append(result, t)
+			tree = append(tree, p.tok)
 		}
 	}
-	return result
+	return tree, result
 }
 
 func Result(ts [][]*Token) [][]*Token {
