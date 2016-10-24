@@ -7,6 +7,7 @@ import (
 
 type (
 	Reader func([][]*Token) [][]*Token
+	Parser func([]interface{}, [][]*Token) ([]interface{}, [][]*Token)
 )
 
 func AddOp(ts [][]*Token) [][]*Token {
