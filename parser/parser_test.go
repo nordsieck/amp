@@ -131,13 +131,15 @@ func TestCommClause(t *testing.T) {
 		`case a<-5:`: {{}},
 		`default: a()`: {{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `a`}},
 			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}}, {semi}, {}},
-		`case <-a: b(); c()`: {{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `c`}, {tok: token.SEMICOLON, lit: `;`},
-			{tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `b`}},
+		`case <-a: b(); c()`: {
+			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `c`}, {tok: token.SEMICOLON, lit: `;`},
+				{tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `b`}},
 			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `c`}, {tok: token.SEMICOLON, lit: `;`},
 				{tok: token.RPAREN}, {tok: token.LPAREN}},
 			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `c`}, {tok: token.SEMICOLON, lit: `;`}},
 			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}, {tok: token.IDENT, lit: `c`}},
-			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}}, {semi}, {}},
+			{semi, {tok: token.RPAREN}, {tok: token.LPAREN}}, {semi}, {},
+		},
 	})
 }
 
@@ -153,9 +155,11 @@ func TestConstDecl(t *testing.T) {
 
 func TestConstSpec(t *testing.T) {
 	remaining(t, ConstSpec, Tmap{
-		`a = 1`:           {{semi}},
-		`a int = 1`:       {{semi}},
-		`a, b int = 1, 2`: {{semi, {tok: token.INT, lit: `2`}, {tok: token.COMMA}}, {semi}},
+		`a = 1`:     {{semi}},
+		`a int = 1`: {{semi}},
+		`a, b int = 1, 2`: {
+			{semi, {tok: token.INT, lit: `2`}, {tok: token.COMMA}}, {semi},
+		},
 	})
 }
 
@@ -591,18 +595,33 @@ func TestPointerType(t *testing.T) {
 func TestPrimaryExpr(t *testing.T) {
 	remaining(t, PrimaryExpr, Tmap{
 		`1`: {{semi}},
-		`(a.a)("foo")`: {{semi, {tok: token.RPAREN}, {tok: token.STRING, lit: `"foo"`}, {tok: token.LPAREN}},
+		`(a.a)("foo")`: {
 			{semi, {tok: token.RPAREN}, {tok: token.STRING, lit: `"foo"`}, {tok: token.LPAREN}},
 			{semi, {tok: token.RPAREN}, {tok: token.STRING, lit: `"foo"`}, {tok: token.LPAREN}},
-			{semi}, {semi}, {semi}, {semi}},
-		`a.a`:     {{semi, {tok: token.IDENT, lit: `a`}, {tok: token.PERIOD}}, {semi}, {semi}, {semi}},
-		`a[1]`:    {{semi, {tok: token.RBRACK}, {tok: token.INT, lit: `1`}, {tok: token.LBRACK}}, {semi}},
-		`a[:]`:    {{semi, {tok: token.RBRACK}, {tok: token.COLON}, {tok: token.LBRACK}}, {semi}},
-		`a.(int)`: {{semi, {tok: token.RPAREN}, {tok: token.IDENT, lit: `int`}, {tok: token.LPAREN}, {tok: token.PERIOD}}, {semi}},
-		`a(b...)`: {{semi, {tok: token.RPAREN}, {tok: token.ELLIPSIS}, {tok: token.IDENT, lit: `b`}, {tok: token.LPAREN}}, {semi}},
-		`a(b...)[:]`: {{semi, {tok: token.RBRACK}, {tok: token.COLON}, {tok: token.LBRACK},
-			{tok: token.RPAREN}, {tok: token.ELLIPSIS}, {tok: token.IDENT, lit: `b`}, {tok: token.LPAREN}},
-			{semi, {tok: token.RBRACK}, {tok: token.COLON}, {tok: token.LBRACK}}, {semi}},
+			{semi, {tok: token.RPAREN}, {tok: token.STRING, lit: `"foo"`}, {tok: token.LPAREN}},
+			{semi}, {semi}, {semi}, {semi},
+		},
+		`a.a`: {
+			{semi, {tok: token.IDENT, lit: `a`}, {tok: token.PERIOD}}, {semi}, {semi}, {semi},
+		},
+		`a[1]`: {
+			{semi, {tok: token.RBRACK}, {tok: token.INT, lit: `1`}, {tok: token.LBRACK}}, {semi},
+		},
+		`a[:]`: {
+			{semi, {tok: token.RBRACK}, {tok: token.COLON}, {tok: token.LBRACK}}, {semi},
+		},
+		`a.(int)`: {
+			{semi, {tok: token.RPAREN}, {tok: token.IDENT, lit: `int`}, {tok: token.LPAREN}, {tok: token.PERIOD}}, {semi},
+		},
+		`a(b...)`: {
+			{semi, {tok: token.RPAREN}, {tok: token.ELLIPSIS}, {tok: token.IDENT, lit: `b`}, {tok: token.LPAREN}}, {semi},
+		},
+		`a(b...)[:]`: {
+			{semi, {tok: token.RBRACK}, {tok: token.COLON}, {tok: token.LBRACK},
+				{tok: token.RPAREN}, {tok: token.ELLIPSIS}, {tok: token.IDENT, lit: `b`}, {tok: token.LPAREN}},
+			{semi, {tok: token.RBRACK}, {tok: token.COLON}, {tok: token.LBRACK}},
+			{semi},
+		},
 	})
 }
 
@@ -975,6 +994,9 @@ func TestVarSpec(t *testing.T) {
 }
 
 func TestTokenParser(t *testing.T) {
-	toks := []State{{semi, {tok: token.RPAREN}}, {semi, {tok: token.RPAREN}, {tok: token.IDENT, lit: `a`}, {tok: token.PERIOD}}}
+	toks := []State{
+		{semi, {tok: token.RPAREN}},
+		{semi, {tok: token.RPAREN}, {tok: token.IDENT, lit: `a`}, {tok: token.PERIOD}},
+	}
 	defect.DeepEqual(t, tokenParser(toks, token.RPAREN), []State{{semi}})
 }
