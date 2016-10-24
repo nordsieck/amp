@@ -10,16 +10,18 @@ type (
 	Parser func([]interface{}, [][]*Token) ([]interface{}, [][]*Token)
 )
 
-func AddOp(ts [][]*Token) [][]*Token {
+func AddOp(i []interface{}, ts [][]*Token) ([]interface{}, [][]*Token) {
 	var result [][]*Token
+	var tree []interface{}
 	for _, t := range ts {
 		switch p := pop(&t); true {
 		case p == nil:
 		case p.tok == token.ADD, p.tok == token.SUB, p.tok == token.OR, p.tok == token.AND:
 			result = append(result, t)
+			tree = append(tree, p.tok)
 		}
 	}
-	return result
+	return tree, result
 }
 
 func AnonymousField(ts [][]*Token) [][]*Token {
@@ -75,9 +77,11 @@ func BasicLit(ts [][]*Token) [][]*Token {
 }
 
 func BinaryOp(ts [][]*Token) [][]*Token {
+	_, addOp := AddOp(nil, ts)
+
 	return append(
 		append(append(tokenParser(ts, token.LAND), tokenParser(ts, token.LOR)...),
-			append(RelOp(ts), AddOp(ts)...)...),
+			append(RelOp(ts), addOp...)...),
 		MulOp(ts)...)
 }
 

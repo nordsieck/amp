@@ -15,7 +15,7 @@ var (
 )
 
 func TestAddOp(t *testing.T) {
-	remaining(t, AddOp, Tmap{
+	result(t, AddOp, Tmap{
 		`+`: {{}},
 		`-`: {{}},
 		`|`: {{}},
