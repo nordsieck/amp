@@ -7,10 +7,10 @@ import (
 	"github.com/nordsieck/defect"
 )
 
-type Tmap map[string][]State
+type Tmap map[string][][]*Token
 
 var (
-	empty = []State(nil)
+	empty = [][]*Token(nil)
 	semi  = &Token{tok: token.SEMICOLON, lit: "\n"}
 )
 
@@ -994,9 +994,9 @@ func TestVarSpec(t *testing.T) {
 }
 
 func TestTokenParser(t *testing.T) {
-	toks := []State{
+	toks := [][]*Token{
 		{semi, {tok: token.RPAREN}},
 		{semi, {tok: token.RPAREN}, {tok: token.IDENT, lit: `a`}, {tok: token.PERIOD}},
 	}
-	defect.DeepEqual(t, tokenParser(toks, token.RPAREN), []State{{semi}})
+	defect.DeepEqual(t, tokenParser(toks, token.RPAREN), [][]*Token{{semi}})
 }

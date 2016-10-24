@@ -28,7 +28,7 @@ func Scan(s *scanner.Scanner) []*Token {
 
 func remaining(t *testing.T, p Parser, m Tmap) {
 	for raw, left := range m {
-		toks := []State{Scan(newScanner(raw))}
+		toks := [][]*Token{Scan(newScanner(raw))}
 		defect.DeepEqual(t, p(toks), left)
 	}
 }
