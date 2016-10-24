@@ -8,6 +8,11 @@ import (
 )
 
 type Tmap map[string][][]*Token
+type Output struct {
+	tree []interface{}
+	rest [][]*Token
+}
+type Omap map[string]Output
 
 var (
 	empty = [][]*Token(nil)
@@ -15,12 +20,12 @@ var (
 )
 
 func TestAddOp(t *testing.T) {
-	result(t, AddOp, Tmap{
-		`+`: {{}},
-		`-`: {{}},
-		`|`: {{}},
-		`&`: {{}},
-		`1`: empty,
+	result(t, AddOp, Omap{
+		`+`: {[]interface{}{token.ADD}, [][]*Token{{}}},
+		`-`: {[]interface{}{token.SUB}, [][]*Token{{}}},
+		`|`: {[]interface{}{token.OR}, [][]*Token{{}}},
+		`&`: {[]interface{}{token.AND}, [][]*Token{{}}},
+		`1`: {},
 	})
 }
 
@@ -74,13 +79,13 @@ func TestBasicLit(t *testing.T) {
 }
 
 func TestBinaryOp(t *testing.T) {
-	result(t, BinaryOp, Tmap{
-		`==`: {{}},
-		`+`:  {{}},
-		`*`:  {{}},
-		`||`: {{}},
-		`&&`: {{}},
-		`1`:  empty,
+	result(t, BinaryOp, Omap{
+		`==`: {[]interface{}{token.EQL}, [][]*Token{{}}},
+		`+`:  {[]interface{}{token.ADD}, [][]*Token{{}}},
+		`*`:  {[]interface{}{token.MUL}, [][]*Token{{}}},
+		`||`: {[]interface{}{token.LOR}, [][]*Token{{}}},
+		`&&`: {[]interface{}{token.LAND}, [][]*Token{{}}},
+		`1`:  {},
 	})
 }
 
@@ -501,15 +506,15 @@ func TestMethodSpec(t *testing.T) {
 }
 
 func TestMulOp(t *testing.T) {
-	result(t, MulOp, Tmap{
-		`*`:  {{}},
-		`/`:  {{}},
-		`%`:  {{}},
-		`<<`: {{}},
-		`>>`: {{}},
-		`&`:  {{}},
-		`&^`: {{}},
-		`1`:  empty,
+	result(t, MulOp, Omap{
+		`*`:  {[]interface{}{token.MUL}, [][]*Token{{}}},
+		`/`:  {[]interface{}{token.QUO}, [][]*Token{{}}},
+		`%`:  {[]interface{}{token.REM}, [][]*Token{{}}},
+		`<<`: {[]interface{}{token.SHL}, [][]*Token{{}}},
+		`>>`: {[]interface{}{token.SHR}, [][]*Token{{}}},
+		`&`:  {[]interface{}{token.AND}, [][]*Token{{}}},
+		`&^`: {[]interface{}{token.AND_NOT}, [][]*Token{{}}},
+		`1`:  {},
 	})
 }
 
@@ -667,14 +672,14 @@ func TestRecvStmt(t *testing.T) {
 }
 
 func TestRelOp(t *testing.T) {
-	result(t, RelOp, Tmap{
-		`==`: {{}},
-		`!=`: {{}},
-		`>`:  {{}},
-		`>=`: {{}},
-		`<`:  {{}},
-		`<=`: {{}},
-		`1`:  empty,
+	result(t, RelOp, Omap{
+		`==`: {[]interface{}{token.EQL}, [][]*Token{{}}},
+		`!=`: {[]interface{}{token.NEQ}, [][]*Token{{}}},
+		`>`:  {[]interface{}{token.GTR}, [][]*Token{{}}},
+		`>=`: {[]interface{}{token.GEQ}, [][]*Token{{}}},
+		`<`:  {[]interface{}{token.LSS}, [][]*Token{{}}},
+		`<=`: {[]interface{}{token.LEQ}, [][]*Token{{}}},
+		`1`:  {},
 	})
 }
 
