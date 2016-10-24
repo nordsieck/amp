@@ -472,7 +472,7 @@ func MapType(ts [][]*Token) [][]*Token {
 func MethodDecl(ts [][]*Token) [][]*Token {
 	ts = tokenReader(ts, token.FUNC)
 	ts = Parameters(ts)
-	ts = nonBlankIdent(ts)
+	_, ts = nonBlankIdent(ts)
 	return Function(ts)
 }
 
@@ -483,7 +483,7 @@ func MethodExpr(ts [][]*Token) [][]*Token {
 }
 
 func MethodSpec(ts [][]*Token) [][]*Token {
-	sig := nonBlankIdent(ts)
+	_, sig := nonBlankIdent(ts)
 	sig = Signature(sig)
 	return append(sig, TypeName(ts)...)
 }
@@ -521,7 +521,10 @@ func PackageClause(ts [][]*Token) [][]*Token {
 	return PackageName(ts)
 }
 
-func PackageName(ts [][]*Token) [][]*Token { return nonBlankIdent(ts) }
+func PackageName(ts [][]*Token) [][]*Token {
+	_, ts = nonBlankIdent(ts)
+	return ts
+}
 
 func ParameterDecl(ts [][]*Token) [][]*Token {
 	ts = append(ts, IdentifierList(ts)...)
@@ -935,14 +938,16 @@ func VarSpec(ts [][]*Token) [][]*Token {
 	return append(typ, assign...)
 }
 
-func nonBlankIdent(ts [][]*Token) [][]*Token {
+func nonBlankIdent(ts [][]*Token) ([]interface{}, [][]*Token) {
 	var result [][]*Token
+	var tree []interface{}
 	for _, t := range ts {
 		if p := pop(&t); p != nil && p.tok == token.IDENT && p.lit != `_` {
 			result = append(result, t)
+			tree = append(tree, p.tok)
 		}
 	}
-	return result
+	return tree, result
 }
 
 func tokenReader(ts [][]*Token, tok token.Token) [][]*Token {
