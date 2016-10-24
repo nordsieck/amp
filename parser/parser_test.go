@@ -501,7 +501,7 @@ func TestMethodSpec(t *testing.T) {
 }
 
 func TestMulOp(t *testing.T) {
-	remaining(t, MulOp, Tmap{
+	result(t, MulOp, Tmap{
 		`*`:  {{}},
 		`/`:  {{}},
 		`%`:  {{}},
@@ -998,5 +998,5 @@ func TestTokenParser(t *testing.T) {
 		{semi, {tok: token.RPAREN}},
 		{semi, {tok: token.RPAREN}, {tok: token.IDENT, lit: `a`}, {tok: token.PERIOD}},
 	}
-	defect.DeepEqual(t, tokenParser(toks, token.RPAREN), [][]*Token{{semi}})
+	defect.DeepEqual(t, tokenReader(toks, token.RPAREN), [][]*Token{{semi}})
 }

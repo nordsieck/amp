@@ -25,27 +25,27 @@ func AddOp(i []interface{}, ts [][]*Token) ([]interface{}, [][]*Token) {
 }
 
 func AnonymousField(ts [][]*Token) [][]*Token {
-	ts = append(ts, tokenParser(ts, token.MUL)...)
+	ts = append(ts, tokenReader(ts, token.MUL)...)
 	return TypeName(ts)
 }
 
 // bad spec
 // "(" [ ExpressionList [ "..." ] [ "," ]] ")"
 func Arguments(ts [][]*Token) [][]*Token {
-	ts = tokenParser(ts, token.LPAREN)
+	ts = tokenReader(ts, token.LPAREN)
 	newTs := ExpressionList(ts)
-	newTs = append(newTs, tokenParser(newTs, token.ELLIPSIS)...)
-	newTs = append(newTs, tokenParser(newTs, token.COMMA)...)
-	return tokenParser(append(ts, newTs...), token.RPAREN)
+	newTs = append(newTs, tokenReader(newTs, token.ELLIPSIS)...)
+	newTs = append(newTs, tokenReader(newTs, token.COMMA)...)
+	return tokenReader(append(ts, newTs...), token.RPAREN)
 }
 
 func ArrayType(ts [][]*Token) [][]*Token {
-	ts = tokenParser(ts, token.LBRACK)
+	ts = tokenReader(ts, token.LBRACK)
 	if len(ts) == 0 {
 		return nil
 	}
 	ts = Expression(ts)
-	ts = tokenParser(ts, token.RBRACK)
+	ts = tokenReader(ts, token.RBRACK)
 	return Type(ts)
 }
 
@@ -71,40 +71,40 @@ func AssignOp(ts [][]*Token) [][]*Token {
 
 func BasicLit(ts [][]*Token) [][]*Token {
 	return append(
-		append(append(tokenParser(ts, token.INT), tokenParser(ts, token.FLOAT)...),
-			append(tokenParser(ts, token.IMAG), tokenParser(ts, token.CHAR)...)...),
-		tokenParser(ts, token.STRING)...)
+		append(append(tokenReader(ts, token.INT), tokenReader(ts, token.FLOAT)...),
+			append(tokenReader(ts, token.IMAG), tokenReader(ts, token.CHAR)...)...),
+		tokenReader(ts, token.STRING)...)
 }
 
 func BinaryOp(ts [][]*Token) [][]*Token {
 	_, addOp := AddOp(nil, ts)
 	_, relOp := RelOp(nil, ts)
+	_, mulOp := MulOp(nil, ts)
 
 	return append(
-		append(append(tokenParser(ts, token.LAND), tokenParser(ts, token.LOR)...),
-			append(relOp, addOp...)...),
-		MulOp(ts)...)
+		append(append(tokenReader(ts, token.LAND), tokenReader(ts, token.LOR)...),
+			append(relOp, addOp...)...), mulOp...)
 }
 
 // bad spec
 // "{" StatementList [ ";" ] "}"
 // force empty stmt
 func Block(ts [][]*Token) [][]*Token {
-	ts = tokenParser(ts, token.LBRACE)
+	ts = tokenReader(ts, token.LBRACE)
 	ts = StatementList(ts)
-	return tokenParser(ts, token.RBRACE)
+	return tokenReader(ts, token.RBRACE)
 }
 
 func BreakStmt(ts [][]*Token) [][]*Token {
-	ts = tokenParser(ts, token.BREAK)
-	return append(ts, tokenParser(ts, token.IDENT)...)
+	ts = tokenReader(ts, token.BREAK)
+	return append(ts, tokenReader(ts, token.IDENT)...)
 }
 
 func ChannelType(ts [][]*Token) [][]*Token {
-	plain := tokenParser(ts, token.CHAN)
-	after := tokenParser(plain, token.ARROW)
-	before := tokenParser(ts, token.ARROW)
-	before = tokenParser(before, token.CHAN)
+	plain := tokenReader(ts, token.CHAN)
+	after := tokenReader(plain, token.ARROW)
+	before := tokenReader(ts, token.ARROW)
+	before = tokenReader(before, token.CHAN)
 	together := append(append(plain, after...), before...)
 	if len(together) == 0 {
 		return nil
@@ -113,14 +113,14 @@ func ChannelType(ts [][]*Token) [][]*Token {
 }
 
 func CommCase(ts [][]*Token) [][]*Token {
-	cas := tokenParser(ts, token.CASE)
+	cas := tokenReader(ts, token.CASE)
 	cas = append(SendStmt(cas), RecvStmt(cas)...)
-	return append(cas, tokenParser(ts, token.DEFAULT)...)
+	return append(cas, tokenReader(ts, token.DEFAULT)...)
 }
 
 func CommClause(ts [][]*Token) [][]*Token {
 	ts = CommCase(ts)
-	ts = tokenParser(ts, token.COLON)
+	ts = tokenReader(ts, token.COLON)
 	return StatementList(ts)
 }
 
@@ -132,18 +132,18 @@ func CompositeLit(ts [][]*Token) [][]*Token {
 // bad spec
 // "const" ( ConstSpec | "(" [ ConstSpec { ";" ConstSpec } [ ";" ]] ")" )
 func ConstDecl(ts [][]*Token) [][]*Token {
-	ts = tokenParser(ts, token.CONST)
-	paren := tokenParser(ts, token.LPAREN)
+	ts = tokenReader(ts, token.CONST)
+	paren := tokenReader(ts, token.LPAREN)
 	paren = ConstSpec(paren)
 	next := paren
 	for len(next) != 0 {
-		current := tokenParser(next, token.SEMICOLON)
+		current := tokenReader(next, token.SEMICOLON)
 		current = ConstSpec(current)
 		paren = append(paren, current...)
 		next = current
 	}
-	paren = append(paren, tokenParser(paren, token.SEMICOLON)...)
-	paren = tokenParser(paren, token.RPAREN)
+	paren = append(paren, tokenReader(paren, token.SEMICOLON)...)
+	paren = tokenReader(paren, token.RPAREN)
 	return append(paren, ConstSpec(ts)...)
 }
 
@@ -152,24 +152,24 @@ func ConstDecl(ts [][]*Token) [][]*Token {
 func ConstSpec(ts [][]*Token) [][]*Token {
 	ts = IdentifierList(ts)
 	ts = append(ts, Type(ts)...)
-	ts = tokenParser(ts, token.ASSIGN)
+	ts = tokenReader(ts, token.ASSIGN)
 	return ExpressionList(ts)
 }
 
 func ContinueStmt(ts [][]*Token) [][]*Token {
-	ts = tokenParser(ts, token.CONTINUE)
-	return append(ts, tokenParser(ts, token.IDENT)...)
+	ts = tokenReader(ts, token.CONTINUE)
+	return append(ts, tokenReader(ts, token.IDENT)...)
 }
 
 func Conversion(ts [][]*Token) [][]*Token {
 	ts = Type(ts)
-	ts = tokenParser(ts, token.LPAREN)
+	ts = tokenReader(ts, token.LPAREN)
 	if len(ts) == 0 {
 		return nil
 	}
 	ts = Expression(ts)
-	ts = append(ts, tokenParser(ts, token.COMMA)...)
-	return tokenParser(ts, token.RPAREN)
+	ts = append(ts, tokenReader(ts, token.COMMA)...)
+	return tokenReader(ts, token.RPAREN)
 }
 
 func Declaration(ts [][]*Token) [][]*Token {
@@ -177,7 +177,7 @@ func Declaration(ts [][]*Token) [][]*Token {
 }
 
 func DeferStmt(ts [][]*Token) [][]*Token {
-	ts = tokenParser(ts, token.DEFER)
+	ts = tokenReader(ts, token.DEFER)
 	return Expression(ts)
 }
 
@@ -189,7 +189,7 @@ func ElementList(ts [][]*Token) [][]*Token {
 	ts = KeyedElement(ts)
 	base := ts
 	for len(base) != 0 {
-		next := tokenParser(base, token.COMMA)
+		next := tokenReader(base, token.COMMA)
 		next = KeyedElement(next)
 		ts = append(ts, next...)
 		base = next
@@ -198,9 +198,9 @@ func ElementList(ts [][]*Token) [][]*Token {
 }
 
 func EllipsisArrayType(ts [][]*Token) [][]*Token {
-	ts = tokenParser(ts, token.LBRACK)
-	ts = tokenParser(ts, token.ELLIPSIS)
-	ts = tokenParser(ts, token.RBRACK)
+	ts = tokenReader(ts, token.LBRACK)
+	ts = tokenReader(ts, token.ELLIPSIS)
+	ts = tokenReader(ts, token.RBRACK)
 	if len(ts) == 0 {
 		return nil
 	}
@@ -211,7 +211,7 @@ func EmptyStmt(ts [][]*Token) [][]*Token { return ts }
 
 func ExprCaseClause(ts [][]*Token) [][]*Token {
 	ts = ExprSwitchCase(ts)
-	ts = tokenParser(ts, token.COLON)
+	ts = tokenReader(ts, token.COLON)
 	return StatementList(ts)
 }
 
@@ -229,7 +229,7 @@ func ExpressionList(ts [][]*Token) [][]*Token {
 	ts = Expression(ts)
 	next := ts
 	for len(next) != 0 {
-		current := tokenParser(next, token.COMMA)
+		current := tokenReader(next, token.COMMA)
 		current = Expression(current)
 		ts = append(ts, current...)
 		next = current
@@ -240,36 +240,36 @@ func ExpressionList(ts [][]*Token) [][]*Token {
 func ExpressionStmt(ts [][]*Token) [][]*Token { return Expression(ts) }
 
 func ExprSwitchCase(ts [][]*Token) [][]*Token {
-	cas := tokenParser(ts, token.CASE)
+	cas := tokenReader(ts, token.CASE)
 	cas = ExpressionList(cas)
-	return append(tokenParser(ts, token.DEFAULT), cas...)
+	return append(tokenReader(ts, token.DEFAULT), cas...)
 }
 
 // bad spec
 // "switch" [ SimpleStmt ";" ] [ Expression ] "{" [ ExprCaseClause { ";" ExprCaseClause } [ ";" ]] "}"
 func ExprSwitchStmt(ts [][]*Token) [][]*Token {
-	ts = tokenParser(ts, token.SWITCH)
+	ts = tokenReader(ts, token.SWITCH)
 	stmt := SimpleStmt(ts)
-	ts = append(ts, tokenParser(stmt, token.SEMICOLON)...)
+	ts = append(ts, tokenReader(stmt, token.SEMICOLON)...)
 	if len(ts) == 0 {
 		return nil
 	}
 	ts = append(ts, Expression(ts)...)
-	ts = tokenParser(ts, token.LBRACE)
+	ts = tokenReader(ts, token.LBRACE)
 	list := ExprCaseClause(ts)
 	next := list
 	for len(next) != 0 {
-		current := tokenParser(next, token.SEMICOLON)
+		current := tokenReader(next, token.SEMICOLON)
 		current = ExprCaseClause(current)
 		list = append(list, current...)
 		next = current
 	}
-	list = append(list, tokenParser(list, token.SEMICOLON)...)
+	list = append(list, tokenReader(list, token.SEMICOLON)...)
 	ts = append(ts, list...)
-	return tokenParser(ts, token.RBRACE)
+	return tokenReader(ts, token.RBRACE)
 }
 
-func FallthroughStmt(ts [][]*Token) [][]*Token { return tokenParser(ts, token.FALLTHROUGH) }
+func FallthroughStmt(ts [][]*Token) [][]*Token { return tokenReader(ts, token.FALLTHROUGH) }
 
 func FieldDecl(ts [][]*Token) [][]*Token {
 	a := IdentifierList(ts)
@@ -277,19 +277,19 @@ func FieldDecl(ts [][]*Token) [][]*Token {
 		a = Type(a)
 	}
 	ts = append(AnonymousField(ts), a...)
-	return append(ts, tokenParser(ts, token.STRING)...)
+	return append(ts, tokenReader(ts, token.STRING)...)
 }
 
 func ForClause(ts [][]*Token) [][]*Token {
 	ts = append(ts, SimpleStmt(ts)...)
-	ts = tokenParser(ts, token.SEMICOLON)
+	ts = tokenReader(ts, token.SEMICOLON)
 	ts = append(ts, Expression(ts)...)
-	ts = tokenParser(ts, token.SEMICOLON)
+	ts = tokenReader(ts, token.SEMICOLON)
 	return append(ts, SimpleStmt(ts)...)
 }
 
 func ForStmt(ts [][]*Token) [][]*Token {
-	ts = tokenParser(ts, token.FOR)
+	ts = tokenReader(ts, token.FOR)
 	ts = append(append(ts, Expression(ts)...), append(ForClause(ts), RangeClause(ts)...)...)
 	return Block(ts)
 }
@@ -302,37 +302,37 @@ func Function(ts [][]*Token) [][]*Token {
 // bad spec
 // "func" FunctionName Function
 func FunctionDecl(ts [][]*Token) [][]*Token {
-	ts = tokenParser(ts, token.FUNC)
-	ts = tokenParser(ts, token.IDENT)
+	ts = tokenReader(ts, token.FUNC)
+	ts = tokenReader(ts, token.IDENT)
 	return Function(ts)
 }
 
 func FunctionLit(ts [][]*Token) [][]*Token {
-	ts = tokenParser(ts, token.FUNC)
+	ts = tokenReader(ts, token.FUNC)
 	return Function(ts)
 }
 
 func FunctionType(ts [][]*Token) [][]*Token {
-	ts = tokenParser(ts, token.FUNC)
+	ts = tokenReader(ts, token.FUNC)
 	return Signature(ts)
 }
 
 func GoStmt(ts [][]*Token) [][]*Token {
-	ts = tokenParser(ts, token.GO)
+	ts = tokenReader(ts, token.GO)
 	return Expression(ts)
 }
 
 func GotoStmt(ts [][]*Token) [][]*Token {
-	ts = tokenParser(ts, token.GOTO)
-	return tokenParser(ts, token.IDENT)
+	ts = tokenReader(ts, token.GOTO)
+	return tokenReader(ts, token.IDENT)
 }
 
 func IdentifierList(ts [][]*Token) [][]*Token {
-	ts = tokenParser(ts, token.IDENT)
+	ts = tokenReader(ts, token.IDENT)
 	more := ts
 	for len(more) != 0 {
-		next := tokenParser(more, token.COMMA)
-		next = tokenParser(next, token.IDENT)
+		next := tokenReader(more, token.COMMA)
+		next = tokenReader(next, token.IDENT)
 		ts = append(ts, next...)
 		more = next
 	}
@@ -340,15 +340,15 @@ func IdentifierList(ts [][]*Token) [][]*Token {
 }
 
 func IfStmt(ts [][]*Token) [][]*Token {
-	ts = tokenParser(ts, token.IF)
+	ts = tokenReader(ts, token.IF)
 	simple := SimpleStmt(ts)
-	ts = append(ts, tokenParser(simple, token.SEMICOLON)...)
+	ts = append(ts, tokenReader(simple, token.SEMICOLON)...)
 	if len(ts) == 0 {
 		return nil
 	}
 	ts = Expression(ts)
 	ts = Block(ts)
-	els := tokenParser(ts, token.ELSE)
+	els := tokenReader(ts, token.ELSE)
 	els = append(IfStmt(els), Block(els)...)
 	return append(ts, els...)
 }
@@ -356,75 +356,75 @@ func IfStmt(ts [][]*Token) [][]*Token {
 // bad spec
 // "import" ( ImportSpec | "(" [ ImportSpec { ";" ImportSpec } [ ";" ]] ")" )
 func ImportDecl(ts [][]*Token) [][]*Token {
-	ts = tokenParser(ts, token.IMPORT)
-	group := tokenParser(ts, token.LPAREN)
+	ts = tokenReader(ts, token.IMPORT)
+	group := tokenReader(ts, token.LPAREN)
 	elements := ImportSpec(group)
 	next := elements
 	for len(next) != 0 {
-		current := tokenParser(next, token.SEMICOLON)
+		current := tokenReader(next, token.SEMICOLON)
 		current = ImportSpec(current)
 		elements = append(elements, current...)
 		next = current
 	}
-	elements = append(elements, tokenParser(elements, token.SEMICOLON)...)
+	elements = append(elements, tokenReader(elements, token.SEMICOLON)...)
 	group = append(group, elements...)
-	group = tokenParser(group, token.RPAREN)
+	group = tokenReader(group, token.RPAREN)
 	return append(group, ImportSpec(ts)...)
 }
 
 // bad spec
 // [ "." | "_" | PackageName ] ImportPath
 func ImportSpec(ts [][]*Token) [][]*Token {
-	names := append(tokenParser(ts, token.PERIOD), tokenParser(ts, token.IDENT)...)
+	names := append(tokenReader(ts, token.PERIOD), tokenReader(ts, token.IDENT)...)
 	ts = append(ts, names...)
-	return tokenParser(ts, token.STRING)
+	return tokenReader(ts, token.STRING)
 }
 
 func IncDecStmt(ts [][]*Token) [][]*Token {
 	ts = Expression(ts)
-	return append(tokenParser(ts, token.INC), tokenParser(ts, token.DEC)...)
+	return append(tokenReader(ts, token.INC), tokenReader(ts, token.DEC)...)
 }
 
 func Index(ts [][]*Token) [][]*Token {
-	ts = tokenParser(ts, token.LBRACK)
+	ts = tokenReader(ts, token.LBRACK)
 	if len(ts) == 0 {
 		return nil
 	}
 	ts = Expression(ts)
-	return tokenParser(ts, token.RBRACK)
+	return tokenReader(ts, token.RBRACK)
 }
 
 // bad spec
 // "interface" "{" [ MethodSpec { ";" MethodSpec } [ ";" ]] "}"
 func InterfaceType(ts [][]*Token) [][]*Token {
-	ts = tokenParser(ts, token.INTERFACE)
-	ts = tokenParser(ts, token.LBRACE)
+	ts = tokenReader(ts, token.INTERFACE)
+	ts = tokenReader(ts, token.LBRACE)
 	list := MethodSpec(ts)
 	next := list
 	for len(next) != 0 {
-		ms := tokenParser(next, token.SEMICOLON)
+		ms := tokenReader(next, token.SEMICOLON)
 		ms = MethodSpec(ms)
 		list = append(list, ms...)
 		next = ms
 	}
-	list = append(list, tokenParser(list, token.SEMICOLON)...)
+	list = append(list, tokenReader(list, token.SEMICOLON)...)
 	ts = append(ts, list...)
-	return tokenParser(ts, token.RBRACE)
+	return tokenReader(ts, token.RBRACE)
 }
 
 func Key(ts [][]*Token) [][]*Token {
-	return append(tokenParser(ts, token.IDENT), Expression(ts)...)
+	return append(tokenReader(ts, token.IDENT), Expression(ts)...)
 }
 
 func KeyedElement(ts [][]*Token) [][]*Token {
 	with := Key(ts)
-	with = tokenParser(with, token.COLON)
+	with = tokenReader(with, token.COLON)
 	return append(Element(ts), Element(with)...)
 }
 
 func LabeledStmt(ts [][]*Token) [][]*Token {
-	ts = tokenParser(ts, token.IDENT)
-	ts = tokenParser(ts, token.COLON)
+	ts = tokenReader(ts, token.IDENT)
+	ts = tokenReader(ts, token.COLON)
 	if len(ts) == 0 {
 		return nil
 	}
@@ -444,31 +444,31 @@ func LiteralType(ts [][]*Token) [][]*Token {
 }
 
 func LiteralValue(ts [][]*Token) [][]*Token {
-	ts = tokenParser(ts, token.LBRACE)
+	ts = tokenReader(ts, token.LBRACE)
 	if len(ts) == 0 {
 		return nil
 	}
 	list := ElementList(ts)
-	list = append(list, tokenParser(list, token.COMMA)...)
+	list = append(list, tokenReader(list, token.COMMA)...)
 	ts = append(ts, list...)
-	return tokenParser(ts, token.RBRACE)
+	return tokenReader(ts, token.RBRACE)
 }
 
 func MapType(ts [][]*Token) [][]*Token {
-	ts = tokenParser(ts, token.MAP)
-	ts = tokenParser(ts, token.LBRACK)
+	ts = tokenReader(ts, token.MAP)
+	ts = tokenReader(ts, token.LBRACK)
 	if len(ts) == 0 {
 		return nil
 	}
 	ts = Type(ts)
-	ts = tokenParser(ts, token.RBRACK)
+	ts = tokenReader(ts, token.RBRACK)
 	return Type(ts)
 }
 
 // bad spec
 // "func" Reciever MethodName Function
 func MethodDecl(ts [][]*Token) [][]*Token {
-	ts = tokenParser(ts, token.FUNC)
+	ts = tokenReader(ts, token.FUNC)
 	ts = Parameters(ts)
 	ts = nonBlankIdent(ts)
 	return Function(ts)
@@ -476,8 +476,8 @@ func MethodDecl(ts [][]*Token) [][]*Token {
 
 func MethodExpr(ts [][]*Token) [][]*Token {
 	ts = ReceiverType(ts)
-	ts = tokenParser(ts, token.PERIOD)
-	return tokenParser(ts, token.IDENT)
+	ts = tokenReader(ts, token.PERIOD)
+	return tokenReader(ts, token.IDENT)
 }
 
 func MethodSpec(ts [][]*Token) [][]*Token {
@@ -486,34 +486,36 @@ func MethodSpec(ts [][]*Token) [][]*Token {
 	return append(sig, TypeName(ts)...)
 }
 
-func MulOp(ts [][]*Token) [][]*Token {
+func MulOp(i []interface{}, ts [][]*Token) ([]interface{}, [][]*Token) {
 	var result [][]*Token
+	var tree []interface{}
 	for _, t := range ts {
 		switch p := pop(&t); true {
 		case p == nil:
 		case p.tok == token.MUL, p.tok == token.QUO, p.tok == token.REM, p.tok == token.SHL,
 			p.tok == token.SHR, p.tok == token.AND, p.tok == token.AND_NOT:
 			result = append(result, t)
+			tree = append(tree, p.tok)
 		}
 	}
-	return result
+	return tree, result
 }
 
 func Operand(ts [][]*Token) [][]*Token {
-	xp := tokenParser(ts, token.LPAREN)
+	xp := tokenReader(ts, token.LPAREN)
 	if len(xp) != 0 {
 		xp = Expression(xp)
 	}
-	xp = tokenParser(xp, token.RPAREN)
+	xp = tokenReader(xp, token.RPAREN)
 	return append(append(Literal(ts), OperandName(ts)...), append(MethodExpr(ts), xp...)...)
 }
 
 func OperandName(ts [][]*Token) [][]*Token {
-	return append(tokenParser(ts, token.IDENT), QualifiedIdent(ts)...)
+	return append(tokenReader(ts, token.IDENT), QualifiedIdent(ts)...)
 }
 
 func PackageClause(ts [][]*Token) [][]*Token {
-	ts = tokenParser(ts, token.PACKAGE)
+	ts = tokenReader(ts, token.PACKAGE)
 	return PackageName(ts)
 }
 
@@ -521,7 +523,7 @@ func PackageName(ts [][]*Token) [][]*Token { return nonBlankIdent(ts) }
 
 func ParameterDecl(ts [][]*Token) [][]*Token {
 	ts = append(ts, IdentifierList(ts)...)
-	ts = append(ts, tokenParser(ts, token.ELLIPSIS)...)
+	ts = append(ts, tokenReader(ts, token.ELLIPSIS)...)
 	if len(ts) == 0 {
 		return nil
 	}
@@ -532,7 +534,7 @@ func ParameterList(ts [][]*Token) [][]*Token {
 	ts = ParameterDecl(ts)
 	next := ts
 	for len(next) != 0 {
-		decl := tokenParser(next, token.COMMA)
+		decl := tokenReader(next, token.COMMA)
 		decl = ParameterDecl(decl)
 		ts = append(ts, decl...)
 		next = decl
@@ -541,15 +543,15 @@ func ParameterList(ts [][]*Token) [][]*Token {
 }
 
 func Parameters(ts [][]*Token) [][]*Token {
-	ts = tokenParser(ts, token.LPAREN)
+	ts = tokenReader(ts, token.LPAREN)
 	params := ParameterList(ts)
-	params = append(params, tokenParser(params, token.COMMA)...)
+	params = append(params, tokenReader(params, token.COMMA)...)
 	ts = append(ts, params...)
-	return tokenParser(ts, token.RPAREN)
+	return tokenReader(ts, token.RPAREN)
 }
 
 func PointerType(ts [][]*Token) [][]*Token {
-	ts = tokenParser(ts, token.MUL)
+	ts = tokenReader(ts, token.MUL)
 	if len(ts) == 0 {
 		return nil
 	}
@@ -573,40 +575,40 @@ func PrimaryExpr(ts [][]*Token) [][]*Token {
 
 func QualifiedIdent(ts [][]*Token) [][]*Token {
 	ts = PackageName(ts)
-	ts = tokenParser(ts, token.PERIOD)
-	return tokenParser(ts, token.IDENT)
+	ts = tokenReader(ts, token.PERIOD)
+	return tokenReader(ts, token.IDENT)
 }
 
 func RangeClause(ts [][]*Token) [][]*Token {
 	exp := ExpressionList(ts)
-	exp = tokenParser(exp, token.ASSIGN)
+	exp = tokenReader(exp, token.ASSIGN)
 	id := IdentifierList(ts)
-	id = tokenParser(id, token.DEFINE)
+	id = tokenReader(id, token.DEFINE)
 	ts = append(ts, append(exp, id...)...)
-	ts = tokenParser(ts, token.RANGE)
+	ts = tokenReader(ts, token.RANGE)
 	return Expression(ts)
 }
 
 func ReceiverType(ts [][]*Token) [][]*Token {
-	ptr := tokenParser(ts, token.LPAREN)
-	ptr = tokenParser(ptr, token.MUL)
+	ptr := tokenReader(ts, token.LPAREN)
+	ptr = tokenReader(ptr, token.MUL)
 	ptr = TypeName(ptr)
-	ptr = tokenParser(ptr, token.RPAREN)
+	ptr = tokenReader(ptr, token.RPAREN)
 
-	par := tokenParser(ts, token.LPAREN)
+	par := tokenReader(ts, token.LPAREN)
 	if len(par) != 0 {
 		par = ReceiverType(par)
 	}
-	par = tokenParser(par, token.RPAREN)
+	par = tokenReader(par, token.RPAREN)
 
 	return append(append(ptr, par...), TypeName(ts)...)
 }
 
 func RecvStmt(ts [][]*Token) [][]*Token {
 	expr := ExpressionList(ts)
-	expr = tokenParser(expr, token.ASSIGN)
+	expr = tokenReader(expr, token.ASSIGN)
 	ident := IdentifierList(ts)
-	ident = tokenParser(ident, token.DEFINE)
+	ident = tokenReader(ident, token.DEFINE)
 	return Expression(append(ts, append(expr, ident...)...))
 }
 
@@ -633,42 +635,42 @@ func Result(ts [][]*Token) [][]*Token {
 }
 
 func ReturnStmt(ts [][]*Token) [][]*Token {
-	ts = tokenParser(ts, token.RETURN)
+	ts = tokenReader(ts, token.RETURN)
 	return append(ts, ExpressionList(ts)...)
 }
 
 func Selector(ts [][]*Token) [][]*Token {
-	ts = tokenParser(ts, token.PERIOD)
-	return tokenParser(ts, token.IDENT)
+	ts = tokenReader(ts, token.PERIOD)
+	return tokenReader(ts, token.IDENT)
 }
 
 // bad spec
 // "select" "{" [ CommClause { ";" CommClause } [ ";" ]] "}"
 func SelectStmt(ts [][]*Token) [][]*Token {
-	ts = tokenParser(ts, token.SELECT)
-	ts = tokenParser(ts, token.LBRACE)
+	ts = tokenReader(ts, token.SELECT)
+	ts = tokenReader(ts, token.LBRACE)
 	clause := CommClause(ts)
 	next := clause
 	for len(next) != 0 {
-		current := tokenParser(next, token.SEMICOLON)
+		current := tokenReader(next, token.SEMICOLON)
 		current = CommClause(current)
 		clause = append(clause, current...)
 		next = current
 	}
-	clause = append(clause, tokenParser(clause, token.SEMICOLON)...)
+	clause = append(clause, tokenReader(clause, token.SEMICOLON)...)
 	ts = append(ts, clause...)
-	return tokenParser(ts, token.RBRACE)
+	return tokenReader(ts, token.RBRACE)
 }
 
 func SendStmt(ts [][]*Token) [][]*Token {
 	ts = Expression(ts)
-	ts = tokenParser(ts, token.ARROW)
+	ts = tokenReader(ts, token.ARROW)
 	return Expression(ts)
 }
 
 func ShortVarDecl(ts [][]*Token) [][]*Token {
 	ts = IdentifierList(ts)
-	ts = tokenParser(ts, token.DEFINE)
+	ts = tokenReader(ts, token.DEFINE)
 	return ExpressionList(ts)
 }
 
@@ -685,22 +687,22 @@ func SimpleStmt(ts [][]*Token) [][]*Token {
 }
 
 func Slice(ts [][]*Token) [][]*Token {
-	ts = tokenParser(ts, token.LBRACK)
+	ts = tokenReader(ts, token.LBRACK)
 	ts = append(ts, Expression(ts)...)
-	ts = tokenParser(ts, token.COLON)
+	ts = tokenReader(ts, token.COLON)
 
 	a := append(ts, Expression(ts)...)
 
 	b := Expression(ts)
-	b = tokenParser(b, token.COLON)
+	b = tokenReader(b, token.COLON)
 	b = Expression(b)
 
-	return tokenParser(append(a, b...), token.RBRACK)
+	return tokenReader(append(a, b...), token.RBRACK)
 }
 
 func SliceType(ts [][]*Token) [][]*Token {
-	ts = tokenParser(ts, token.LBRACK)
-	ts = tokenParser(ts, token.RBRACK)
+	ts = tokenReader(ts, token.LBRACK)
+	ts = tokenReader(ts, token.RBRACK)
 	if len(ts) == 0 {
 		return nil
 	}
@@ -709,17 +711,17 @@ func SliceType(ts [][]*Token) [][]*Token {
 
 func SourceFile(ts [][]*Token) [][]*Token {
 	ts = PackageClause(ts)
-	ts = tokenParser(ts, token.SEMICOLON)
+	ts = tokenReader(ts, token.SEMICOLON)
 	next := ts
 	for len(next) != 0 {
 		next = ImportDecl(next)
-		next = tokenParser(next, token.SEMICOLON)
+		next = tokenReader(next, token.SEMICOLON)
 		ts = append(ts, next...)
 	}
 	next = ts
 	for len(next) != 0 {
 		next = TopLevelDecl(next)
-		next = tokenParser(next, token.SEMICOLON)
+		next = tokenReader(next, token.SEMICOLON)
 		ts = append(ts, next...)
 	}
 	return ts
@@ -743,7 +745,7 @@ func StatementList(ts [][]*Token) [][]*Token {
 	ts = Statement(ts)
 	next := ts
 	for len(next) != 0 {
-		current := tokenParser(next, token.SEMICOLON)
+		current := tokenReader(next, token.SEMICOLON)
 		current = Statement(current)
 		ts = append(ts, current...)
 		next = current
@@ -754,18 +756,18 @@ func StatementList(ts [][]*Token) [][]*Token {
 // bad spec
 // "struct" "{" [ FieldDecl { ";" FieldDecl } [ ";" ]] "}"
 func StructType(ts [][]*Token) [][]*Token {
-	ts = tokenParser(ts, token.STRUCT)
-	ts = tokenParser(ts, token.LBRACE)
+	ts = tokenReader(ts, token.STRUCT)
+	ts = tokenReader(ts, token.LBRACE)
 	fields := FieldDecl(ts)
 	next := fields
 	for len(next) != 0 {
-		field := tokenParser(next, token.SEMICOLON)
+		field := tokenReader(next, token.SEMICOLON)
 		field = FieldDecl(field)
 		fields = append(fields, field...)
 		next = field
 	}
-	fields = append(fields, tokenParser(fields, token.SEMICOLON)...)
-	return tokenParser(append(ts, fields...), token.RBRACE)
+	fields = append(fields, tokenReader(fields, token.SEMICOLON)...)
+	return tokenReader(append(ts, fields...), token.RBRACE)
 }
 
 func SwitchStmt(ts [][]*Token) [][]*Token { return append(ExprSwitchStmt(ts), TypeSwitchStmt(ts)...) }
@@ -775,43 +777,43 @@ func TopLevelDecl(ts [][]*Token) [][]*Token {
 }
 
 func Type(ts [][]*Token) [][]*Token {
-	paren := tokenParser(ts, token.LPAREN)
+	paren := tokenReader(ts, token.LPAREN)
 	if len(paren) != 0 {
 		paren = Type(paren)
 	}
-	paren = tokenParser(paren, token.RPAREN)
+	paren = tokenReader(paren, token.RPAREN)
 	return append(append(TypeName(ts), TypeLit(ts)...), paren...)
 }
 
 func TypeAssertion(ts [][]*Token) [][]*Token {
-	ts = tokenParser(ts, token.PERIOD)
-	ts = tokenParser(ts, token.LPAREN)
+	ts = tokenReader(ts, token.PERIOD)
+	ts = tokenReader(ts, token.LPAREN)
 	if len(ts) == 0 {
 		return nil
 	}
 	ts = Expression(ts)
-	return tokenParser(ts, token.RPAREN)
+	return tokenReader(ts, token.RPAREN)
 }
 
 func TypeCaseClause(ts [][]*Token) [][]*Token {
 	ts = TypeSwitchCase(ts)
-	ts = tokenParser(ts, token.COLON)
+	ts = tokenReader(ts, token.COLON)
 	return StatementList(ts)
 }
 
 func TypeDecl(ts [][]*Token) [][]*Token {
-	ts = tokenParser(ts, token.TYPE)
-	multi := tokenParser(ts, token.LPAREN)
+	ts = tokenReader(ts, token.TYPE)
+	multi := tokenReader(ts, token.LPAREN)
 	multi = TypeSpec(multi)
 	next := multi
 	for len(next) != 0 {
-		current := tokenParser(next, token.SEMICOLON)
+		current := tokenReader(next, token.SEMICOLON)
 		current = TypeSpec(current)
 		multi = append(multi, current...)
 		next = current
 	}
-	multi = append(multi, tokenParser(multi, token.SEMICOLON)...)
-	multi = tokenParser(multi, token.RPAREN)
+	multi = append(multi, tokenReader(multi, token.SEMICOLON)...)
+	multi = tokenReader(multi, token.RPAREN)
 	return append(TypeSpec(ts), multi...)
 }
 
@@ -819,7 +821,7 @@ func TypeList(ts [][]*Token) [][]*Token {
 	ts = Type(ts)
 	next := ts
 	for len(next) != 0 {
-		current := tokenParser(next, token.COMMA)
+		current := tokenReader(next, token.COMMA)
 		current = Type(current)
 		ts = append(ts, current...)
 		next = current
@@ -837,48 +839,48 @@ func TypeLit(ts [][]*Token) [][]*Token {
 
 func TypeName(ts [][]*Token) [][]*Token {
 	result := QualifiedIdent(ts)
-	return append(result, tokenParser(ts, token.IDENT)...)
+	return append(result, tokenReader(ts, token.IDENT)...)
 }
 
 func TypeSpec(ts [][]*Token) [][]*Token {
-	ts = tokenParser(ts, token.IDENT)
+	ts = tokenReader(ts, token.IDENT)
 	return Type(ts)
 }
 
 func TypeSwitchCase(ts [][]*Token) [][]*Token {
-	cas := tokenParser(ts, token.CASE)
-	return append(TypeList(cas), tokenParser(ts, token.DEFAULT)...)
+	cas := tokenReader(ts, token.CASE)
+	return append(TypeList(cas), tokenReader(ts, token.DEFAULT)...)
 }
 
 func TypeSwitchGuard(ts [][]*Token) [][]*Token {
-	id := tokenParser(ts, token.IDENT)
-	ts = append(ts, tokenParser(id, token.DEFINE)...)
+	id := tokenReader(ts, token.IDENT)
+	ts = append(ts, tokenReader(id, token.DEFINE)...)
 	ts = PrimaryExpr(ts)
-	ts = tokenParser(ts, token.PERIOD)
-	ts = tokenParser(ts, token.LPAREN)
-	ts = tokenParser(ts, token.TYPE)
-	return tokenParser(ts, token.RPAREN)
+	ts = tokenReader(ts, token.PERIOD)
+	ts = tokenReader(ts, token.LPAREN)
+	ts = tokenReader(ts, token.TYPE)
+	return tokenReader(ts, token.RPAREN)
 }
 
 // bad spec
 // "switch" [ SimpleStmt ";" ] TypeSwitchGuard "{" [ TypeCaseClause { ";" TypeCaseClause } [ ";" ]] "}"
 func TypeSwitchStmt(ts [][]*Token) [][]*Token {
-	ts = tokenParser(ts, token.SWITCH)
+	ts = tokenReader(ts, token.SWITCH)
 	stmt := SimpleStmt(ts)
-	ts = append(ts, tokenParser(stmt, token.SEMICOLON)...)
+	ts = append(ts, tokenReader(stmt, token.SEMICOLON)...)
 	ts = TypeSwitchGuard(ts)
-	ts = tokenParser(ts, token.LBRACE)
+	ts = tokenReader(ts, token.LBRACE)
 	clauses := TypeCaseClause(ts)
 	next := clauses
 	for len(next) != 0 {
-		current := tokenParser(next, token.SEMICOLON)
+		current := tokenReader(next, token.SEMICOLON)
 		current = TypeCaseClause(current)
 		clauses = append(clauses, current...)
 		next = current
 	}
-	clauses = append(clauses, tokenParser(clauses, token.SEMICOLON)...)
+	clauses = append(clauses, tokenReader(clauses, token.SEMICOLON)...)
 	ts = append(ts, clauses...)
-	return tokenParser(ts, token.RBRACE)
+	return tokenReader(ts, token.RBRACE)
 }
 
 func UnaryExpr(ts [][]*Token) [][]*Token {
@@ -903,28 +905,28 @@ func UnaryOp(ts [][]*Token) [][]*Token {
 }
 
 func VarDecl(ts [][]*Token) [][]*Token {
-	ts = tokenParser(ts, token.VAR)
-	paren := tokenParser(ts, token.LPAREN)
+	ts = tokenReader(ts, token.VAR)
+	paren := tokenReader(ts, token.LPAREN)
 	paren = VarSpec(paren)
 	next := paren
 	for len(next) != 0 {
-		current := tokenParser(next, token.SEMICOLON)
+		current := tokenReader(next, token.SEMICOLON)
 		current = VarSpec(current)
 		paren = append(paren, current...)
 		next = current
 	}
-	paren = append(paren, tokenParser(paren, token.SEMICOLON)...)
-	paren = tokenParser(paren, token.RPAREN)
+	paren = append(paren, tokenReader(paren, token.SEMICOLON)...)
+	paren = tokenReader(paren, token.RPAREN)
 	return append(VarSpec(ts), paren...)
 }
 
 func VarSpec(ts [][]*Token) [][]*Token {
 	ts = IdentifierList(ts)
 	typ := Type(ts)
-	extra := tokenParser(typ, token.ASSIGN)
+	extra := tokenReader(typ, token.ASSIGN)
 	extra = ExpressionList(extra)
 	typ = append(typ, extra...)
-	assign := tokenParser(ts, token.ASSIGN)
+	assign := tokenReader(ts, token.ASSIGN)
 	assign = ExpressionList(assign)
 	return append(typ, assign...)
 }
@@ -939,7 +941,7 @@ func nonBlankIdent(ts [][]*Token) [][]*Token {
 	return result
 }
 
-func tokenParser(ts [][]*Token, tok token.Token) [][]*Token {
+func tokenReader(ts [][]*Token, tok token.Token) [][]*Token {
 	var result [][]*Token
 	var p *Token
 	for _, t := range ts {
