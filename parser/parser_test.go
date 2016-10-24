@@ -967,15 +967,15 @@ func TestUnaryExpr(t *testing.T) {
 }
 
 func TestUnaryOp(t *testing.T) {
-	remaining(t, UnaryOp, Tmap{
-		`+`:  {{}},
-		`-`:  {{}},
-		`!`:  {{}},
-		`^`:  {{}},
-		`*`:  {{}},
-		`&`:  {{}},
-		`<-`: {{}},
-		`1`:  empty,
+	result(t, UnaryOp, Omap{
+		`+`:  {[]interface{}{token.ADD}, [][]*Token{{}}},
+		`-`:  {[]interface{}{token.SUB}, [][]*Token{{}}},
+		`!`:  {[]interface{}{token.NOT}, [][]*Token{{}}},
+		`^`:  {[]interface{}{token.XOR}, [][]*Token{{}}},
+		`*`:  {[]interface{}{token.MUL}, [][]*Token{{}}},
+		`&`:  {[]interface{}{token.AND}, [][]*Token{{}}},
+		`<-`: {[]interface{}{token.ARROW}, [][]*Token{{}}},
+		`1`:  {},
 	})
 }
 

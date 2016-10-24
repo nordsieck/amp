@@ -886,24 +886,26 @@ func TypeSwitchStmt(ts [][]*Token) [][]*Token {
 }
 
 func UnaryExpr(ts [][]*Token) [][]*Token {
-	uo := UnaryOp(ts)
+	_, uo := UnaryOp(ts)
 	if len(uo) == 0 {
 		return PrimaryExpr(ts)
 	}
 	return append(PrimaryExpr(ts), UnaryExpr(uo)...)
 }
 
-func UnaryOp(ts [][]*Token) [][]*Token {
+func UnaryOp(ts [][]*Token) ([]interface{}, [][]*Token) {
 	var result [][]*Token
+	var tree []interface{}
 	for _, t := range ts {
 		switch p := pop(&t); true {
 		case p == nil:
 		case p.tok == token.ADD, p.tok == token.SUB, p.tok == token.NOT, p.tok == token.XOR,
 			p.tok == token.MUL, p.tok == token.AND, p.tok == token.ARROW:
 			result = append(result, t)
+			tree = append(tree, p.tok)
 		}
 	}
-	return result
+	return tree, result
 }
 
 func VarDecl(ts [][]*Token) [][]*Token {
