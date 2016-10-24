@@ -993,10 +993,20 @@ func TestVarSpec(t *testing.T) {
 	})
 }
 
-func TestTokenParser(t *testing.T) {
+func TestTokenReader(t *testing.T) {
 	toks := [][]*Token{
 		{semi, {tok: token.RPAREN}},
 		{semi, {tok: token.RPAREN}, {tok: token.IDENT, lit: `a`}, {tok: token.PERIOD}},
 	}
 	defect.DeepEqual(t, tokenReader(toks, token.RPAREN), [][]*Token{{semi}})
+}
+
+func TestTokenParser(t *testing.T) {
+	toks := [][]*Token{
+		{semi, {tok: token.RPAREN}},
+		{semi, {tok: token.RPAREN}, {tok: token.IDENT, lit: `a`}, {tok: token.PERIOD}},
+	}
+	tree, state := tokenParser(toks, token.RPAREN)
+	defect.DeepEqual(t, state, [][]*Token{{semi}})
+	defect.DeepEqual(t, tree, []interface{}{token.RPAREN})
 }

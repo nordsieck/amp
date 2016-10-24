@@ -952,6 +952,19 @@ func tokenReader(ts [][]*Token, tok token.Token) [][]*Token {
 	return result
 }
 
+func tokenParser(ts [][]*Token, tok token.Token) ([]interface{}, [][]*Token) {
+	var result [][]*Token
+	var tree []interface{}
+	var p *Token
+	for _, t := range ts {
+		if p = pop(&t); p != nil && p.tok == tok {
+			result = append(result, t)
+			tree = append(tree, p.tok)
+		}
+	}
+	return tree, result
+}
+
 func print(ts [][]*Token) {
 	for _, t := range ts {
 		fmt.Println(t)
