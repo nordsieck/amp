@@ -283,9 +283,9 @@ func TestExprSwitchStmt(t *testing.T) {
 }
 
 func TestFallthroughStmt(t *testing.T) {
-	remaining(t, FallthroughStmt, Tmap{
-		`fallthrough`: {{semi}},
-		`a`:           empty,
+	result(t, FallthroughStmt, Omap{
+		`fallthrough`: {[]interface{}{&Token{tok: token.FALLTHROUGH, lit: `fallthrough`}}, [][]*Token{{semi}}},
+		`a`:           {},
 	})
 }
 

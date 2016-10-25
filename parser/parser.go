@@ -278,7 +278,9 @@ func ExprSwitchStmt(ts [][]*Token) [][]*Token {
 	return tokenReader(ts, token.RBRACE)
 }
 
-func FallthroughStmt(ts [][]*Token) [][]*Token { return tokenReader(ts, token.FALLTHROUGH) }
+func FallthroughStmt(ts [][]*Token) ([]interface{}, [][]*Token) {
+	return tokenParser(ts, token.FALLTHROUGH)
+}
 
 func FieldDecl(ts [][]*Token) [][]*Token {
 	a := IdentifierList(ts)
@@ -741,10 +743,11 @@ func SourceFile(ts [][]*Token) [][]*Token {
 }
 
 func Statement(ts [][]*Token) [][]*Token {
+	_, fallthroughStmt := FallthroughStmt(ts)
 	return append(
 		append(append(append(Declaration(ts), LabeledStmt(ts)...), append(SimpleStmt(ts), GoStmt(ts)...)...),
 			append(append(ReturnStmt(ts), BreakStmt(ts)...), append(ContinueStmt(ts), GotoStmt(ts)...)...)...),
-		append(append(append(FallthroughStmt(ts), Block(ts)...), append(IfStmt(ts), SwitchStmt(ts)...)...),
+		append(append(append(fallthroughStmt, Block(ts)...), append(IfStmt(ts), SwitchStmt(ts)...)...),
 			append(append(SelectStmt(ts), ForStmt(ts)...), DeferStmt(ts)...)...)...)
 }
 
