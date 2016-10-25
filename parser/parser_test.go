@@ -58,10 +58,19 @@ func TestAssignment(t *testing.T) {
 }
 
 func TestAssignOp(t *testing.T) {
-	remaining(t, AssignOp, Tmap{
-		`+=`: {{}}, `-=`: {{}}, `*=`: {{}}, `/=`: {{}},
-		`%=`: {{}}, `&=`: {{}}, `|=`: {{}}, `^=`: {{}},
-		`<<=`: {{}}, `>>=`: {{}}, `&^=`: {{}}, `=`: {{}},
+	result(t, AssignOp, Omap{
+		`+=`:  {[]interface{}{&Token{tok: token.ADD_ASSIGN}}, [][]*Token{{}}},
+		`-=`:  {[]interface{}{&Token{tok: token.SUB_ASSIGN}}, [][]*Token{{}}},
+		`*=`:  {[]interface{}{&Token{tok: token.MUL_ASSIGN}}, [][]*Token{{}}},
+		`/=`:  {[]interface{}{&Token{tok: token.QUO_ASSIGN}}, [][]*Token{{}}},
+		`%=`:  {[]interface{}{&Token{tok: token.REM_ASSIGN}}, [][]*Token{{}}},
+		`&=`:  {[]interface{}{&Token{tok: token.AND_ASSIGN}}, [][]*Token{{}}},
+		`|=`:  {[]interface{}{&Token{tok: token.OR_ASSIGN}}, [][]*Token{{}}},
+		`^=`:  {[]interface{}{&Token{tok: token.XOR_ASSIGN}}, [][]*Token{{}}},
+		`<<=`: {[]interface{}{&Token{tok: token.SHL_ASSIGN}}, [][]*Token{{}}},
+		`>>=`: {[]interface{}{&Token{tok: token.SHR_ASSIGN}}, [][]*Token{{}}},
+		`&^=`: {[]interface{}{&Token{tok: token.AND_NOT_ASSIGN}}, [][]*Token{{}}},
+		`=`:   {[]interface{}{&Token{tok: token.ASSIGN}}, [][]*Token{{}}},
 	})
 }
 

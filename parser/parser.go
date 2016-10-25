@@ -51,12 +51,13 @@ func ArrayType(ts [][]*Token) [][]*Token {
 
 func Assignment(ts [][]*Token) [][]*Token {
 	ts = ExpressionList(ts)
-	ts = AssignOp(ts)
+	_, ts = AssignOp(ts)
 	return ExpressionList(ts)
 }
 
-func AssignOp(ts [][]*Token) [][]*Token {
+func AssignOp(ts [][]*Token) ([]interface{}, [][]*Token) {
 	var result [][]*Token
+	var tree []interface{}
 	for _, t := range ts {
 		switch p := pop(&t); true {
 		case p == nil:
@@ -64,9 +65,10 @@ func AssignOp(ts [][]*Token) [][]*Token {
 			p.tok == token.REM_ASSIGN, p.tok == token.AND_ASSIGN, p.tok == token.OR_ASSIGN, p.tok == token.XOR_ASSIGN,
 			p.tok == token.SHL_ASSIGN, p.tok == token.SHR_ASSIGN, p.tok == token.AND_NOT_ASSIGN, p.tok == token.ASSIGN:
 			result = append(result, t)
+			tree = append(tree, p)
 		}
 	}
-	return result
+	return tree, result
 }
 
 func BasicLit(ts [][]*Token) ([]interface{}, [][]*Token) {
