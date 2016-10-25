@@ -18,7 +18,7 @@ func AddOp(ts [][]*Token) ([]interface{}, [][]*Token) {
 		case p == nil:
 		case p.tok == token.ADD, p.tok == token.SUB, p.tok == token.OR, p.tok == token.AND:
 			result = append(result, t)
-			tree = append(tree, p.tok)
+			tree = append(tree, p)
 		}
 	}
 	return tree, result
@@ -503,7 +503,7 @@ func MulOp(ts [][]*Token) ([]interface{}, [][]*Token) {
 		case p.tok == token.MUL, p.tok == token.QUO, p.tok == token.REM, p.tok == token.SHL,
 			p.tok == token.SHR, p.tok == token.AND, p.tok == token.AND_NOT:
 			result = append(result, t)
-			tree = append(tree, p.tok)
+			tree = append(tree, p)
 		}
 	}
 	return tree, result
@@ -632,7 +632,7 @@ func RelOp(ts [][]*Token) ([]interface{}, [][]*Token) {
 		case p.tok == token.EQL, p.tok == token.NEQ, p.tok == token.LSS,
 			p.tok == token.LEQ, p.tok == token.GTR, p.tok == token.GEQ:
 			result = append(result, t)
-			tree = append(tree, p.tok)
+			tree = append(tree, p)
 		}
 	}
 	return tree, result
@@ -974,7 +974,7 @@ func tokenParser(ts [][]*Token, tok token.Token) ([]interface{}, [][]*Token) {
 	for _, t := range ts {
 		if p = pop(&t); p != nil && p.tok == tok {
 			result = append(result, t)
-			tree = append(tree, p.tok)
+			tree = append(tree, p)
 		}
 	}
 	return tree, result

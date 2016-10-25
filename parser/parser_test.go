@@ -21,10 +21,10 @@ var (
 
 func TestAddOp(t *testing.T) {
 	result(t, AddOp, Omap{
-		`+`: {[]interface{}{token.ADD}, [][]*Token{{}}},
-		`-`: {[]interface{}{token.SUB}, [][]*Token{{}}},
-		`|`: {[]interface{}{token.OR}, [][]*Token{{}}},
-		`&`: {[]interface{}{token.AND}, [][]*Token{{}}},
+		`+`: {[]interface{}{&Token{tok: token.ADD}}, [][]*Token{{}}},
+		`-`: {[]interface{}{&Token{tok: token.SUB}}, [][]*Token{{}}},
+		`|`: {[]interface{}{&Token{tok: token.OR}}, [][]*Token{{}}},
+		`&`: {[]interface{}{&Token{tok: token.AND}}, [][]*Token{{}}},
 		`1`: {},
 	})
 }
@@ -68,11 +68,11 @@ func TestAssignOp(t *testing.T) {
 func TestBasicLit(t *testing.T) {
 	result(t, BasicLit, Omap{
 		``:    {},
-		`1`:   {[]interface{}{token.INT}, [][]*Token{{semi}}},
-		`1.1`: {[]interface{}{token.FLOAT}, [][]*Token{{semi}}},
-		`1i`:  {[]interface{}{token.IMAG}, [][]*Token{{semi}}},
-		`'a'`: {[]interface{}{token.CHAR}, [][]*Token{{semi}}},
-		`"a"`: {[]interface{}{token.STRING}, [][]*Token{{semi}}},
+		`1`:   {[]interface{}{&Token{tok: token.INT, lit: `1`}}, [][]*Token{{semi}}},
+		`1.1`: {[]interface{}{&Token{tok: token.FLOAT, lit: `1.1`}}, [][]*Token{{semi}}},
+		`1i`:  {[]interface{}{&Token{tok: token.IMAG, lit: `1i`}}, [][]*Token{{semi}}},
+		`'a'`: {[]interface{}{&Token{tok: token.CHAR, lit: `'a'`}}, [][]*Token{{semi}}},
+		`"a"`: {[]interface{}{&Token{tok: token.STRING, lit: `"a"`}}, [][]*Token{{semi}}},
 		`a`:   {},
 		`_`:   {},
 	})
@@ -80,11 +80,11 @@ func TestBasicLit(t *testing.T) {
 
 func TestBinaryOp(t *testing.T) {
 	result(t, BinaryOp, Omap{
-		`==`: {[]interface{}{token.EQL}, [][]*Token{{}}},
-		`+`:  {[]interface{}{token.ADD}, [][]*Token{{}}},
-		`*`:  {[]interface{}{token.MUL}, [][]*Token{{}}},
-		`||`: {[]interface{}{token.LOR}, [][]*Token{{}}},
-		`&&`: {[]interface{}{token.LAND}, [][]*Token{{}}},
+		`==`: {[]interface{}{&Token{tok: token.EQL}}, [][]*Token{{}}},
+		`+`:  {[]interface{}{&Token{tok: token.ADD}}, [][]*Token{{}}},
+		`*`:  {[]interface{}{&Token{tok: token.MUL}}, [][]*Token{{}}},
+		`||`: {[]interface{}{&Token{tok: token.LOR}}, [][]*Token{{}}},
+		`&&`: {[]interface{}{&Token{tok: token.LAND}}, [][]*Token{{}}},
 		`1`:  {},
 	})
 }
@@ -507,13 +507,13 @@ func TestMethodSpec(t *testing.T) {
 
 func TestMulOp(t *testing.T) {
 	result(t, MulOp, Omap{
-		`*`:  {[]interface{}{token.MUL}, [][]*Token{{}}},
-		`/`:  {[]interface{}{token.QUO}, [][]*Token{{}}},
-		`%`:  {[]interface{}{token.REM}, [][]*Token{{}}},
-		`<<`: {[]interface{}{token.SHL}, [][]*Token{{}}},
-		`>>`: {[]interface{}{token.SHR}, [][]*Token{{}}},
-		`&`:  {[]interface{}{token.AND}, [][]*Token{{}}},
-		`&^`: {[]interface{}{token.AND_NOT}, [][]*Token{{}}},
+		`*`:  {[]interface{}{&Token{tok: token.MUL}}, [][]*Token{{}}},
+		`/`:  {[]interface{}{&Token{tok: token.QUO}}, [][]*Token{{}}},
+		`%`:  {[]interface{}{&Token{tok: token.REM}}, [][]*Token{{}}},
+		`<<`: {[]interface{}{&Token{tok: token.SHL}}, [][]*Token{{}}},
+		`>>`: {[]interface{}{&Token{tok: token.SHR}}, [][]*Token{{}}},
+		`&`:  {[]interface{}{&Token{tok: token.AND}}, [][]*Token{{}}},
+		`&^`: {[]interface{}{&Token{tok: token.AND_NOT}}, [][]*Token{{}}},
 		`1`:  {},
 	})
 }
@@ -673,12 +673,12 @@ func TestRecvStmt(t *testing.T) {
 
 func TestRelOp(t *testing.T) {
 	result(t, RelOp, Omap{
-		`==`: {[]interface{}{token.EQL}, [][]*Token{{}}},
-		`!=`: {[]interface{}{token.NEQ}, [][]*Token{{}}},
-		`>`:  {[]interface{}{token.GTR}, [][]*Token{{}}},
-		`>=`: {[]interface{}{token.GEQ}, [][]*Token{{}}},
-		`<`:  {[]interface{}{token.LSS}, [][]*Token{{}}},
-		`<=`: {[]interface{}{token.LEQ}, [][]*Token{{}}},
+		`==`: {[]interface{}{&Token{tok: token.EQL}}, [][]*Token{{}}},
+		`!=`: {[]interface{}{&Token{tok: token.NEQ}}, [][]*Token{{}}},
+		`>`:  {[]interface{}{&Token{tok: token.GTR}}, [][]*Token{{}}},
+		`>=`: {[]interface{}{&Token{tok: token.GEQ}}, [][]*Token{{}}},
+		`<`:  {[]interface{}{&Token{tok: token.LSS}}, [][]*Token{{}}},
+		`<=`: {[]interface{}{&Token{tok: token.LEQ}}, [][]*Token{{}}},
 		`1`:  {},
 	})
 }
@@ -1013,5 +1013,5 @@ func TestTokenParser(t *testing.T) {
 	}
 	tree, state := tokenParser(toks, token.RPAREN)
 	defect.DeepEqual(t, state, [][]*Token{{semi}})
-	defect.DeepEqual(t, tree, []interface{}{token.RPAREN})
+	defect.DeepEqual(t, tree, []interface{}{&Token{tok: token.RPAREN}})
 }
