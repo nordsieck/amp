@@ -66,15 +66,15 @@ func TestAssignOp(t *testing.T) {
 }
 
 func TestBasicLit(t *testing.T) {
-	remaining(t, BasicLit, Tmap{
-		``:    empty,
-		`1`:   {{semi}},
-		`1.1`: {{semi}},
-		`1i`:  {{semi}},
-		`'a'`: {{semi}},
-		`"a"`: {{semi}},
-		`a`:   empty,
-		`_`:   empty,
+	result(t, BasicLit, Omap{
+		``:    {},
+		`1`:   {[]interface{}{token.INT}, [][]*Token{{semi}}},
+		`1.1`: {[]interface{}{token.FLOAT}, [][]*Token{{semi}}},
+		`1i`:  {[]interface{}{token.IMAG}, [][]*Token{{semi}}},
+		`'a'`: {[]interface{}{token.CHAR}, [][]*Token{{semi}}},
+		`"a"`: {[]interface{}{token.STRING}, [][]*Token{{semi}}},
+		`a`:   {},
+		`_`:   {},
 	})
 }
 

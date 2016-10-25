@@ -69,11 +69,16 @@ func AssignOp(ts [][]*Token) [][]*Token {
 	return result
 }
 
-func BasicLit(ts [][]*Token) [][]*Token {
-	return append(
-		append(append(tokenReader(ts, token.INT), tokenReader(ts, token.FLOAT)...),
-			append(tokenReader(ts, token.IMAG), tokenReader(ts, token.CHAR)...)...),
-		tokenReader(ts, token.STRING)...)
+func BasicLit(ts [][]*Token) ([]interface{}, [][]*Token) {
+	intI, intT := tokenParser(ts, token.INT)
+	floatI, floatT := tokenParser(ts, token.FLOAT)
+	imagI, imagT := tokenParser(ts, token.IMAG)
+	charI, charT := tokenParser(ts, token.CHAR)
+	stringI, stringT := tokenParser(ts, token.STRING)
+
+	i := append(append(append(intI, floatI...), append(imagI, charI...)...), stringI...)
+	ts = append(append(append(intT, floatT...), append(imagT, charT...)...), stringT...)
+	return i, ts
 }
 
 func BinaryOp(ts [][]*Token) ([]interface{}, [][]*Token) {
@@ -434,7 +439,8 @@ func LabeledStmt(ts [][]*Token) [][]*Token {
 }
 
 func Literal(ts [][]*Token) [][]*Token {
-	return append(append(BasicLit(ts), CompositeLit(ts)...), FunctionLit(ts)...)
+	_, basicLit := BasicLit(ts)
+	return append(append(basicLit, CompositeLit(ts)...), FunctionLit(ts)...)
 }
 
 func LiteralType(ts [][]*Token) [][]*Token {
