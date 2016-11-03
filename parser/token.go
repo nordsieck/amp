@@ -10,6 +10,14 @@ type Token struct {
 
 func (t *Token) String() string { return "{" + t.tok.String() + " " + t.lit + "}" }
 
+func (t *Token) Render() []byte {
+	if t.lit == `` {
+		return []byte(t.tok.String())
+	} else {
+		return []byte(t.lit)
+	}
+}
+
 func pop(t *[]*Token) *Token {
 	if len(*t) == 0 {
 		return nil

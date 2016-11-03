@@ -22,3 +22,8 @@ func TestReverse(t *testing.T) {
 	reverse(s)
 	defect.DeepEqual(t, s, []*Token{{tok: token.INT, lit: "2"}, {tok: token.ADD, lit: "+"}, {tok: token.INT, lit: "1"}})
 }
+
+func TestToken_Render(t *testing.T) {
+	defect.DeepEqual(t, (&Token{tok: token.INT, lit: `1`}).Render(), []byte(`1`))
+	defect.DeepEqual(t, (&Token{tok: token.ADD}).Render(), []byte(`+`))
+}

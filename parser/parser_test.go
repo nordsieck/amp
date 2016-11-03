@@ -373,6 +373,10 @@ func TestIdentifierList(t *testing.T) {
 	})
 }
 
+func TestIdentifierList_Render(t *testing.T) {
+	defect.DeepEqual(t, identifierList{a, one}.Render(), []byte(`a,1`))
+}
+
 func TestIfStmt(t *testing.T) {
 	remaining(t, IfStmt, Tmap{
 		`if a {}`:              {{ret}},

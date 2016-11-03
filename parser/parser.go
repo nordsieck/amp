@@ -368,6 +368,19 @@ func IdentifierList(ts [][]*Token) ([]interface{}, [][]*Token) {
 	return trees, result
 }
 
+type identifierList []*Token
+
+func (il identifierList) Render() []byte {
+	var result []byte
+	for i := 0; i < len(il); i++ {
+		result = append(result, il[i].Render()...)
+		if i != len(il)-1 {
+			result = append(result, `,`...)
+		}
+	}
+	return result
+}
+
 func IfStmt(ts [][]*Token) [][]*Token {
 	ts = tokenReader(ts, token.IF)
 	simple := SimpleStmt(ts)
