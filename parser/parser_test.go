@@ -366,11 +366,12 @@ func TestGotoStmt(t *testing.T) {
 }
 
 func TestIdentifierList(t *testing.T) {
-	remaining(t, IdentifierList, Tmap{
-		`a`:   {{semi}},
-		`a,a`: {{semi, {tok: token.IDENT, lit: `a`}, {tok: token.COMMA}}, {semi}},
-		`1`:   empty,
-		`_`:   {{semi}},
+	result(t, IdentifierList, Omap{
+		`a`: {[]interface{}{[]*Token{{tok: token.IDENT, lit: `a`}}}, [][]*Token{{semi}}},
+		`a,a`: {[]interface{}{[]*Token{{tok: token.IDENT, lit: `a`}}, []*Token{{tok: token.IDENT, lit: `a`}, {tok: token.IDENT, lit: `a`}}},
+			[][]*Token{{semi, {tok: token.IDENT, lit: `a`}, {tok: token.COMMA}}, {semi}}},
+		`1`: {},
+		`_`: {[]interface{}{[]*Token{{tok: token.IDENT, lit: `_`}}}, [][]*Token{{semi}}},
 	})
 }
 
