@@ -37,8 +37,12 @@ func result(t *testing.T, p Parser, o Omap) {
 	for raw, left := range o {
 		toks := [][]*Token{Scan(newScanner(raw))}
 		tree, state := p(toks)
+		var rendered []string
+		for _, t := range tree {
+			rendered = append(rendered, string(t.Render()))
+		}
 		defect.DeepEqual(t, state, left.rest)
-		defect.DeepEqual(t, tree, left.tree)
+		defect.DeepEqual(t, rendered, left.tree)
 		defect.Equal(t, len(tree), len(state))
 	}
 }

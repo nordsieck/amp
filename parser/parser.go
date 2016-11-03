@@ -6,13 +6,16 @@ import (
 )
 
 type (
-	Reader func([][]*Token) [][]*Token
-	Parser func([][]*Token) ([]interface{}, [][]*Token)
+	Reader   func([][]*Token) [][]*Token
+	Parser   func([][]*Token) ([]Renderer, [][]*Token)
+	Renderer interface {
+		Render() []byte
+	}
 )
 
-func AddOp(ts [][]*Token) ([]interface{}, [][]*Token) {
+func AddOp(ts [][]*Token) ([]Renderer, [][]*Token) {
 	var result [][]*Token
-	var tree []interface{}
+	var tree []Renderer
 	for _, t := range ts {
 		switch p := pop(&t); true {
 		case p == nil:
@@ -55,9 +58,9 @@ func Assignment(ts [][]*Token) [][]*Token {
 	return ExpressionList(ts)
 }
 
-func AssignOp(ts [][]*Token) ([]interface{}, [][]*Token) {
+func AssignOp(ts [][]*Token) ([]Renderer, [][]*Token) {
 	var result [][]*Token
-	var tree []interface{}
+	var tree []Renderer
 	for _, t := range ts {
 		switch p := pop(&t); true {
 		case p == nil:
@@ -71,7 +74,7 @@ func AssignOp(ts [][]*Token) ([]interface{}, [][]*Token) {
 	return tree, result
 }
 
-func BasicLit(ts [][]*Token) ([]interface{}, [][]*Token) {
+func BasicLit(ts [][]*Token) ([]Renderer, [][]*Token) {
 	intI, intT := tokenParser(ts, token.INT)
 	floatI, floatT := tokenParser(ts, token.FLOAT)
 	imagI, imagT := tokenParser(ts, token.IMAG)
@@ -83,7 +86,7 @@ func BasicLit(ts [][]*Token) ([]interface{}, [][]*Token) {
 	return i, ts
 }
 
-func BinaryOp(ts [][]*Token) ([]interface{}, [][]*Token) {
+func BinaryOp(ts [][]*Token) ([]Renderer, [][]*Token) {
 	addT, addS := AddOp(ts)
 	relT, relS := RelOp(ts)
 	mulT, mulS := MulOp(ts)
@@ -278,7 +281,7 @@ func ExprSwitchStmt(ts [][]*Token) [][]*Token {
 	return tokenReader(ts, token.RBRACE)
 }
 
-func FallthroughStmt(ts [][]*Token) ([]interface{}, [][]*Token) {
+func FallthroughStmt(ts [][]*Token) ([]Renderer, [][]*Token) {
 	return tokenParser(ts, token.FALLTHROUGH)
 }
 
@@ -338,16 +341,16 @@ func GotoStmt(ts [][]*Token) [][]*Token {
 	return tokenReader(ts, token.IDENT)
 }
 
-func IdentifierList(ts [][]*Token) ([]interface{}, [][]*Token) {
+func IdentifierList(ts [][]*Token) ([]Renderer, [][]*Token) {
 	var result [][]*Token
-	var trees []interface{}
-	var tree []*Token
+	var trees []Renderer
+	var tree identifierList
 	for _, t := range ts {
 		outT, outS := tokenParser([][]*Token{t}, token.IDENT)
 		if len(outT) == 0 {
 			continue
 		}
-		tree = []*Token{outT[0].(*Token)}
+		tree = identifierList{outT[0].(*Token)}
 		trees = append(trees, tree)
 		t = outS[0]
 		result = append(result, t)
@@ -529,9 +532,9 @@ func MethodSpec(ts [][]*Token) [][]*Token {
 	return append(sig, TypeName(ts)...)
 }
 
-func MulOp(ts [][]*Token) ([]interface{}, [][]*Token) {
+func MulOp(ts [][]*Token) ([]Renderer, [][]*Token) {
 	var result [][]*Token
-	var tree []interface{}
+	var tree []Renderer
 	for _, t := range ts {
 		switch p := pop(&t); true {
 		case p == nil:
@@ -659,9 +662,9 @@ func RecvStmt(ts [][]*Token) [][]*Token {
 	return Expression(append(ts, append(expr, ident...)...))
 }
 
-func RelOp(ts [][]*Token) ([]interface{}, [][]*Token) {
+func RelOp(ts [][]*Token) ([]Renderer, [][]*Token) {
 	var result [][]*Token
-	var tree []interface{}
+	var tree []Renderer
 	for _, t := range ts {
 		switch p := pop(&t); true {
 		case p == nil:
@@ -939,16 +942,16 @@ func UnaryExpr(ts [][]*Token) [][]*Token {
 	return append(PrimaryExpr(ts), UnaryExpr(uo)...)
 }
 
-func UnaryOp(ts [][]*Token) ([]interface{}, [][]*Token) {
+func UnaryOp(ts [][]*Token) ([]Renderer, [][]*Token) {
 	var result [][]*Token
-	var tree []interface{}
+	var tree []Renderer
 	for _, t := range ts {
 		switch p := pop(&t); true {
 		case p == nil:
 		case p.tok == token.ADD, p.tok == token.SUB, p.tok == token.NOT, p.tok == token.XOR,
 			p.tok == token.MUL, p.tok == token.AND, p.tok == token.ARROW:
 			result = append(result, t)
-			tree = append(tree, p.tok)
+			tree = append(tree, p)
 		}
 	}
 	return tree, result
@@ -981,13 +984,13 @@ func VarSpec(ts [][]*Token) [][]*Token {
 	return append(typ, assign...)
 }
 
-func nonBlankIdent(ts [][]*Token) ([]interface{}, [][]*Token) {
+func nonBlankIdent(ts [][]*Token) ([]Renderer, [][]*Token) {
 	var result [][]*Token
-	var tree []interface{}
+	var tree []Renderer
 	for _, t := range ts {
 		if p := pop(&t); p != nil && p.tok == token.IDENT && p.lit != `_` {
 			result = append(result, t)
-			tree = append(tree, p.tok)
+			tree = append(tree, p)
 		}
 	}
 	return tree, result
@@ -1004,9 +1007,9 @@ func tokenReader(ts [][]*Token, tok token.Token) [][]*Token {
 	return result
 }
 
-func tokenParser(ts [][]*Token, tok token.Token) ([]interface{}, [][]*Token) {
+func tokenParser(ts [][]*Token, tok token.Token) ([]Renderer, [][]*Token) {
 	var result [][]*Token
-	var tree []interface{}
+	var tree []Renderer
 	var p *Token
 	for _, t := range ts {
 		if p = pop(&t); p != nil && p.tok == tok {

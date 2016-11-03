@@ -9,7 +9,7 @@ import (
 
 type Tmap map[string][][]*Token
 type Output struct {
-	tree []interface{}
+	tree []string
 	rest [][]*Token
 }
 type Omap map[string]Output
@@ -33,10 +33,10 @@ var (
 
 func TestAddOp(t *testing.T) {
 	result(t, AddOp, Omap{
-		`+`: {[]interface{}{&Token{tok: token.ADD}}, [][]*Token{{}}},
-		`-`: {[]interface{}{&Token{tok: token.SUB}}, [][]*Token{{}}},
-		`|`: {[]interface{}{&Token{tok: token.OR}}, [][]*Token{{}}},
-		`&`: {[]interface{}{&Token{tok: token.AND}}, [][]*Token{{}}},
+		`+`: {[]string{`+`}, [][]*Token{{}}},
+		`-`: {[]string{`-`}, [][]*Token{{}}},
+		`|`: {[]string{`|`}, [][]*Token{{}}},
+		`&`: {[]string{`&`}, [][]*Token{{}}},
 		`1`: {},
 	})
 }
@@ -71,29 +71,29 @@ func TestAssignment(t *testing.T) {
 
 func TestAssignOp(t *testing.T) {
 	result(t, AssignOp, Omap{
-		`+=`:  {[]interface{}{&Token{tok: token.ADD_ASSIGN}}, [][]*Token{{}}},
-		`-=`:  {[]interface{}{&Token{tok: token.SUB_ASSIGN}}, [][]*Token{{}}},
-		`*=`:  {[]interface{}{&Token{tok: token.MUL_ASSIGN}}, [][]*Token{{}}},
-		`/=`:  {[]interface{}{&Token{tok: token.QUO_ASSIGN}}, [][]*Token{{}}},
-		`%=`:  {[]interface{}{&Token{tok: token.REM_ASSIGN}}, [][]*Token{{}}},
-		`&=`:  {[]interface{}{&Token{tok: token.AND_ASSIGN}}, [][]*Token{{}}},
-		`|=`:  {[]interface{}{&Token{tok: token.OR_ASSIGN}}, [][]*Token{{}}},
-		`^=`:  {[]interface{}{&Token{tok: token.XOR_ASSIGN}}, [][]*Token{{}}},
-		`<<=`: {[]interface{}{&Token{tok: token.SHL_ASSIGN}}, [][]*Token{{}}},
-		`>>=`: {[]interface{}{&Token{tok: token.SHR_ASSIGN}}, [][]*Token{{}}},
-		`&^=`: {[]interface{}{&Token{tok: token.AND_NOT_ASSIGN}}, [][]*Token{{}}},
-		`=`:   {[]interface{}{&Token{tok: token.ASSIGN}}, [][]*Token{{}}},
+		`+=`:  {[]string{`+=`}, [][]*Token{{}}},
+		`-=`:  {[]string{`-=`}, [][]*Token{{}}},
+		`*=`:  {[]string{`*=`}, [][]*Token{{}}},
+		`/=`:  {[]string{`/=`}, [][]*Token{{}}},
+		`%=`:  {[]string{`%=`}, [][]*Token{{}}},
+		`&=`:  {[]string{`&=`}, [][]*Token{{}}},
+		`|=`:  {[]string{`|=`}, [][]*Token{{}}},
+		`^=`:  {[]string{`^=`}, [][]*Token{{}}},
+		`<<=`: {[]string{`<<=`}, [][]*Token{{}}},
+		`>>=`: {[]string{`>>=`}, [][]*Token{{}}},
+		`&^=`: {[]string{`&^=`}, [][]*Token{{}}},
+		`=`:   {[]string{`=`}, [][]*Token{{}}},
 	})
 }
 
 func TestBasicLit(t *testing.T) {
 	result(t, BasicLit, Omap{
 		``:    {},
-		`1`:   {[]interface{}{one}, [][]*Token{{ret}}},
-		`1.1`: {[]interface{}{&Token{tok: token.FLOAT, lit: `1.1`}}, [][]*Token{{ret}}},
-		`1i`:  {[]interface{}{&Token{tok: token.IMAG, lit: `1i`}}, [][]*Token{{ret}}},
-		`'a'`: {[]interface{}{&Token{tok: token.CHAR, lit: `'a'`}}, [][]*Token{{ret}}},
-		`"a"`: {[]interface{}{&Token{tok: token.STRING, lit: `"a"`}}, [][]*Token{{ret}}},
+		`1`:   {[]string{`1`}, [][]*Token{{ret}}},
+		`1.1`: {[]string{`1.1`}, [][]*Token{{ret}}},
+		`1i`:  {[]string{`1i`}, [][]*Token{{ret}}},
+		`'a'`: {[]string{`'a'`}, [][]*Token{{ret}}},
+		`"a"`: {[]string{`"a"`}, [][]*Token{{ret}}},
 		`a`:   {},
 		`_`:   {},
 	})
@@ -101,11 +101,11 @@ func TestBasicLit(t *testing.T) {
 
 func TestBinaryOp(t *testing.T) {
 	result(t, BinaryOp, Omap{
-		`==`: {[]interface{}{&Token{tok: token.EQL}}, [][]*Token{{}}},
-		`+`:  {[]interface{}{&Token{tok: token.ADD}}, [][]*Token{{}}},
-		`*`:  {[]interface{}{&Token{tok: token.MUL}}, [][]*Token{{}}},
-		`||`: {[]interface{}{&Token{tok: token.LOR}}, [][]*Token{{}}},
-		`&&`: {[]interface{}{&Token{tok: token.LAND}}, [][]*Token{{}}},
+		`==`: {[]string{`==`}, [][]*Token{{}}},
+		`+`:  {[]string{`+`}, [][]*Token{{}}},
+		`*`:  {[]string{`*`}, [][]*Token{{}}},
+		`||`: {[]string{`||`}, [][]*Token{{}}},
+		`&&`: {[]string{`&&`}, [][]*Token{{}}},
 		`1`:  {},
 	})
 }
@@ -288,7 +288,7 @@ func TestExprSwitchStmt(t *testing.T) {
 
 func TestFallthroughStmt(t *testing.T) {
 	result(t, FallthroughStmt, Omap{
-		`fallthrough`: {[]interface{}{&Token{tok: token.FALLTHROUGH, lit: `fallthrough`}}, [][]*Token{{ret}}},
+		`fallthrough`: {[]string{`fallthrough`}, [][]*Token{{ret}}},
 		`a`:           {},
 	})
 }
@@ -366,10 +366,10 @@ func TestGotoStmt(t *testing.T) {
 
 func TestIdentifierList(t *testing.T) {
 	result(t, IdentifierList, Omap{
-		`a`:   {[]interface{}{[]*Token{a}}, [][]*Token{{ret}}},
-		`a,a`: {[]interface{}{[]*Token{a}, []*Token{a, a}}, [][]*Token{{ret, a, comma}, {ret}}},
+		`a`:   {[]string{`a`}, [][]*Token{{ret}}},
+		`a,a`: {[]string{`a`, `a,a`}, [][]*Token{{ret, a, comma}, {ret}}},
 		`1`:   {},
-		`_`:   {[]interface{}{[]*Token{{tok: token.IDENT, lit: `_`}}}, [][]*Token{{ret}}},
+		`_`:   {[]string{`_`}, [][]*Token{{ret}}},
 	})
 }
 
@@ -516,13 +516,13 @@ func TestMethodSpec(t *testing.T) {
 
 func TestMulOp(t *testing.T) {
 	result(t, MulOp, Omap{
-		`*`:  {[]interface{}{&Token{tok: token.MUL}}, [][]*Token{{}}},
-		`/`:  {[]interface{}{&Token{tok: token.QUO}}, [][]*Token{{}}},
-		`%`:  {[]interface{}{&Token{tok: token.REM}}, [][]*Token{{}}},
-		`<<`: {[]interface{}{&Token{tok: token.SHL}}, [][]*Token{{}}},
-		`>>`: {[]interface{}{&Token{tok: token.SHR}}, [][]*Token{{}}},
-		`&`:  {[]interface{}{&Token{tok: token.AND}}, [][]*Token{{}}},
-		`&^`: {[]interface{}{&Token{tok: token.AND_NOT}}, [][]*Token{{}}},
+		`*`:  {[]string{`*`}, [][]*Token{{}}},
+		`/`:  {[]string{`/`}, [][]*Token{{}}},
+		`%`:  {[]string{`%`}, [][]*Token{{}}},
+		`<<`: {[]string{`<<`}, [][]*Token{{}}},
+		`>>`: {[]string{`>>`}, [][]*Token{{}}},
+		`&`:  {[]string{`&`}, [][]*Token{{}}},
+		`&^`: {[]string{`&^`}, [][]*Token{{}}},
 		`1`:  {},
 	})
 }
@@ -670,12 +670,12 @@ func TestRecvStmt(t *testing.T) {
 
 func TestRelOp(t *testing.T) {
 	result(t, RelOp, Omap{
-		`==`: {[]interface{}{&Token{tok: token.EQL}}, [][]*Token{{}}},
-		`!=`: {[]interface{}{&Token{tok: token.NEQ}}, [][]*Token{{}}},
-		`>`:  {[]interface{}{&Token{tok: token.GTR}}, [][]*Token{{}}},
-		`>=`: {[]interface{}{&Token{tok: token.GEQ}}, [][]*Token{{}}},
-		`<`:  {[]interface{}{&Token{tok: token.LSS}}, [][]*Token{{}}},
-		`<=`: {[]interface{}{&Token{tok: token.LEQ}}, [][]*Token{{}}},
+		`==`: {[]string{`==`}, [][]*Token{{}}},
+		`!=`: {[]string{`!=`}, [][]*Token{{}}},
+		`>`:  {[]string{`>`}, [][]*Token{{}}},
+		`>=`: {[]string{`>=`}, [][]*Token{{}}},
+		`<`:  {[]string{`<`}, [][]*Token{{}}},
+		`<=`: {[]string{`<=`}, [][]*Token{{}}},
 		`1`:  {},
 	})
 }
@@ -952,13 +952,13 @@ func TestUnaryExpr(t *testing.T) {
 
 func TestUnaryOp(t *testing.T) {
 	result(t, UnaryOp, Omap{
-		`+`:  {[]interface{}{token.ADD}, [][]*Token{{}}},
-		`-`:  {[]interface{}{token.SUB}, [][]*Token{{}}},
-		`!`:  {[]interface{}{token.NOT}, [][]*Token{{}}},
-		`^`:  {[]interface{}{token.XOR}, [][]*Token{{}}},
-		`*`:  {[]interface{}{token.MUL}, [][]*Token{{}}},
-		`&`:  {[]interface{}{token.AND}, [][]*Token{{}}},
-		`<-`: {[]interface{}{token.ARROW}, [][]*Token{{}}},
+		`+`:  {[]string{`+`}, [][]*Token{{}}},
+		`-`:  {[]string{`-`}, [][]*Token{{}}},
+		`!`:  {[]string{`!`}, [][]*Token{{}}},
+		`^`:  {[]string{`^`}, [][]*Token{{}}},
+		`*`:  {[]string{`*`}, [][]*Token{{}}},
+		`&`:  {[]string{`&`}, [][]*Token{{}}},
+		`<-`: {[]string{`<-`}, [][]*Token{{}}},
 		`1`:  {},
 	})
 }
@@ -997,5 +997,5 @@ func TestTokenParser(t *testing.T) {
 	}
 	tree, state := tokenParser(toks, token.RPAREN)
 	defect.DeepEqual(t, state, [][]*Token{{ret}})
-	defect.DeepEqual(t, tree, []interface{}{rparen})
+	defect.DeepEqual(t, tree, []Renderer{&Token{tok: token.RPAREN}})
 }
