@@ -562,13 +562,11 @@ func OperandName(ts [][]*Token) [][]*Token {
 
 func PackageClause(ts [][]*Token) [][]*Token {
 	ts = tokenReader(ts, token.PACKAGE)
-	return PackageName(ts)
-}
-
-func PackageName(ts [][]*Token) [][]*Token {
-	_, ts = nonBlankIdent(ts)
+	_, ts = PackageName(ts)
 	return ts
 }
+
+func PackageName(ts [][]*Token) ([]Renderer, [][]*Token) { return nonBlankIdent(ts) }
 
 func ParameterDecl(ts [][]*Token) [][]*Token {
 	_, idList := IdentifierList(ts)
@@ -624,7 +622,7 @@ func PrimaryExpr(ts [][]*Token) [][]*Token {
 }
 
 func QualifiedIdent(ts [][]*Token) [][]*Token {
-	ts = PackageName(ts)
+	_, ts = PackageName(ts)
 	ts = tokenReader(ts, token.PERIOD)
 	return tokenReader(ts, token.IDENT)
 }

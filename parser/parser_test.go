@@ -545,10 +545,10 @@ func TestOperandName(t *testing.T) {
 }
 
 func TestPackageName(t *testing.T) {
-	remaining(t, PackageName, Tmap{
-		`a`: {{ret}},
-		`1`: empty,
-		`_`: empty,
+	result(t, PackageName, Omap{
+		`a`: {[]string{`a`}, [][]*Token{{ret}}},
+		`1`: {},
+		`_`: {},
 	})
 }
 
