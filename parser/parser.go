@@ -350,7 +350,7 @@ func IdentifierList(ts [][]*Token) ([]Renderer, [][]*Token) {
 		if len(outT) == 0 {
 			continue
 		}
-		tree = identifierList{outT[0].(*Token)}
+		tree = identifierList{outT[0]}
 		trees = append(trees, tree)
 		t = outS[0]
 		result = append(result, t)
@@ -362,7 +362,7 @@ func IdentifierList(ts [][]*Token) ([]Renderer, [][]*Token) {
 			if len(outT) == 0 {
 				break
 			}
-			tree = append(tree, outT[0].(*Token))
+			tree = append(tree, outT[0])
 			trees = append(trees, tree)
 			result = append(result, outS...)
 			nextS = outS
@@ -371,7 +371,7 @@ func IdentifierList(ts [][]*Token) ([]Renderer, [][]*Token) {
 	return trees, result
 }
 
-type identifierList []*Token
+type identifierList []Renderer
 
 func (il identifierList) Render() []byte {
 	var result []byte
