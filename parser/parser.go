@@ -557,7 +557,8 @@ func Operand(ts [][]*Token) [][]*Token {
 }
 
 func OperandName(ts [][]*Token) [][]*Token {
-	return append(tokenReader(ts, token.IDENT), QualifiedIdent(ts)...)
+	_, qi := QualifiedIdent(ts)
+	return append(tokenReader(ts, token.IDENT), qi...)
 }
 
 func PackageClause(ts [][]*Token) [][]*Token {
@@ -621,10 +622,29 @@ func PrimaryExpr(ts [][]*Token) [][]*Token {
 	return base
 }
 
-func QualifiedIdent(ts [][]*Token) [][]*Token {
-	_, ts = PackageName(ts)
-	ts = tokenReader(ts, token.PERIOD)
-	return tokenReader(ts, token.IDENT)
+func QualifiedIdent(ts [][]*Token) ([]Renderer, [][]*Token) {
+	var result [][]*Token
+	var qi []Renderer
+	for _, t := range ts {
+		pkg, outS := PackageName([][]*Token{t})
+		_, outS = tokenParser(outS, token.PERIOD)
+		name, outS := tokenParser(outS, token.IDENT)
+		if len(name) == 0 {
+			continue
+		}
+		qi = append(qi, &qualifiedIdent{pkg[0], name[0]})
+		result = append(result, outS...)
+	}
+	return qi, result
+}
+
+type qualifiedIdent struct{ pkg, name Renderer }
+
+func (q *qualifiedIdent) Render() []byte {
+	var ret []byte
+	ret = append(ret, q.pkg.Render()...)
+	ret = append(ret, "."...)
+	return append(ret, q.name.Render()...)
 }
 
 func RangeClause(ts [][]*Token) [][]*Token {
@@ -887,7 +907,7 @@ func TypeLit(ts [][]*Token) [][]*Token {
 }
 
 func TypeName(ts [][]*Token) [][]*Token {
-	result := QualifiedIdent(ts)
+	_, result := QualifiedIdent(ts)
 	return append(result, tokenReader(ts, token.IDENT)...)
 }
 

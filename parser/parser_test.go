@@ -628,13 +628,13 @@ func TestPrimaryExpr(t *testing.T) {
 }
 
 func TestQualifiedIdent(t *testing.T) {
-	remaining(t, QualifiedIdent, Tmap{
-		`1`:   empty,
-		`a`:   empty,
-		`a.a`: {{ret}},
-		`_.a`: empty,
-		`a._`: {{ret}},
-		`_._`: empty,
+	result(t, QualifiedIdent, Omap{
+		`1`:   {},
+		`a`:   {},
+		`a.a`: {[]string{`a.a`}, [][]*Token{{ret}}},
+		`_.a`: {},
+		`a._`: {[]string{`a._`}, [][]*Token{{ret}}},
+		`_._`: {},
 	})
 }
 
