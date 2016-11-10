@@ -900,11 +900,11 @@ func TestTypeLit(t *testing.T) {
 }
 
 func TestTypeName(t *testing.T) {
-	remaining(t, TypeName, Tmap{
-		`a`:   {{ret}},
-		`a.a`: {{ret}, {ret, a, dot}},
-		`1`:   empty,
-		`_`:   {{ret}},
+	result(t, TypeName, Omap{
+		`a`:   {[]string{`a`}, [][]*Token{{ret}}},
+		`a.a`: {[]string{`a.a`, `a`}, [][]*Token{{ret}, {ret, a, dot}}},
+		`1`:   {},
+		`_`:   {[]string{`_`}, [][]*Token{{ret}}},
 	})
 }
 

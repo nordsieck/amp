@@ -29,7 +29,8 @@ func AddOp(ts [][]*Token) ([]Renderer, [][]*Token) {
 
 func AnonymousField(ts [][]*Token) [][]*Token {
 	ts = append(ts, tokenReader(ts, token.MUL)...)
-	return TypeName(ts)
+	_, ts = TypeName(ts)
+	return ts
 }
 
 // bad spec
@@ -482,11 +483,12 @@ func Literal(ts [][]*Token) [][]*Token {
 }
 
 func LiteralType(ts [][]*Token) [][]*Token {
+	_, tn := TypeName(ts)
 	return append(
 		append(
 			append(StructType(ts), ArrayType(ts)...),
 			append(EllipsisArrayType(ts), SliceType(ts)...)...),
-		append(MapType(ts), TypeName(ts)...)...)
+		append(MapType(ts), tn...)...)
 }
 
 func LiteralValue(ts [][]*Token) [][]*Token {
@@ -529,7 +531,8 @@ func MethodExpr(ts [][]*Token) [][]*Token {
 func MethodSpec(ts [][]*Token) [][]*Token {
 	_, sig := nonBlankIdent(ts)
 	sig = Signature(sig)
-	return append(sig, TypeName(ts)...)
+	_, ts = TypeName(ts)
+	return append(sig, ts...)
 }
 
 func MulOp(ts [][]*Token) ([]Renderer, [][]*Token) {
@@ -660,7 +663,7 @@ func RangeClause(ts [][]*Token) [][]*Token {
 func ReceiverType(ts [][]*Token) [][]*Token {
 	ptr := tokenReader(ts, token.LPAREN)
 	ptr = tokenReader(ptr, token.MUL)
-	ptr = TypeName(ptr)
+	_, ptr = TypeName(ptr)
 	ptr = tokenReader(ptr, token.RPAREN)
 
 	par := tokenReader(ts, token.LPAREN)
@@ -668,8 +671,9 @@ func ReceiverType(ts [][]*Token) [][]*Token {
 		par = ReceiverType(par)
 	}
 	par = tokenReader(par, token.RPAREN)
+	_, ts = TypeName(ts)
 
-	return append(append(ptr, par...), TypeName(ts)...)
+	return append(append(ptr, par...), ts...)
 }
 
 func RecvStmt(ts [][]*Token) [][]*Token {
@@ -851,7 +855,8 @@ func Type(ts [][]*Token) [][]*Token {
 		paren = Type(paren)
 	}
 	paren = tokenReader(paren, token.RPAREN)
-	return append(append(TypeName(ts), TypeLit(ts)...), paren...)
+	_, tn := TypeName(ts)
+	return append(append(tn, TypeLit(ts)...), paren...)
 }
 
 func TypeAssertion(ts [][]*Token) [][]*Token {
@@ -906,9 +911,10 @@ func TypeLit(ts [][]*Token) [][]*Token {
 			append(MapType(ts), ChannelType(ts)...)...)...)
 }
 
-func TypeName(ts [][]*Token) [][]*Token {
-	_, result := QualifiedIdent(ts)
-	return append(result, tokenReader(ts, token.IDENT)...)
+func TypeName(ts [][]*Token) ([]Renderer, [][]*Token) {
+	qiR, qiS := QualifiedIdent(ts)
+	idR, idS := tokenParser(ts, token.IDENT)
+	return append(qiR, idR...), append(qiS, idS...)
 }
 
 func TypeSpec(ts [][]*Token) [][]*Token {
