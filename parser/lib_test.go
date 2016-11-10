@@ -46,3 +46,11 @@ func result(t *testing.T, p Parser, o Omap) {
 		defect.Equal(t, len(tree), len(state))
 	}
 }
+
+func resultState(t *testing.T, s Stator, m map[string][]StateOutput) {
+	for raw, result := range m {
+		toks := Scan(newScanner(raw))
+		state := s([]State{{empties(len(toks)), toks}})
+		defect.DeepEqual(t, GetStateOutput(state), result)
+	}
+}

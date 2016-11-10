@@ -14,6 +14,23 @@ type Output struct {
 }
 type Omap map[string]Output
 
+func GetStateOutput(ss []State) []StateOutput {
+	var result []StateOutput
+	for _, s := range ss {
+		var r []string
+		for _, rend := range s.r {
+			r = append(r, string(rend.Render()))
+		}
+		result = append(result, StateOutput{r, s.t})
+	}
+	return result
+}
+
+type StateOutput struct {
+	r []string
+	t []*Token
+}
+
 var (
 	empty  = [][]*Token(nil)
 	ret    = &Token{tok: token.SEMICOLON, lit: "\n"}
@@ -70,19 +87,19 @@ func TestAssignment(t *testing.T) {
 }
 
 func TestAssignOp(t *testing.T) {
-	result(t, AssignOp, Omap{
-		`+=`:  {[]string{`+=`}, [][]*Token{{}}},
-		`-=`:  {[]string{`-=`}, [][]*Token{{}}},
-		`*=`:  {[]string{`*=`}, [][]*Token{{}}},
-		`/=`:  {[]string{`/=`}, [][]*Token{{}}},
-		`%=`:  {[]string{`%=`}, [][]*Token{{}}},
-		`&=`:  {[]string{`&=`}, [][]*Token{{}}},
-		`|=`:  {[]string{`|=`}, [][]*Token{{}}},
-		`^=`:  {[]string{`^=`}, [][]*Token{{}}},
-		`<<=`: {[]string{`<<=`}, [][]*Token{{}}},
-		`>>=`: {[]string{`>>=`}, [][]*Token{{}}},
-		`&^=`: {[]string{`&^=`}, [][]*Token{{}}},
-		`=`:   {[]string{`=`}, [][]*Token{{}}},
+	resultState(t, AssignOp, map[string][]StateOutput{
+		`+=`:  {{[]string{``, `+=`}, []*Token{}}},
+		`-=`:  {{[]string{``, `-=`}, []*Token{}}},
+		`*=`:  {{[]string{``, `*=`}, []*Token{}}},
+		`/=`:  {{[]string{``, `/=`}, []*Token{}}},
+		`%=`:  {{[]string{``, `%=`}, []*Token{}}},
+		`&=`:  {{[]string{``, `&=`}, []*Token{}}},
+		`|=`:  {{[]string{``, `|=`}, []*Token{}}},
+		`^=`:  {{[]string{``, `^=`}, []*Token{}}},
+		`<<=`: {{[]string{``, `<<=`}, []*Token{}}},
+		`>>=`: {{[]string{``, `>>=`}, []*Token{}}},
+		`&^=`: {{[]string{``, `&^=`}, []*Token{}}},
+		`=`:   {{[]string{``, `=`}, []*Token{}}},
 	})
 }
 
@@ -998,4 +1015,13 @@ func TestTokenParser(t *testing.T) {
 	tree, state := tokenParser(toks, token.RPAREN)
 	defect.DeepEqual(t, state, [][]*Token{{ret}})
 	defect.DeepEqual(t, tree, []Renderer{&Token{tok: token.RPAREN}})
+}
+
+func TestTokenParserState(t *testing.T) {
+	state := []State{
+		{[]Renderer{e{}}, []*Token{ret, rparen}},
+		{[]Renderer{e{}}, []*Token{ret, rparen, a, dot}},
+	}
+	newState := tokenParserState(state, token.RPAREN)
+	defect.DeepEqual(t, newState, []State{{[]Renderer{e{}, &Token{tok: token.RPAREN}}, []*Token{ret}}})
 }

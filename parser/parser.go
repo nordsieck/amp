@@ -11,7 +11,17 @@ type (
 	Renderer interface {
 		Render() []byte
 	}
+
+	Stator func([]State) []State
+	State  struct {
+		r []Renderer
+		t []*Token
+	}
+
+	e struct{} // empty renderer
 )
+
+func (_ e) Render() []byte { return nil }
 
 func AddOp(ts [][]*Token) ([]Renderer, [][]*Token) {
 	var result [][]*Token
@@ -55,24 +65,22 @@ func ArrayType(ts [][]*Token) [][]*Token {
 
 func Assignment(ts [][]*Token) [][]*Token {
 	ts = ExpressionList(ts)
-	_, ts = AssignOp(ts)
+	ts = fromState(AssignOp(toState(ts)))
 	return ExpressionList(ts)
 }
 
-func AssignOp(ts [][]*Token) ([]Renderer, [][]*Token) {
-	var result [][]*Token
-	var tree []Renderer
-	for _, t := range ts {
-		switch p := pop(&t); true {
+func AssignOp(ss []State) []State {
+	var result []State
+	for _, s := range ss {
+		switch p := pop(&s.t); true {
 		case p == nil:
 		case p.tok == token.ADD_ASSIGN, p.tok == token.SUB_ASSIGN, p.tok == token.MUL_ASSIGN, p.tok == token.QUO_ASSIGN,
 			p.tok == token.REM_ASSIGN, p.tok == token.AND_ASSIGN, p.tok == token.OR_ASSIGN, p.tok == token.XOR_ASSIGN,
 			p.tok == token.SHL_ASSIGN, p.tok == token.SHR_ASSIGN, p.tok == token.AND_NOT_ASSIGN, p.tok == token.ASSIGN:
-			result = append(result, t)
-			tree = append(tree, p)
+			result = append(result, State{append(s.r, p), s.t})
 		}
 	}
-	return tree, result
+	return result
 }
 
 func BasicLit(ts [][]*Token) ([]Renderer, [][]*Token) {
@@ -1044,9 +1052,43 @@ func tokenParser(ts [][]*Token, tok token.Token) ([]Renderer, [][]*Token) {
 	return tree, result
 }
 
+func tokenParserState(ss []State, tok token.Token) []State {
+	var result []State
+	for _, s := range ss {
+		if p := pop(&s.t); p != nil && p.tok == tok {
+			result = append(result, State{append(s.r, p), s.t})
+		}
+	}
+	return result
+}
+
 func print(ts [][]*Token) {
 	for _, t := range ts {
 		fmt.Println(t)
 	}
 	fmt.Println("-----")
+}
+
+func empties(n int) []Renderer {
+	result := make([]Renderer, 0, n)
+	for i := 0; i < n; i++ {
+		result = append(result, e{})
+	}
+	return result
+}
+
+func toState(ts [][]*Token) []State {
+	var s []State
+	for _, t := range ts {
+		s = append(s, State{empties(len(t)), t})
+	}
+	return s
+}
+
+func fromState(ss []State) [][]*Token {
+	var t [][]*Token
+	for _, s := range ss {
+		t = append(t, s.t)
+	}
+	return t
 }
