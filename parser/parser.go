@@ -91,7 +91,9 @@ func BasicLit(ss []State) []State {
 func BinaryOp(ts [][]*Token) ([]Renderer, [][]*Token) {
 	addS := fromState(AddOp(toState(ts)))
 	var addT []Renderer
-	relT, relS := RelOp(ts)
+	relS := fromState(RelOp(toState(ts)))
+	var relT []Renderer
+
 	mulT, mulS := MulOp(ts)
 	landT, landS := tokenParser(ts, token.LAND)
 	lorT, lorS := tokenParser(ts, token.LOR)
@@ -686,19 +688,17 @@ func RecvStmt(ts [][]*Token) [][]*Token {
 	return Expression(append(ts, append(expr, ident...)...))
 }
 
-func RelOp(ts [][]*Token) ([]Renderer, [][]*Token) {
-	var result [][]*Token
-	var tree []Renderer
-	for _, t := range ts {
-		switch p := pop(&t); true {
+func RelOp(ss []State) []State {
+	var result []State
+	for _, s := range ss {
+		switch p := pop(&s.t); true {
 		case p == nil:
 		case p.tok == token.EQL, p.tok == token.NEQ, p.tok == token.LSS,
 			p.tok == token.LEQ, p.tok == token.GTR, p.tok == token.GEQ:
-			result = append(result, t)
-			tree = append(tree, p)
+			result = append(result, State{append(s.r, p), s.t})
 		}
 	}
-	return tree, result
+	return result
 }
 
 func Result(ts [][]*Token) [][]*Token {

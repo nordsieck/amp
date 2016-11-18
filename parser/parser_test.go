@@ -126,7 +126,7 @@ func TestBasicLit(t *testing.T) {
 
 func TestBinaryOp(t *testing.T) {
 	result(t, BinaryOp, Omap{
-		`==`: {[]string{`==`}, [][]*Token{{}}},
+		// `==`: {[]string{`==`}, [][]*Token{{}}},
 		// `+`:  {[]string{`+`}, [][]*Token{{}}},
 		`*`:  {[]string{`*`}, [][]*Token{{}}},
 		`||`: {[]string{`||`}, [][]*Token{{}}},
@@ -694,14 +694,14 @@ func TestRecvStmt(t *testing.T) {
 }
 
 func TestRelOp(t *testing.T) {
-	result(t, RelOp, Omap{
-		`==`: {[]string{`==`}, [][]*Token{{}}},
-		`!=`: {[]string{`!=`}, [][]*Token{{}}},
-		`>`:  {[]string{`>`}, [][]*Token{{}}},
-		`>=`: {[]string{`>=`}, [][]*Token{{}}},
-		`<`:  {[]string{`<`}, [][]*Token{{}}},
-		`<=`: {[]string{`<=`}, [][]*Token{{}}},
-		`1`:  {},
+	resultState(t, RelOp, map[string][]StateOutput{
+		`==`: {{[]string{``, `==`}, []*Token{}}},
+		`!=`: {{[]string{``, `!=`}, []*Token{}}},
+		`>`:  {{[]string{``, `>`}, []*Token{}}},
+		`>=`: {{[]string{``, `>=`}, []*Token{}}},
+		`<`:  {{[]string{``, `<`}, []*Token{}}},
+		`<=`: {{[]string{``, `<=`}, []*Token{}}},
+		`1`:  nil,
 	})
 }
 
