@@ -23,18 +23,16 @@ type (
 
 func (_ e) Render() []byte { return nil }
 
-func AddOp(ts [][]*Token) ([]Renderer, [][]*Token) {
-	var result [][]*Token
-	var tree []Renderer
-	for _, t := range ts {
-		switch p := pop(&t); true {
+func AddOp(ss []State) []State {
+	var result []State
+	for _, s := range ss {
+		switch p := pop(&s.t); true {
 		case p == nil:
 		case p.tok == token.ADD, p.tok == token.SUB, p.tok == token.OR, p.tok == token.AND:
-			result = append(result, t)
-			tree = append(tree, p)
+			result = append(result, State{append(s.r, p), s.t})
 		}
 	}
-	return tree, result
+	return result
 }
 
 func AnonymousField(ts [][]*Token) [][]*Token {
@@ -91,7 +89,8 @@ func BasicLit(ss []State) []State {
 }
 
 func BinaryOp(ts [][]*Token) ([]Renderer, [][]*Token) {
-	addT, addS := AddOp(ts)
+	addS := fromState(AddOp(toState(ts)))
+	var addT []Renderer
 	relT, relS := RelOp(ts)
 	mulT, mulS := MulOp(ts)
 	landT, landS := tokenParser(ts, token.LAND)

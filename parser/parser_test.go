@@ -49,13 +49,21 @@ var (
 )
 
 func TestAddOp(t *testing.T) {
-	result(t, AddOp, Omap{
-		`+`: {[]string{`+`}, [][]*Token{{}}},
-		`-`: {[]string{`-`}, [][]*Token{{}}},
-		`|`: {[]string{`|`}, [][]*Token{{}}},
-		`&`: {[]string{`&`}, [][]*Token{{}}},
-		`1`: {},
+	resultState(t, AddOp, map[string][]StateOutput{
+		`+`: {{[]string{``, `+`}, []*Token{}}},
+		`-`: {{[]string{``, `-`}, []*Token{}}},
+		`|`: {{[]string{``, `|`}, []*Token{}}},
+		`&`: {{[]string{``, `&`}, []*Token{}}},
+		`1`: nil,
 	})
+
+	// result(t, AddOp, Omap{
+	// 	`+`: {[]string{`+`}, [][]*Token{{}}},
+	// 	`-`: {[]string{`-`}, [][]*Token{{}}},
+	// 	`|`: {[]string{`|`}, [][]*Token{{}}},
+	// 	`&`: {[]string{`&`}, [][]*Token{{}}},
+	// 	`1`: {},
+	// })
 }
 
 func TestAnonymousField(t *testing.T) {
@@ -119,7 +127,7 @@ func TestBasicLit(t *testing.T) {
 func TestBinaryOp(t *testing.T) {
 	result(t, BinaryOp, Omap{
 		`==`: {[]string{`==`}, [][]*Token{{}}},
-		`+`:  {[]string{`+`}, [][]*Token{{}}},
+		// `+`:  {[]string{`+`}, [][]*Token{{}}},
 		`*`:  {[]string{`*`}, [][]*Token{{}}},
 		`||`: {[]string{`||`}, [][]*Token{{}}},
 		`&&`: {[]string{`&&`}, [][]*Token{{}}},
