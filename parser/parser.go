@@ -83,16 +83,11 @@ func AssignOp(ss []State) []State {
 	return result
 }
 
-func BasicLit(ts [][]*Token) ([]Renderer, [][]*Token) {
-	intI, intT := tokenParser(ts, token.INT)
-	floatI, floatT := tokenParser(ts, token.FLOAT)
-	imagI, imagT := tokenParser(ts, token.IMAG)
-	charI, charT := tokenParser(ts, token.CHAR)
-	stringI, stringT := tokenParser(ts, token.STRING)
-
-	i := append(append(append(intI, floatI...), append(imagI, charI...)...), stringI...)
-	ts = append(append(append(intT, floatT...), append(imagT, charT...)...), stringT...)
-	return i, ts
+func BasicLit(ss []State) []State {
+	return append(
+		append(append(tokenParserState(ss, token.INT), tokenParserState(ss, token.FLOAT)...),
+			append(tokenParserState(ss, token.IMAG), tokenParserState(ss, token.CHAR)...)...),
+		tokenParserState(ss, token.STRING)...)
 }
 
 func BinaryOp(ts [][]*Token) ([]Renderer, [][]*Token) {
@@ -486,7 +481,7 @@ func LabeledStmt(ts [][]*Token) [][]*Token {
 }
 
 func Literal(ts [][]*Token) [][]*Token {
-	_, basicLit := BasicLit(ts)
+	basicLit := fromState(BasicLit(toState(ts)))
 	return append(append(basicLit, CompositeLit(ts)...), FunctionLit(ts)...)
 }
 

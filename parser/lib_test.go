@@ -50,7 +50,15 @@ func result(t *testing.T, p Parser, o Omap) {
 func resultState(t *testing.T, s Stator, m map[string][]StateOutput) {
 	for raw, result := range m {
 		toks := Scan(newScanner(raw))
-		state := s([]State{{empties(len(toks)), toks}})
-		defect.DeepEqual(t, GetStateOutput(state), result)
+		state := s([]State{{[]Renderer{e{}}, toks}})
+		so := GetStateOutput(state)
+		defect.DeepEqual(t, so, result)
+
+		// Use for understanding test output
+		// for i := range state {
+		// 	defect.DeepEqual(t, len(so[i].s), len(result[i].s))
+		// 	defect.DeepEqual(t, so[i].s, result[i].s)
+		// 	defect.DeepEqual(t, so[i].t, result[i].t)
+		// }
 	}
 }

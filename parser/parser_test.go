@@ -27,7 +27,7 @@ func GetStateOutput(ss []State) []StateOutput {
 }
 
 type StateOutput struct {
-	r []string
+	s []string
 	t []*Token
 }
 
@@ -104,15 +104,15 @@ func TestAssignOp(t *testing.T) {
 }
 
 func TestBasicLit(t *testing.T) {
-	result(t, BasicLit, Omap{
-		``:    {},
-		`1`:   {[]string{`1`}, [][]*Token{{ret}}},
-		`1.1`: {[]string{`1.1`}, [][]*Token{{ret}}},
-		`1i`:  {[]string{`1i`}, [][]*Token{{ret}}},
-		`'a'`: {[]string{`'a'`}, [][]*Token{{ret}}},
-		`"a"`: {[]string{`"a"`}, [][]*Token{{ret}}},
-		`a`:   {},
-		`_`:   {},
+	resultState(t, BasicLit, map[string][]StateOutput{
+		``:    nil,
+		`1`:   {{[]string{``, `1`}, []*Token{ret}}},
+		`1.1`: {{[]string{``, `1.1`}, []*Token{ret}}},
+		`1i`:  {{[]string{``, `1i`}, []*Token{ret}}},
+		`'a'`: {{[]string{``, `'a'`}, []*Token{ret}}},
+		`"a"`: {{[]string{``, `"a"`}, []*Token{ret}}},
+		`a`:   nil,
+		`_`:   nil,
 	})
 }
 
