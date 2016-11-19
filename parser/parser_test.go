@@ -128,7 +128,7 @@ func TestBinaryOp(t *testing.T) {
 	result(t, BinaryOp, Omap{
 		// `==`: {[]string{`==`}, [][]*Token{{}}},
 		// `+`:  {[]string{`+`}, [][]*Token{{}}},
-		`*`:  {[]string{`*`}, [][]*Token{{}}},
+		// `*`:  {[]string{`*`}, [][]*Token{{}}},
 		`||`: {[]string{`||`}, [][]*Token{{}}},
 		`&&`: {[]string{`&&`}, [][]*Token{{}}},
 		`1`:  {},
@@ -540,15 +540,15 @@ func TestMethodSpec(t *testing.T) {
 }
 
 func TestMulOp(t *testing.T) {
-	result(t, MulOp, Omap{
-		`*`:  {[]string{`*`}, [][]*Token{{}}},
-		`/`:  {[]string{`/`}, [][]*Token{{}}},
-		`%`:  {[]string{`%`}, [][]*Token{{}}},
-		`<<`: {[]string{`<<`}, [][]*Token{{}}},
-		`>>`: {[]string{`>>`}, [][]*Token{{}}},
-		`&`:  {[]string{`&`}, [][]*Token{{}}},
-		`&^`: {[]string{`&^`}, [][]*Token{{}}},
-		`1`:  {},
+	resultState(t, MulOp, map[string][]StateOutput{
+		`*`:  {{[]string{``, `*`}, []*Token{}}},
+		`/`:  {{[]string{``, `/`}, []*Token{}}},
+		`%`:  {{[]string{``, `%`}, []*Token{}}},
+		`<<`: {{[]string{``, `<<`}, []*Token{}}},
+		`>>`: {{[]string{``, `>>`}, []*Token{}}},
+		`&`:  {{[]string{``, `&`}, []*Token{}}},
+		`&^`: {{[]string{``, `&^`}, []*Token{}}},
+		`1`:  nil,
 	})
 }
 

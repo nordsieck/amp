@@ -93,8 +93,9 @@ func BinaryOp(ts [][]*Token) ([]Renderer, [][]*Token) {
 	var addT []Renderer
 	relS := fromState(RelOp(toState(ts)))
 	var relT []Renderer
+	mulS := fromState(MulOp(toState(ts)))
+	var mulT []Renderer
 
-	mulT, mulS := MulOp(ts)
 	landT, landS := tokenParser(ts, token.LAND)
 	lorT, lorS := tokenParser(ts, token.LOR)
 
@@ -539,19 +540,17 @@ func MethodSpec(ts [][]*Token) [][]*Token {
 	return append(sig, ts...)
 }
 
-func MulOp(ts [][]*Token) ([]Renderer, [][]*Token) {
-	var result [][]*Token
-	var tree []Renderer
-	for _, t := range ts {
-		switch p := pop(&t); true {
+func MulOp(ss []State) []State {
+	var result []State
+	for _, s := range ss {
+		switch p := pop(&s.t); true {
 		case p == nil:
 		case p.tok == token.MUL, p.tok == token.QUO, p.tok == token.REM, p.tok == token.SHL,
 			p.tok == token.SHR, p.tok == token.AND, p.tok == token.AND_NOT:
-			result = append(result, t)
-			tree = append(tree, p)
+			result = append(result, State{append(s.r, p), s.t})
 		}
 	}
-	return tree, result
+	return result
 }
 
 func Operand(ts [][]*Token) [][]*Token {
