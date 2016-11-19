@@ -976,15 +976,15 @@ func TestUnaryExpr(t *testing.T) {
 }
 
 func TestUnaryOp(t *testing.T) {
-	result(t, UnaryOp, Omap{
-		`+`:  {[]string{`+`}, [][]*Token{{}}},
-		`-`:  {[]string{`-`}, [][]*Token{{}}},
-		`!`:  {[]string{`!`}, [][]*Token{{}}},
-		`^`:  {[]string{`^`}, [][]*Token{{}}},
-		`*`:  {[]string{`*`}, [][]*Token{{}}},
-		`&`:  {[]string{`&`}, [][]*Token{{}}},
-		`<-`: {[]string{`<-`}, [][]*Token{{}}},
-		`1`:  {},
+	resultState(t, UnaryOp, map[string][]StateOutput{
+		`+`:  {{[]string{``, `+`}, []*Token{}}},
+		`-`:  {{[]string{``, `-`}, []*Token{}}},
+		`!`:  {{[]string{``, `!`}, []*Token{}}},
+		`^`:  {{[]string{``, `^`}, []*Token{}}},
+		`*`:  {{[]string{``, `*`}, []*Token{}}},
+		`&`:  {{[]string{``, `&`}, []*Token{}}},
+		`<-`: {{[]string{``, `<-`}, []*Token{}}},
+		`1`:  nil,
 	})
 }
 
