@@ -56,14 +56,6 @@ func TestAddOp(t *testing.T) {
 		`&`: {{[]string{``, `&`}, []*Token{}}},
 		`1`: nil,
 	})
-
-	// result(t, AddOp, Omap{
-	// 	`+`: {[]string{`+`}, [][]*Token{{}}},
-	// 	`-`: {[]string{`-`}, [][]*Token{{}}},
-	// 	`|`: {[]string{`|`}, [][]*Token{{}}},
-	// 	`&`: {[]string{`&`}, [][]*Token{{}}},
-	// 	`1`: {},
-	// })
 }
 
 func TestAnonymousField(t *testing.T) {
