@@ -88,20 +88,11 @@ func BasicLit(ss []State) []State {
 		tokenParserState(ss, token.STRING)...)
 }
 
-func BinaryOp(ts [][]*Token) ([]Renderer, [][]*Token) {
-	addS := fromState(AddOp(toState(ts)))
-	var addT []Renderer
-	relS := fromState(RelOp(toState(ts)))
-	var relT []Renderer
-	mulS := fromState(MulOp(toState(ts)))
-	var mulT []Renderer
-
-	landT, landS := tokenParser(ts, token.LAND)
-	lorT, lorS := tokenParser(ts, token.LOR)
-
-	t := append(append(append(addT, relT...), append(mulT, landT...)...), lorT...)
-	s := append(append(append(addS, relS...), append(mulS, landS...)...), lorS...)
-	return t, s
+func BinaryOp(ss []State) []State {
+	return append(
+		append(append(AddOp(ss), RelOp(ss)...),
+			append(MulOp(ss), tokenParserState(ss, token.LAND)...)...),
+		tokenParserState(ss, token.LOR)...)
 }
 
 // bad spec
@@ -235,7 +226,7 @@ func ExprCaseClause(ts [][]*Token) [][]*Token {
 
 func Expression(ts [][]*Token) [][]*Token {
 	base := UnaryExpr(ts)
-	_, comp := BinaryOp(base)
+	comp := fromState(BinaryOp(toState(base)))
 	if len(comp) == 0 {
 		return base
 	}

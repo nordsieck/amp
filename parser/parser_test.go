@@ -125,13 +125,13 @@ func TestBasicLit(t *testing.T) {
 }
 
 func TestBinaryOp(t *testing.T) {
-	result(t, BinaryOp, Omap{
-		// `==`: {[]string{`==`}, [][]*Token{{}}},
-		// `+`:  {[]string{`+`}, [][]*Token{{}}},
-		// `*`:  {[]string{`*`}, [][]*Token{{}}},
-		`||`: {[]string{`||`}, [][]*Token{{}}},
-		`&&`: {[]string{`&&`}, [][]*Token{{}}},
-		`1`:  {},
+	resultState(t, BinaryOp, map[string][]StateOutput{
+		`==`: {{[]string{``, `==`}, []*Token{}}},
+		`+`:  {{[]string{``, `+`}, []*Token{}}},
+		`*`:  {{[]string{``, `*`}, []*Token{}}},
+		`||`: {{[]string{``, `||`}, []*Token{}}},
+		`&&`: {{[]string{``, `&&`}, []*Token{}}},
+		`1`:  nil,
 	})
 }
 
