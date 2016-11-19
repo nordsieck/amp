@@ -37,8 +37,7 @@ func AddOp(ss []State) []State {
 
 func AnonymousField(ts [][]*Token) [][]*Token {
 	ts = append(ts, tokenReader(ts, token.MUL)...)
-	_, ts = TypeName(ts)
-	return ts
+	return fromState(TypeName(toState(ts)))
 }
 
 // bad spec
@@ -477,7 +476,7 @@ func Literal(ts [][]*Token) [][]*Token {
 }
 
 func LiteralType(ts [][]*Token) [][]*Token {
-	_, tn := TypeName(ts)
+	tn := fromState(TypeName(toState(ts)))
 	return append(
 		append(
 			append(StructType(ts), ArrayType(ts)...),
@@ -525,7 +524,7 @@ func MethodExpr(ts [][]*Token) [][]*Token {
 func MethodSpec(ts [][]*Token) [][]*Token {
 	sig := fromState(nonBlankIdent(toState(ts)))
 	sig = Signature(sig)
-	_, ts = TypeName(ts)
+	ts = fromState(TypeName(toState(ts)))
 	return append(sig, ts...)
 }
 
@@ -666,7 +665,7 @@ func RangeClause(ts [][]*Token) [][]*Token {
 func ReceiverType(ts [][]*Token) [][]*Token {
 	ptr := tokenReader(ts, token.LPAREN)
 	ptr = tokenReader(ptr, token.MUL)
-	_, ptr = TypeName(ptr)
+	ptr = fromState(TypeName(toState(ptr)))
 	ptr = tokenReader(ptr, token.RPAREN)
 
 	par := tokenReader(ts, token.LPAREN)
@@ -674,7 +673,7 @@ func ReceiverType(ts [][]*Token) [][]*Token {
 		par = ReceiverType(par)
 	}
 	par = tokenReader(par, token.RPAREN)
-	_, ts = TypeName(ts)
+	ts = fromState(TypeName(toState(ts)))
 
 	return append(append(ptr, par...), ts...)
 }
@@ -856,7 +855,7 @@ func Type(ts [][]*Token) [][]*Token {
 		paren = Type(paren)
 	}
 	paren = tokenReader(paren, token.RPAREN)
-	_, tn := TypeName(ts)
+	tn := fromState(TypeName(toState(ts)))
 	return append(append(tn, TypeLit(ts)...), paren...)
 }
 
@@ -912,11 +911,8 @@ func TypeLit(ts [][]*Token) [][]*Token {
 			append(MapType(ts), ChannelType(ts)...)...)...)
 }
 
-func TypeName(ts [][]*Token) ([]Renderer, [][]*Token) {
-	var qiR []Renderer
-	qiS := fromState(QualifiedIdent(toState(ts)))
-	idR, idS := tokenParser(ts, token.IDENT)
-	return append(qiR, idR...), append(qiS, idS...)
+func TypeName(ss []State) []State {
+	return append(QualifiedIdent(ss), tokenParserState(ss, token.IDENT)...)
 }
 
 func TypeSpec(ts [][]*Token) [][]*Token {

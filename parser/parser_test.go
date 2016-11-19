@@ -917,11 +917,11 @@ func TestTypeLit(t *testing.T) {
 }
 
 func TestTypeName(t *testing.T) {
-	result(t, TypeName, Omap{
-		`a`: {[]string{`a`}, [][]*Token{{ret}}},
-		// `a.a`: {[]string{`a.a`, `a`}, [][]*Token{{ret}, {ret, a, dot}}},
-		`1`: {},
-		`_`: {[]string{`_`}, [][]*Token{{ret}}},
+	resultState(t, TypeName, map[string][]StateOutput{
+		`a`:   {{[]string{``, `a`}, []*Token{ret}}},
+		`a.a`: {{[]string{``, `a.a`}, []*Token{ret}}, {[]string{``, `a`}, []*Token{ret, a, dot}}},
+		`1`:   nil,
+		`_`:   {{[]string{``, `_`}, []*Token{ret}}},
 	})
 }
 
