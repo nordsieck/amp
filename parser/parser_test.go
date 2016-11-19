@@ -304,9 +304,9 @@ func TestExprSwitchStmt(t *testing.T) {
 }
 
 func TestFallthroughStmt(t *testing.T) {
-	result(t, FallthroughStmt, Omap{
-		`fallthrough`: {[]string{`fallthrough`}, [][]*Token{{ret}}},
-		`a`:           {},
+	resultState(t, FallthroughStmt, map[string][]StateOutput{
+		`fallthrough`: {{[]string{``, `fallthrough`}, []*Token{ret}}},
+		`a`:           nil,
 	})
 }
 
