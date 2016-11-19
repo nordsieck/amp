@@ -562,10 +562,10 @@ func TestOperandName(t *testing.T) {
 }
 
 func TestPackageName(t *testing.T) {
-	result(t, PackageName, Omap{
-		`a`: {[]string{`a`}, [][]*Token{{ret}}},
-		`1`: {},
-		`_`: {},
+	resultState(t, PackageName, map[string][]StateOutput{
+		`a`: {{[]string{``, `a`}, []*Token{ret}}},
+		`1`: nil,
+		`_`: nil,
 	})
 }
 
@@ -645,13 +645,13 @@ func TestPrimaryExpr(t *testing.T) {
 }
 
 func TestQualifiedIdent(t *testing.T) {
-	result(t, QualifiedIdent, Omap{
-		`1`:   {},
-		`a`:   {},
-		`a.a`: {[]string{`a.a`}, [][]*Token{{ret}}},
-		`_.a`: {},
-		`a._`: {[]string{`a._`}, [][]*Token{{ret}}},
-		`_._`: {},
+	resultState(t, QualifiedIdent, map[string][]StateOutput{
+		`1`:   nil,
+		`a`:   nil,
+		`a.a`: {{[]string{``, `a.a`}, []*Token{ret}}},
+		`_.a`: nil,
+		`a._`: {{[]string{``, `a._`}, []*Token{ret}}},
+		`_._`: nil,
 	})
 }
 
@@ -918,10 +918,10 @@ func TestTypeLit(t *testing.T) {
 
 func TestTypeName(t *testing.T) {
 	result(t, TypeName, Omap{
-		`a`:   {[]string{`a`}, [][]*Token{{ret}}},
-		`a.a`: {[]string{`a.a`, `a`}, [][]*Token{{ret}, {ret, a, dot}}},
-		`1`:   {},
-		`_`:   {[]string{`_`}, [][]*Token{{ret}}},
+		`a`: {[]string{`a`}, [][]*Token{{ret}}},
+		// `a.a`: {[]string{`a.a`, `a`}, [][]*Token{{ret}, {ret, a, dot}}},
+		`1`: {},
+		`_`: {[]string{`_`}, [][]*Token{{ret}}},
 	})
 }
 

@@ -512,7 +512,7 @@ func MapType(ts [][]*Token) [][]*Token {
 func MethodDecl(ts [][]*Token) [][]*Token {
 	ts = tokenReader(ts, token.FUNC)
 	ts = Parameters(ts)
-	_, ts = nonBlankIdent(ts)
+	ts = fromState(nonBlankIdent(toState(ts)))
 	return Function(ts)
 }
 
@@ -523,7 +523,7 @@ func MethodExpr(ts [][]*Token) [][]*Token {
 }
 
 func MethodSpec(ts [][]*Token) [][]*Token {
-	_, sig := nonBlankIdent(ts)
+	sig := fromState(nonBlankIdent(toState(ts)))
 	sig = Signature(sig)
 	_, ts = TypeName(ts)
 	return append(sig, ts...)
@@ -552,17 +552,16 @@ func Operand(ts [][]*Token) [][]*Token {
 }
 
 func OperandName(ts [][]*Token) [][]*Token {
-	_, qi := QualifiedIdent(ts)
+	qi := fromState(QualifiedIdent(toState(ts)))
 	return append(tokenReader(ts, token.IDENT), qi...)
 }
 
 func PackageClause(ts [][]*Token) [][]*Token {
 	ts = tokenReader(ts, token.PACKAGE)
-	_, ts = PackageName(ts)
-	return ts
+	return fromState(PackageName(toState(ts)))
 }
 
-func PackageName(ts [][]*Token) ([]Renderer, [][]*Token) { return nonBlankIdent(ts) }
+func PackageName(ss []State) []State { return nonBlankIdent(ss) }
 
 func ParameterDecl(ts [][]*Token) [][]*Token {
 	_, idList := IdentifierList(ts)
@@ -617,25 +616,37 @@ func PrimaryExpr(ts [][]*Token) [][]*Token {
 	return base
 }
 
-func QualifiedIdent(ts [][]*Token) ([]Renderer, [][]*Token) {
-	var result [][]*Token
-	var qi []Renderer
-	for _, t := range ts {
-		pkg, outS := PackageName([][]*Token{t})
-		_, outS = tokenParser(outS, token.PERIOD)
-		name, outS := tokenParser(outS, token.IDENT)
-		if len(name) == 0 {
-			continue
-		}
-		qi = append(qi, &qualifiedIdent{pkg[0], name[0]})
-		result = append(result, outS...)
+func QualifiedIdent(ss []State) []State {
+	ss = PackageName(ss)
+	ss = tokenParserState(ss, token.PERIOD)
+	ss = tokenParserState(ss, token.IDENT)
+	for i, s := range ss {
+		qi := qualifiedIdent{s.r[len(s.r)-3], s.r[len(s.r)-1]}
+		ss[i].r = append(s.r[:len(s.r)-3], qi)
 	}
-	return qi, result
+	return ss
 }
+
+// func QualifiedIdent(ts [][]*Token) ([]Renderer, [][]*Token) {
+// 	var result [][]*Token
+// 	var qi []Renderer
+// 	for _, t := range ts {
+
+// 		pkg, outS := PackageName([][]*Token{t})
+// 		_, outS = tokenParser(outS, token.PERIOD)
+// 		name, outS := tokenParser(outS, token.IDENT)
+// 		if len(name) == 0 {
+// 			continue
+// 		}
+// 		qi = append(qi, &qualifiedIdent{pkg[0], name[0]})
+// 		result = append(result, outS...)
+// 	}
+// 	return qi, result
+// }
 
 type qualifiedIdent struct{ pkg, name Renderer }
 
-func (q *qualifiedIdent) Render() []byte {
+func (q qualifiedIdent) Render() []byte {
 	var ret []byte
 	ret = append(ret, q.pkg.Render()...)
 	ret = append(ret, "."...)
@@ -902,7 +913,8 @@ func TypeLit(ts [][]*Token) [][]*Token {
 }
 
 func TypeName(ts [][]*Token) ([]Renderer, [][]*Token) {
-	qiR, qiS := QualifiedIdent(ts)
+	var qiR []Renderer
+	qiS := fromState(QualifiedIdent(toState(ts)))
 	idR, idS := tokenParser(ts, token.IDENT)
 	return append(qiR, idR...), append(qiS, idS...)
 }
@@ -996,16 +1008,14 @@ func VarSpec(ts [][]*Token) [][]*Token {
 	return append(typ, assign...)
 }
 
-func nonBlankIdent(ts [][]*Token) ([]Renderer, [][]*Token) {
-	var result [][]*Token
-	var tree []Renderer
-	for _, t := range ts {
-		if p := pop(&t); p != nil && p.tok == token.IDENT && p.lit != `_` {
-			result = append(result, t)
-			tree = append(tree, p)
+func nonBlankIdent(ss []State) []State {
+	var result []State
+	for _, s := range ss {
+		if p := pop(&s.t); p != nil && p.tok == token.IDENT && p.lit != `_` {
+			result = append(result, State{append(s.r, p), s.t})
 		}
 	}
-	return tree, result
+	return result
 }
 
 func tokenReader(ts [][]*Token, tok token.Token) [][]*Token {
