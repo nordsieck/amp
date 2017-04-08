@@ -337,6 +337,10 @@ func GotoStmt(ts [][]*Token) [][]*Token {
 	return tokenReader(ts, token.IDENT)
 }
 
+func IdentifierListState(ss []State) []State {
+	return tokenParserState(ss, token.IDENT)
+}
+
 func IdentifierList(ts [][]*Token) ([]Renderer, [][]*Token) {
 	var result [][]*Token
 	var trees []Renderer
