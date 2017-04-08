@@ -23,6 +23,8 @@ type (
 
 func (_ e) Render() []byte { return nil }
 
+func (s *State) String() string { return `{` + fmt.Sprint(s.r) + `,` + fmt.Sprint(s.t) + `}` }
+
 func AddOp(ss []State) []State {
 	var result []State
 	for _, s := range ss {

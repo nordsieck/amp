@@ -48,6 +48,22 @@ var (
 	lbrace = &Token{tok: token.LBRACE}
 )
 
+func TestState_String(t *testing.T) {
+	states := map[string]State{
+		`{[],[]}`:                     {},
+		`{[],[{; ;}]}`:                {t: []*Token{semi}},
+		`{[],[{INT 1} {; ;}]}`:        {t: []*Token{{token.INT, `1`}, semi}},
+		`{[{INT 1}],[]}`:              {r: []Renderer{&Token{token.INT, `1`}}},
+		`{[{INT 1}],[{INT 1} {; ;}]}`: {[]Renderer{&Token{token.INT, `1`}}, []*Token{{token.INT, `1`}, semi}},
+	}
+	for expected, s := range states {
+		text := s.String()
+		if text != expected {
+			t.Error(`Expected: ` + expected + `, Got: ` + text + `,`)
+		}
+	}
+}
+
 func TestAddOp(t *testing.T) {
 	resultState(t, AddOp, map[string][]StateOutput{
 		`+`: {{[]string{``, `+`}, []*Token{}}},
