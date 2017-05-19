@@ -57,10 +57,18 @@ func TestState_String(t *testing.T) {
 		`{[{INT 1}],[{INT 1} {; ;}]}`: {[]Renderer{&Token{token.INT, `1`}}, []*Token{{token.INT, `1`}, semi}},
 	}
 	for expected, s := range states {
-		text := s.String()
-		if text != expected {
-			t.Error(`Expected: ` + expected + `, Got: ` + text + `,`)
-		}
+		defect.Equal(t, s.String(), expected)
+	}
+}
+
+func TestState_Copy(t *testing.T) {
+	cases := []State{
+		{r: []Renderer{}},
+		{r: []Renderer{&Token{tok: token.IDENT, lit: `a`}}, t: []*Token{{token.IDENT, `a`}}},
+	}
+
+	for _, c := range cases {
+		defect.DeepEqual(t, c.Copy(), c)
 	}
 }
 
