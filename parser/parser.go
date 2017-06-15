@@ -23,7 +23,7 @@ type (
 
 func (_ e) Render() []byte { return nil }
 
-func (s *State) String() string { return `{` + fmt.Sprint(s.r) + `,` + fmt.Sprint(s.t) + `}` }
+func (s *State) String() string { return `{` + fmt.Sprint(s.r) + `,` + tokenSliceToString(s.t) + `}` }
 
 func (s *State) Copy() State {
 	ns := State{

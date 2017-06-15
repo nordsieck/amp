@@ -62,3 +62,15 @@ func resultState(t *testing.T, s Stator, m map[string][]StateOutput) {
 		// }
 	}
 }
+
+func TestTokenSliceToString(t *testing.T) {
+	cases := map[string][]*Token{
+		"[]":                 {},
+		"[{; \n}]":           {ret},
+		"[{; \n} {IDENT a}]": {ret, &Token{token.IDENT, `a`}},
+	}
+
+	for expected, tokens := range cases {
+		defect.DeepEqual(t, tokenSliceToString(tokens), expected)
+	}
+}
