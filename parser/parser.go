@@ -350,7 +350,24 @@ func GotoStmt(ts [][]*Token) [][]*Token {
 
 // what does this need to do to be successful?
 func IdentifierListState(ss []State) []State {
-	return tokenParserState(ss, token.IDENT)
+	state := []State{}
+
+	for _, s := range ss {
+		list := identifierList{}
+		resultStates := tokenParserState([]State{s}, token.IDENT)
+		if len(resultStates) > 0 {
+			// pop ident off the stack and add it to a list
+			id := resultStates[0].r[len(resultStates[0].r)-1]
+			list = append(list, id)
+			resultStates[0].r = resultStates[0].r[:len(resultStates[0].r)-1]
+
+			// put the list on the stack
+			resultStates[0].r = append(resultStates[0].r, list)
+			state = append(state, resultStates...)
+		}
+	}
+
+	return state
 }
 
 func IdentifierList(ts [][]*Token) ([]Renderer, [][]*Token) {
