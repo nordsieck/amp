@@ -405,8 +405,8 @@ func TestGotoStmt(t *testing.T) {
 	remaining(t, GotoStmt, Tmap{`goto a`: {{ret}}, `goto`: empty, `a`: empty})
 }
 
-func TestIdentifierListState(t *testing.T) {
-	resultState(t, IdentifierListState, map[string][]StateOutput{
+func TestIdentifierList(t *testing.T) {
+	resultState(t, IdentifierList, map[string][]StateOutput{
 		`a`: {{[]string{``, `a`}, []*Token{ret}}},
 		//`a,a`: {{[]string{``, `a`}, []*Token{ret, a, comma}}, {[]string{``, `a,a`}, []*Token{ret}}}, // TODO: support non greedy parser
 		`a,a`: {{[]string{``, `a,a`}, []*Token{ret}}},
