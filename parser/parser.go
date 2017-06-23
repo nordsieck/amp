@@ -48,6 +48,22 @@ func AddOp(ss []State) []State {
 	return result
 }
 
+func AnonymousFieldState(ss []State) []State {
+	return ss
+}
+
+type anonymousField struct {
+	pointer  bool
+	typeName Renderer
+}
+
+func (a anonymousField) Render() []byte {
+	if a.pointer {
+		return append([]byte(`*`), a.typeName.Render()...)
+	}
+	return a.typeName.Render()
+}
+
 func AnonymousField(ts [][]*Token) [][]*Token {
 	ts = append(ts, tokenReader(ts, token.MUL)...)
 	return fromState(TypeName(toState(ts)))

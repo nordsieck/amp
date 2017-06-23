@@ -89,6 +89,11 @@ func TestAnonymousField(t *testing.T) {
 	})
 }
 
+func TestAnonymousField_Render(t *testing.T) {
+	defect.Equal(t, string(anonymousField{true, &Token{tok: token.IDENT, lit: `a`}}.Render()), `*a`)
+	defect.Equal(t, string(anonymousField{false, &qualifiedIdent{&Token{tok: token.IDENT, lit: `a`}, &Token{tok: token.IDENT, lit: `b`}}}.Render()), `a.b`)
+}
+
 func TestArguments(t *testing.T) {
 	remaining(t, Arguments, Tmap{
 		`()`:        {{ret}},
