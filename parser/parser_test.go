@@ -417,9 +417,10 @@ func TestIdentifierList(t *testing.T) {
 func TestIdentifierListState(t *testing.T) {
 	resultState(t, IdentifierListState, map[string][]StateOutput{
 		`a`: {{[]string{``, `a`}, []*Token{ret}}},
-		//		`a,a`: {[]string{`a`, `a,a`}, [][]*Token{{ret, a, comma}, {ret}}},
-		`1`: nil,
-		`_`: {{[]string{``, `_`}, []*Token{ret}}},
+		//`a,a`: {{[]string{``, `a`}, []*Token{ret, a, comma}}, {[]string{``, `a,a`}, []*Token{ret}}}, // TODO: support non greedy parser
+		`a,a`: {{[]string{``, `a,a`}, []*Token{ret}}},
+		`1`:   nil,
+		`_`:   {{[]string{``, `_`}, []*Token{ret}}},
 	})
 }
 

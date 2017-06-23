@@ -361,6 +361,25 @@ func IdentifierListState(ss []State) []State {
 			list = append(list, id)
 			resultStates[0].r = resultStates[0].r[:len(resultStates[0].r)-1]
 
+			// take multiple items (greedy).  Later, fix this so that we just
+			// use parsers here and take items off the stack
+			for {
+				tempStates := tokenReaderState([]State{resultStates[0]}, token.COMMA)
+				if len(tempStates) != 1 {
+					break
+				}
+				tempStates = tokenParserState([]State{tempStates[0]}, token.IDENT)
+				if len(tempStates) != 1 {
+					break
+				}
+				resultStates = tempStates
+
+				// pop ident off the stacka nd add it to a list
+				id = resultStates[0].r[len(resultStates[0].r)-1]
+				list = append(list, id)
+				resultStates[0].r = resultStates[0].r[:len(resultStates[0].r)-1]
+			}
+
 			// put the list on the stack
 			resultStates[0].r = append(resultStates[0].r, list)
 			state = append(state, resultStates...)
