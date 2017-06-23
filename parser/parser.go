@@ -650,23 +650,6 @@ func QualifiedIdent(ss []State) []State {
 	return ss
 }
 
-// func QualifiedIdent(ts [][]*Token) ([]Renderer, [][]*Token) {
-// 	var result [][]*Token
-// 	var qi []Renderer
-// 	for _, t := range ts {
-
-// 		pkg, outS := PackageName([][]*Token{t})
-// 		_, outS = tokenParser(outS, token.PERIOD)
-// 		name, outS := tokenParser(outS, token.IDENT)
-// 		if len(name) == 0 {
-// 			continue
-// 		}
-// 		qi = append(qi, &qualifiedIdent{pkg[0], name[0]})
-// 		result = append(result, outS...)
-// 	}
-// 	return qi, result
-// }
-
 type qualifiedIdent struct{ pkg, name Renderer }
 
 func (q qualifiedIdent) Render() []byte {
