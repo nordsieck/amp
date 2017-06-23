@@ -1073,6 +1073,16 @@ func tokenParser(ts [][]*Token, tok token.Token) ([]Renderer, [][]*Token) {
 	return tree, result
 }
 
+func tokenReaderState(ss []State, tok token.Token) []State {
+	var result []State
+	for _, s := range ss {
+		if p := pop(&s.t); p != nil && p.tok == tok {
+			result = append(result, s)
+		}
+	}
+	return result
+}
+
 func tokenParserState(ss []State, tok token.Token) []State {
 	var result []State
 	for _, s := range ss {

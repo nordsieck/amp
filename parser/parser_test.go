@@ -1050,6 +1050,15 @@ func TestTokenParser(t *testing.T) {
 	defect.DeepEqual(t, tree, []Renderer{&Token{tok: token.RPAREN}})
 }
 
+func TestTokenReaderState(t *testing.T) {
+	state := []State{
+		{[]Renderer{e{}}, []*Token{ret, rparen}},
+		{[]Renderer{e{}}, []*Token{ret, rparen, a, dot}},
+	}
+	newState := tokenReaderState(state, token.RPAREN)
+	defect.DeepEqual(t, newState, []State{{[]Renderer{e{}}, []*Token{ret}}})
+}
+
 func TestTokenParserState(t *testing.T) {
 	state := []State{
 		{[]Renderer{e{}}, []*Token{ret, rparen}},
