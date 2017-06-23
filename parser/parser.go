@@ -171,7 +171,7 @@ func ConstDecl(ts [][]*Token) [][]*Token {
 // bad spec
 // IdentifierLit [ Type ] "=" ExpressionList
 func ConstSpec(ts [][]*Token) [][]*Token {
-	_, ts = IdentifierList(ts)
+	ts = fromState(IdentifierListState(toState(ts)))
 	ts = append(ts, Type(ts)...)
 	ts = tokenReader(ts, token.ASSIGN)
 	return ExpressionList(ts)
@@ -293,7 +293,7 @@ func ExprSwitchStmt(ts [][]*Token) [][]*Token {
 func FallthroughStmt(ss []State) []State { return tokenParserState(ss, token.FALLTHROUGH) }
 
 func FieldDecl(ts [][]*Token) [][]*Token {
-	_, a := IdentifierList(ts)
+	a := fromState(IdentifierListState(toState(ts)))
 	if len(a) != 0 {
 		a = Type(a)
 	}
@@ -387,36 +387,6 @@ func IdentifierListState(ss []State) []State {
 	}
 
 	return state
-}
-
-func IdentifierList(ts [][]*Token) ([]Renderer, [][]*Token) {
-	var result [][]*Token
-	var trees []Renderer
-	var tree identifierList
-	for _, t := range ts {
-		outT, outS := tokenParser([][]*Token{t}, token.IDENT)
-		if len(outT) == 0 {
-			continue
-		}
-		tree = identifierList{outT[0]}
-		trees = append(trees, tree)
-		t = outS[0]
-		result = append(result, t)
-
-		nextS := [][]*Token{t}
-		for {
-			_, outS = tokenParser(nextS, token.COMMA)
-			outT, outS = tokenParser(outS, token.IDENT)
-			if len(outT) == 0 {
-				break
-			}
-			tree = append(tree, outT[0])
-			trees = append(trees, tree)
-			result = append(result, outS...)
-			nextS = outS
-		}
-	}
-	return trees, result
 }
 
 type identifierList []Renderer
@@ -617,7 +587,7 @@ func PackageClause(ts [][]*Token) [][]*Token {
 func PackageName(ss []State) []State { return nonBlankIdent(ss) }
 
 func ParameterDecl(ts [][]*Token) [][]*Token {
-	_, idList := IdentifierList(ts)
+	idList := fromState(IdentifierListState(toState(ts)))
 	ts = append(ts, idList...)
 	ts = append(ts, tokenReader(ts, token.ELLIPSIS)...)
 	if len(ts) == 0 {
@@ -709,7 +679,7 @@ func (q qualifiedIdent) Render() []byte {
 func RangeClause(ts [][]*Token) [][]*Token {
 	exp := ExpressionList(ts)
 	exp = tokenReader(exp, token.ASSIGN)
-	_, id := IdentifierList(ts)
+	id := fromState(IdentifierListState(toState(ts)))
 	id = tokenReader(id, token.DEFINE)
 	ts = append(ts, append(exp, id...)...)
 	ts = tokenReader(ts, token.RANGE)
@@ -735,7 +705,7 @@ func ReceiverType(ts [][]*Token) [][]*Token {
 func RecvStmt(ts [][]*Token) [][]*Token {
 	expr := ExpressionList(ts)
 	expr = tokenReader(expr, token.ASSIGN)
-	_, ident := IdentifierList(ts)
+	ident := fromState(IdentifierListState(toState(ts)))
 	ident = tokenReader(ident, token.DEFINE)
 	return Expression(append(ts, append(expr, ident...)...))
 }
@@ -795,7 +765,7 @@ func SendStmt(ts [][]*Token) [][]*Token {
 }
 
 func ShortVarDecl(ts [][]*Token) [][]*Token {
-	_, ts = IdentifierList(ts)
+	ts = fromState(IdentifierListState(toState(ts)))
 	ts = tokenReader(ts, token.DEFINE)
 	return ExpressionList(ts)
 }
@@ -1048,7 +1018,7 @@ func VarDecl(ts [][]*Token) [][]*Token {
 }
 
 func VarSpec(ts [][]*Token) [][]*Token {
-	_, ts = IdentifierList(ts)
+	ts = fromState(IdentifierListState(toState(ts)))
 	typ := Type(ts)
 	extra := tokenReader(typ, token.ASSIGN)
 	extra = ExpressionList(extra)

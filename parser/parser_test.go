@@ -405,15 +405,6 @@ func TestGotoStmt(t *testing.T) {
 	remaining(t, GotoStmt, Tmap{`goto a`: {{ret}}, `goto`: empty, `a`: empty})
 }
 
-func TestIdentifierList(t *testing.T) {
-	result(t, IdentifierList, Omap{
-		`a`:   {[]string{`a`}, [][]*Token{{ret}}},
-		`a,a`: {[]string{`a`, `a,a`}, [][]*Token{{ret, a, comma}, {ret}}},
-		`1`:   {},
-		`_`:   {[]string{`_`}, [][]*Token{{ret}}},
-	})
-}
-
 func TestIdentifierListState(t *testing.T) {
 	resultState(t, IdentifierListState, map[string][]StateOutput{
 		`a`: {{[]string{``, `a`}, []*Token{ret}}},
