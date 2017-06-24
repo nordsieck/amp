@@ -163,6 +163,21 @@ func TestChannelType(t *testing.T) {
 	})
 }
 
+func TestChannelTypeState(t *testing.T) {
+	resultState(t, ChannelTypeState, map[string][]StateOutput{
+		`chan int`:   {{[]string{``, `chan int`}, []*Token{ret}}},
+		`<-chan int`: {{[]string{``, `<-chan int`}, []*Token{ret}}},
+		`chan<- int`: {{[]string{``, `chan<- int`}, []*Token{ret}}},
+		`int`:        nil,
+	})
+}
+
+func TestChannelType_Render(t *testing.T) {
+	defect.Equal(t, string(channelType{nil, &Token{token.IDENT, `int`}}.Render()), `chan int`)
+	defect.Equal(t, string(channelType{&_true, &Token{token.IDENT, `int`}}.Render()), `<-chan int`)
+	defect.Equal(t, string(channelType{&_false, &Token{token.IDENT, `int`}}.Render()), `chan<- int`)
+}
+
 func TestCompositeLit(t *testing.T) {
 	remaining(t, CompositeLit, Tmap{
 		`T{1}`: {{ret}},
@@ -511,6 +526,17 @@ func TestLiteralValue(t *testing.T) {
 
 func TestMapType(t *testing.T) {
 	remaining(t, MapType, Tmap{`map[int]int`: {{ret}}})
+}
+
+func TestMapTypeState(t *testing.T) {
+	resultState(t, MapTypeState, map[string][]StateOutput{
+		`map[int]int`: {{[]string{``, `map[int]int`}, []*Token{ret}}},
+		`int`:         nil,
+	})
+}
+
+func TestMapType_Render(t *testing.T) {
+	defect.Equal(t, string(mapType{&Token{token.IDENT, `a`}, &Token{token.IDENT, `b`}}.Render()), `map[a]b`)
 }
 
 func TestMethodDecl(t *testing.T) {
@@ -893,13 +919,13 @@ func TestType(t *testing.T) {
 
 func TestTypeState(t *testing.T) {
 	resultState(t, TypeState, map[string][]StateOutput{
-	//`a`:        {{[]string{``, `a`}, []*Token{ret}}},
-	//`a.a`:      {{[]string{``, `a.a`}, []*Token{ret}}, {[]string{``, `a`}, []*Token{ret, a, dot}}},
-	//`1`:        nil,
-	//`_`:        {{[]string{``, `_`}, []*Token{ret}}},
-	//`(a.a)`:    {{[]string{``, `(a.a)`}, []*Token{ret}}},
-	//`(((_)))`:  {{[]string{``, `(((_)))`}, []*Token{ret}}},
-	//`chan int`: {{[]string{``, `chan int`}, []*Token{ret}}},
+		`a`:   {{[]string{``, `a`}, []*Token{ret}}},
+		`a.a`: {{[]string{``, `a.a`}, []*Token{ret}}, {[]string{``, `a`}, []*Token{ret, a, dot}}},
+		`1`:   nil,
+		`_`:   {{[]string{``, `_`}, []*Token{ret}}},
+		//`(a.a)`:    {{[]string{``, `(a.a)`}, []*Token{ret}}},
+		//`(((_)))`:  {{[]string{``, `(((_)))`}, []*Token{ret}}},
+		`chan int`: {{[]string{``, `chan int`}, []*Token{ret}}},
 	})
 }
 
@@ -962,9 +988,9 @@ func TestTypeLitState(t *testing.T) {
 		`*int`: {{[]string{``, `*int`}, []*Token{ret}}},
 		//`func()`:      {{[]string{``, `func()`}, []*Token{ret}}},
 		//`interface{}`: {{[]string{``, `interface{}`}, []*Token{ret}}},
-		`[]int`: {{[]string{``, `[]int`}, []*Token{ret}}},
-		//`map[int]int`: {{[]string{``, `map[int]int`}, []*Token{ret}}},
-		//`chan int`:    {{[]string{``, `chan int`}, []*Token{ret}}},
+		`[]int`:       {{[]string{``, `[]int`}, []*Token{ret}}},
+		`map[int]int`: {{[]string{``, `map[int]int`}, []*Token{ret}}},
+		`chan int`:    {{[]string{``, `chan int`}, []*Token{ret}}},
 	})
 }
 

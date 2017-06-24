@@ -5,6 +5,11 @@ import (
 	"go/token"
 )
 
+var (
+	_true  = true
+	_false = false
+)
+
 type (
 	Reader   func([][]*Token) [][]*Token
 	Parser   func([][]*Token) ([]Renderer, [][]*Token)
@@ -142,6 +147,52 @@ func ChannelType(ts [][]*Token) [][]*Token {
 		return nil
 	}
 	return Type(together)
+}
+
+func ChannelTypeState(ss []State) []State {
+	plain := tokenReaderState(ss, token.CHAN)
+	after := tokenReaderState(plain, token.ARROW)
+	before := tokenReaderState(ss, token.ARROW)
+	before = tokenReaderState(before, token.CHAN)
+
+	if len(plain) != 0 {
+		plain = TypeState(plain)
+		for _, s := range plain {
+			ct := channelType{nil, s.r[len(s.r)-1]}
+			s.r[len(s.r)-1] = ct
+		}
+	}
+	if len(after) != 0 {
+		after = TypeState(after)
+		for _, s := range after {
+			ct := channelType{&_false, s.r[len(s.r)-1]}
+			s.r[len(s.r)-1] = ct
+		}
+	}
+	if len(before) != 0 {
+		before = TypeState(before)
+		for _, s := range before {
+			ct := channelType{&_true, s.r[len(s.r)-1]}
+			s.r[len(s.r)-1] = ct
+		}
+	}
+	return append(append(plain, after...), before...)
+}
+
+type channelType struct {
+	leadingArrow *bool // nil = no arrow
+	r            Renderer
+}
+
+func (c channelType) Render() []byte {
+	preamble := `chan<- `
+	if c.leadingArrow == nil {
+		preamble = `chan `
+	} else if *c.leadingArrow {
+		preamble = `<-chan `
+	}
+
+	return append([]byte(preamble), c.r.Render()...)
 }
 
 func CommCase(ts [][]*Token) [][]*Token {
@@ -532,6 +583,30 @@ func MapType(ts [][]*Token) [][]*Token {
 	ts = Type(ts)
 	ts = tokenReader(ts, token.RBRACK)
 	return Type(ts)
+}
+
+func MapTypeState(ss []State) []State {
+	ss = tokenReaderState(ss, token.MAP)
+	ss = tokenReaderState(ss, token.LBRACK)
+	if len(ss) == 0 {
+		return nil
+	}
+	ss = TypeState(ss)
+	ss = tokenReaderState(ss, token.RBRACK)
+	ss = TypeState(ss)
+	for i, s := range ss {
+		mt := mapType{s.r[len(s.r)-2], s.r[len(s.r)-1]}
+		s.r = s.r[:len(s.r)-2]
+		s.r = append(s.r, mt)
+		ss[i].r = s.r
+	}
+	return ss
+}
+
+type mapType struct{ k, v Renderer }
+
+func (m mapType) Render() []byte {
+	return append(append(append([]byte(`map[`), m.k.Render()...), `]`...), m.v.Render()...)
 }
 
 // bad spec
@@ -959,7 +1034,9 @@ func TypeList(ts [][]*Token) [][]*Token {
 }
 
 func TypeLitState(ss []State) []State {
-	return append(PointerTypeState(ss), SliceTypeState(ss)...)
+	return append(
+		append(PointerTypeState(ss), SliceTypeState(ss)...),
+		append(MapTypeState(ss), ChannelTypeState(ss)...)...)
 }
 
 func TypeLit(ts [][]*Token) [][]*Token {
