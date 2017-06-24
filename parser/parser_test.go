@@ -89,6 +89,13 @@ func TestAnonymousField(t *testing.T) {
 	})
 }
 
+func TestAnonymousFieldState(t *testing.T) {
+	resultState(t, AnonymousFieldState, map[string][]StateOutput{
+		`a.a`:  {{[]string{``, `a.a`}, []*Token{ret}}, {[]string{``, `a`}, []*Token{ret, a, dot}}},
+		`*a.a`: {{[]string{``, `*a.a`}, []*Token{ret}}, {[]string{``, `*a`}, []*Token{ret, a, dot}}},
+	})
+}
+
 func TestAnonymousField_Render(t *testing.T) {
 	defect.Equal(t, string(anonymousField{true, &Token{tok: token.IDENT, lit: `a`}}.Render()), `*a`)
 	defect.Equal(t, string(anonymousField{false, &qualifiedIdent{&Token{tok: token.IDENT, lit: `a`}, &Token{tok: token.IDENT, lit: `b`}}}.Render()), `a.b`)

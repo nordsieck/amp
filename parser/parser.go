@@ -49,6 +49,19 @@ func AddOp(ss []State) []State {
 }
 
 func AnonymousFieldState(ss []State) []State {
+	ss = append(ss, tokenParserState(ss, token.MUL)...)
+	ss = TypeName(ss)
+	for i, s := range ss {
+		af := anonymousField{typeName: s.r[len(s.r)-1]}
+		prev := s.r[len(s.r)-2]
+		if tok, ok := prev.(*Token); ok && tok.tok == token.MUL {
+			af.pointer = true
+			s.r = s.r[:len(s.r)-2]
+		} else {
+			s.r = s.r[:len(s.r)-1]
+		}
+		ss[i].r = append(s.r, af)
+	}
 	return ss
 }
 
