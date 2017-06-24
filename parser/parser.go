@@ -860,6 +860,15 @@ func TopLevelDecl(ts [][]*Token) [][]*Token {
 	return append(append(Declaration(ts), FunctionDecl(ts)...), MethodDecl(ts)...)
 }
 
+func TypeState(ss []State) []State {
+	paren := tokenReaderState(ss, token.LPAREN) // TODO: wrap this in a struct to preserve the parens
+	if len(paren) != 0 {
+		paren = TypeState(paren)
+	}
+	paren = tokenReaderState(paren, token.RPAREN)
+	return append(append(TypeName(ss), TypeLitState(ss)...), paren...)
+}
+
 func Type(ts [][]*Token) [][]*Token {
 	paren := tokenReader(ts, token.LPAREN)
 	if len(paren) != 0 {
@@ -912,6 +921,10 @@ func TypeList(ts [][]*Token) [][]*Token {
 		next = current
 	}
 	return ts
+}
+
+func TypeLitState(ss []State) []State {
+	return ss
 }
 
 func TypeLit(ts [][]*Token) [][]*Token {

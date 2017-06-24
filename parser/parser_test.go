@@ -869,6 +869,18 @@ func TestType(t *testing.T) {
 	})
 }
 
+func TestTypeState(t *testing.T) {
+	resultState(t, TypeState, map[string][]StateOutput{
+	//`a`:        {{[]string{``, `a`}, []*Token{ret}}},
+	//`a.a`:      {{[]string{``, `a.a`}, []*Token{ret}}, {[]string{``, `a`}, []*Token{ret, a, dot}}},
+	//`1`:        nil,
+	//`_`:        {{[]string{``, `_`}, []*Token{ret}}},
+	//`(a.a)`:    {{[]string{``, `(a.a)`}, []*Token{ret}}},
+	//`(((_)))`:  {{[]string{``, `(((_)))`}, []*Token{ret}}},
+	//`chan int`: {{[]string{``, `chan int`}, []*Token{ret}}},
+	})
+}
+
 func TestTypeAssertion(t *testing.T) {
 	remaining(t, TypeAssertion, Tmap{
 		`.(int)`: {{ret}},
@@ -918,6 +930,19 @@ func TestTypeLit(t *testing.T) {
 		`[]int`:       {{ret}},
 		`map[int]int`: {{ret}},
 		`chan int`:    {{ret}},
+	})
+}
+
+func TestTypeLitState(t *testing.T) {
+	resultState(t, TypeLitState, map[string][]StateOutput{
+	//`[1]int`:      {{[]string{``, `[1]int`}, []*Token{ret}}},
+	//`struct{}`:    {{[]string{``, `struct{}`}, []*Token{ret}}},
+	//`*int`:        {{[]string{``, `*int`}, []*Token{ret}}},
+	//`func()`:      {{[]string{``, `func()`}, []*Token{ret}}},
+	//`interface{}`: {{[]string{``, `interface{}`}, []*Token{ret}}},
+	//`[]int`:       {{[]string{``, `[]int`}, []*Token{ret}}},
+	//`map[int]int`: {{[]string{``, `map[int]int`}, []*Token{ret}}},
+	//`chan int`:    {{[]string{``, `chan int`}, []*Token{ret}}},
 	})
 }
 
