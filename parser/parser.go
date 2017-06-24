@@ -48,7 +48,7 @@ func AddOp(ss []State) []State {
 	return result
 }
 
-func AnonymousFieldState(ss []State) []State {
+func AnonymousField(ss []State) []State {
 	ss = append(ss, tokenParserState(ss, token.MUL)...)
 	ss = TypeName(ss)
 	for i, s := range ss {
@@ -75,11 +75,6 @@ func (a anonymousField) Render() []byte {
 		return append([]byte(`*`), a.typeName.Render()...)
 	}
 	return a.typeName.Render()
-}
-
-func AnonymousField(ts [][]*Token) [][]*Token {
-	ts = append(ts, tokenReader(ts, token.MUL)...)
-	return fromState(TypeName(toState(ts)))
 }
 
 // bad spec
@@ -326,7 +321,7 @@ func FieldDecl(ts [][]*Token) [][]*Token {
 	if len(a) != 0 {
 		a = Type(a)
 	}
-	ts = append(AnonymousField(ts), a...)
+	ts = append(fromState(AnonymousField(toState(ts))), a...)
 	return append(ts, tokenReader(ts, token.STRING)...)
 }
 

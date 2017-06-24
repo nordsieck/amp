@@ -83,14 +83,7 @@ func TestAddOp(t *testing.T) {
 }
 
 func TestAnonymousField(t *testing.T) {
-	remaining(t, AnonymousField, Tmap{
-		`a.a`:  {{ret}, {ret, a, dot}},
-		`*a.a`: {{ret}, {ret, a, dot}},
-	})
-}
-
-func TestAnonymousFieldState(t *testing.T) {
-	resultState(t, AnonymousFieldState, map[string][]StateOutput{
+	resultState(t, AnonymousField, map[string][]StateOutput{
 		`a.a`:  {{[]string{``, `a.a`}, []*Token{ret}}, {[]string{``, `a`}, []*Token{ret, a, dot}}},
 		`*a.a`: {{[]string{``, `*a.a`}, []*Token{ret}}, {[]string{``, `*a`}, []*Token{ret, a, dot}}},
 	})
