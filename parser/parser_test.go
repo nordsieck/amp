@@ -631,6 +631,17 @@ func TestPointerType(t *testing.T) {
 	})
 }
 
+func TestPointerTypeState(t *testing.T) {
+	resultState(t, PointerTypeState, map[string][]StateOutput{
+		`*int`: {{[]string{``, `*int`}, []*Token{ret}}},
+		`int`:  nil,
+	})
+}
+
+func TestPointerType_Renderer(t *testing.T) {
+	defect.Equal(t, string(pointerType{&Token{tok: token.IDENT, lit: `a`}}.Render()), `*a`)
+}
+
 func TestPrimaryExpr(t *testing.T) {
 	remaining(t, PrimaryExpr, Tmap{
 		`1`: {{ret}},
@@ -935,14 +946,14 @@ func TestTypeLit(t *testing.T) {
 
 func TestTypeLitState(t *testing.T) {
 	resultState(t, TypeLitState, map[string][]StateOutput{
-	//`[1]int`:      {{[]string{``, `[1]int`}, []*Token{ret}}},
-	//`struct{}`:    {{[]string{``, `struct{}`}, []*Token{ret}}},
-	//`*int`:        {{[]string{``, `*int`}, []*Token{ret}}},
-	//`func()`:      {{[]string{``, `func()`}, []*Token{ret}}},
-	//`interface{}`: {{[]string{``, `interface{}`}, []*Token{ret}}},
-	//`[]int`:       {{[]string{``, `[]int`}, []*Token{ret}}},
-	//`map[int]int`: {{[]string{``, `map[int]int`}, []*Token{ret}}},
-	//`chan int`:    {{[]string{``, `chan int`}, []*Token{ret}}},
+		//`[1]int`:      {{[]string{``, `[1]int`}, []*Token{ret}}},
+		//`struct{}`:    {{[]string{``, `struct{}`}, []*Token{ret}}},
+		`*int`: {{[]string{``, `*int`}, []*Token{ret}}},
+		//`func()`:      {{[]string{``, `func()`}, []*Token{ret}}},
+		//`interface{}`: {{[]string{``, `interface{}`}, []*Token{ret}}},
+		//`[]int`:       {{[]string{``, `[]int`}, []*Token{ret}}},
+		//`map[int]int`: {{[]string{``, `map[int]int`}, []*Token{ret}}},
+		//`chan int`:    {{[]string{``, `chan int`}, []*Token{ret}}},
 	})
 }
 

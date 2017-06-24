@@ -628,6 +628,23 @@ func PointerType(ts [][]*Token) [][]*Token {
 	return Type(ts)
 }
 
+func PointerTypeState(ss []State) []State {
+	ss = tokenReaderState(ss, token.MUL)
+	if len(ss) == 0 {
+		return nil
+	}
+	ss = TypeState(ss)
+	for _, s := range ss {
+		pt := pointerType{s.r[len(s.r)-1]}
+		s.r[len(s.r)-1] = pt
+	}
+	return ss
+}
+
+type pointerType struct{ r Renderer }
+
+func (p pointerType) Render() []byte { return append([]byte(`*`), p.r.Render()...) }
+
 func PrimaryExpr(ts [][]*Token) [][]*Token {
 	base := append(Operand(ts), Conversion(ts)...)
 	newBase := base
@@ -924,7 +941,7 @@ func TypeList(ts [][]*Token) [][]*Token {
 }
 
 func TypeLitState(ss []State) []State {
-	return ss
+	return PointerTypeState(ss)
 }
 
 func TypeLit(ts [][]*Token) [][]*Token {
