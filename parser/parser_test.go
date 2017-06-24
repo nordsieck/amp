@@ -793,6 +793,17 @@ func TestSliceType(t *testing.T) {
 	remaining(t, SliceType, Tmap{`[]int`: {{ret}}})
 }
 
+func TestSliceTypeState(t *testing.T) {
+	resultState(t, SliceTypeState, map[string][]StateOutput{
+		`[]int`: {{[]string{``, `[]int`}, []*Token{ret}}},
+		`int`:   nil,
+	})
+}
+
+func TestSliceType_Render(t *testing.T) {
+	defect.Equal(t, string(sliceType{&Token{tok: token.IDENT, lit: `a`}}.Render()), `[]a`)
+}
+
 func TestSourceFile(t *testing.T) {
 	remaining(t, SourceFile, Tmap{
 		`package p`:             {{}},
@@ -951,7 +962,7 @@ func TestTypeLitState(t *testing.T) {
 		`*int`: {{[]string{``, `*int`}, []*Token{ret}}},
 		//`func()`:      {{[]string{``, `func()`}, []*Token{ret}}},
 		//`interface{}`: {{[]string{``, `interface{}`}, []*Token{ret}}},
-		//`[]int`:       {{[]string{``, `[]int`}, []*Token{ret}}},
+		`[]int`: {{[]string{``, `[]int`}, []*Token{ret}}},
 		//`map[int]int`: {{[]string{``, `map[int]int`}, []*Token{ret}}},
 		//`chan int`:    {{[]string{``, `chan int`}, []*Token{ret}}},
 	})

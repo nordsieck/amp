@@ -809,6 +809,24 @@ func SliceType(ts [][]*Token) [][]*Token {
 	return Type(ts)
 }
 
+func SliceTypeState(ss []State) []State {
+	ss = tokenReaderState(ss, token.LBRACK)
+	ss = tokenReaderState(ss, token.RBRACK)
+	if len(ss) == 0 {
+		return nil
+	}
+	ss = TypeState(ss)
+	for _, s := range ss {
+		slice := sliceType{s.r[len(s.r)-1]}
+		s.r[len(s.r)-1] = slice
+	}
+	return ss
+}
+
+type sliceType struct{ r Renderer }
+
+func (s sliceType) Render() []byte { return append([]byte(`[]`), s.r.Render()...) }
+
 func SourceFile(ts [][]*Token) [][]*Token {
 	ts = PackageClause(ts)
 	ts = tokenReader(ts, token.SEMICOLON)
@@ -941,7 +959,7 @@ func TypeList(ts [][]*Token) [][]*Token {
 }
 
 func TypeLitState(ss []State) []State {
-	return PointerTypeState(ss)
+	return append(PointerTypeState(ss), SliceTypeState(ss)...)
 }
 
 func TypeLit(ts [][]*Token) [][]*Token {
