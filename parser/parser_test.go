@@ -412,9 +412,8 @@ func TestGotoStmt(t *testing.T) {
 
 func TestIdentifierList(t *testing.T) {
 	resultState(t, IdentifierList, map[string][]StateOutput{
-		`a`: {{[]string{``, `a`}, []*Token{ret}}},
-		//`a,a`: {{[]string{``, `a`}, []*Token{ret, a, comma}}, {[]string{``, `a,a`}, []*Token{ret}}}, // TODO: support non greedy parser
-		`a,a`: {{[]string{``, `a,a`}, []*Token{ret}}},
+		`a`:   {{[]string{``, `a`}, []*Token{ret}}},
+		`a,b`: {{[]string{``, `a`}, []*Token{ret, &Token{token.IDENT, `b`}, comma}}, {[]string{``, `a,b`}, []*Token{ret}}},
 		`1`:   nil,
 		`_`:   {{[]string{``, `_`}, []*Token{ret}}},
 	})

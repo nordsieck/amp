@@ -372,45 +372,38 @@ func GotoStmt(ts [][]*Token) [][]*Token {
 	return tokenReader(ts, token.IDENT)
 }
 
-// what does this need to do to be successful?
 func IdentifierList(ss []State) []State {
-	state := []State{}
+	ss = tokenParserState(ss, token.IDENT)
 
-	for _, s := range ss {
-		list := identifierList{}
-		resultStates := tokenParserState([]State{s}, token.IDENT)
-		if len(resultStates) > 0 {
-			// pop ident off the stack and add it to a list
-			id := resultStates[0].r[len(resultStates[0].r)-1]
-			list = append(list, id)
-			resultStates[0].r = resultStates[0].r[:len(resultStates[0].r)-1]
-
-			// take multiple items (greedy).  Later, fix this so that we just
-			// use parsers here and take items off the stack
-			for {
-				tempStates := tokenReaderState([]State{resultStates[0]}, token.COMMA)
-				if len(tempStates) != 1 {
-					break
-				}
-				tempStates = tokenParserState([]State{tempStates[0]}, token.IDENT)
-				if len(tempStates) != 1 {
-					break
-				}
-				resultStates = tempStates
-
-				// pop ident off the stacka nd add it to a list
-				id = resultStates[0].r[len(resultStates[0].r)-1]
-				list = append(list, id)
-				resultStates[0].r = resultStates[0].r[:len(resultStates[0].r)-1]
-			}
-
-			// put the list on the stack
-			resultStates[0].r = append(resultStates[0].r, list)
-			state = append(state, resultStates...)
-		}
+	loop := ss
+	for len(loop) != 0 {
+		loop = tokenParserState(loop, token.COMMA)
+		loop = tokenParserState(loop, token.IDENT)
+		ss = append(ss, loop...)
 	}
 
-	return state
+	for i, s := range ss {
+		idList := identifierList{s.r[len(s.r)-1]}
+		s.r = s.r[:len(s.r)-1]
+
+		for len(s.r) > 1 {
+			if tok, ok := s.r[len(s.r)-1].(*Token); ok && tok.tok == token.COMMA {
+				idList = append(idList, s.r[len(s.r)-2])
+				s.r = s.r[:len(s.r)-2]
+			} else {
+				break
+			}
+		}
+
+		// reverse
+		for i := 0; i < len(idList)/2; i++ {
+			j := len(idList) - 1 - i
+			idList[i], idList[j] = idList[j], idList[i]
+		}
+
+		ss[i].r = append(s.r, idList)
+	}
+	return ss
 }
 
 type identifierList []Renderer
