@@ -33,28 +33,34 @@ type StateOutput struct {
 
 var (
 	empty  = [][]*Token(nil)
-	ret    = &Token{tok: token.SEMICOLON, lit: "\n"}
-	semi   = &Token{tok: token.SEMICOLON, lit: `;`}
-	a      = &Token{tok: token.IDENT, lit: `a`}
-	_int   = &Token{tok: token.IDENT, lit: `int`}
-	one    = &Token{tok: token.INT, lit: `1`}
+	ret    = &Token{token.SEMICOLON, "\n"}
+	semi   = &Token{token.SEMICOLON, `;`}
+	a      = &Token{token.IDENT, `a`}
+	b      = &Token{token.IDENT, `b`}
+	c      = &Token{token.IDENT, `c`}
+	d      = &Token{token.IDENT, `d`}
+	_int   = &Token{token.IDENT, `int`}
+	zero   = &Token{token.INT, `0`}
+	one    = &Token{token.INT, `1`}
+	two    = &Token{token.INT, `2`}
 	dot    = &Token{tok: token.PERIOD}
 	comma  = &Token{tok: token.COMMA}
 	lparen = &Token{tok: token.LPAREN}
 	rparen = &Token{tok: token.RPAREN}
-	_if    = &Token{tok: token.IF, lit: `if`}
-	_else  = &Token{tok: token.ELSE, lit: `else`}
+	_if    = &Token{token.IF, `if`}
+	_else  = &Token{token.ELSE, `else`}
 	rbrace = &Token{tok: token.RBRACE}
 	lbrace = &Token{tok: token.LBRACE}
+	inc    = &Token{tok: token.INC}
 )
 
 func TestState_String(t *testing.T) {
 	states := map[string]State{
 		`{[],[]}`:                     {},
 		`{[],[{; ;}]}`:                {t: []*Token{semi}},
-		`{[],[{INT 1} {; ;}]}`:        {t: []*Token{{token.INT, `1`}, semi}},
-		`{[{INT 1}],[]}`:              {r: []Renderer{&Token{token.INT, `1`}}},
-		`{[{INT 1}],[{INT 1} {; ;}]}`: {[]Renderer{&Token{token.INT, `1`}}, []*Token{{token.INT, `1`}, semi}},
+		`{[],[{INT 1} {; ;}]}`:        {t: []*Token{one, semi}},
+		`{[{INT 1}],[]}`:              {r: []Renderer{one}},
+		`{[{INT 1}],[{INT 1} {; ;}]}`: {[]Renderer{one}, []*Token{one, semi}},
 	}
 	for expected, s := range states {
 		defect.Equal(t, s.String(), expected)
@@ -64,7 +70,7 @@ func TestState_String(t *testing.T) {
 func TestState_Copy(t *testing.T) {
 	cases := []State{
 		{r: []Renderer{}},
-		{r: []Renderer{&Token{tok: token.IDENT, lit: `a`}}, t: []*Token{{token.IDENT, `a`}}},
+		{r: []Renderer{a}, t: []*Token{a}},
 	}
 
 	for _, c := range cases {
@@ -90,8 +96,8 @@ func TestAnonymousField(t *testing.T) {
 }
 
 func TestAnonymousField_Render(t *testing.T) {
-	defect.Equal(t, string(anonymousField{true, &Token{tok: token.IDENT, lit: `a`}}.Render()), `*a`)
-	defect.Equal(t, string(anonymousField{false, &qualifiedIdent{&Token{tok: token.IDENT, lit: `a`}, &Token{tok: token.IDENT, lit: `b`}}}.Render()), `a.b`)
+	defect.Equal(t, string(anonymousField{true, a}.Render()), `*a`)
+	defect.Equal(t, string(anonymousField{false, &qualifiedIdent{a, b}}.Render()), `a.b`)
 }
 
 func TestArguments(t *testing.T) {
@@ -192,7 +198,7 @@ func TestCommCase(t *testing.T) {
 	remaining(t, CommCase, Tmap{
 		`default`:   {{}},
 		`case <-a`:  {{ret}},
-		`case a<-5`: {{ret}, {ret, {tok: token.INT, lit: `5`}, {tok: token.ARROW}}},
+		`case a<-5`: {{ret}, {ret, {token.INT, `5`}, {tok: token.ARROW}}},
 	})
 }
 
@@ -203,10 +209,10 @@ func TestCommClause(t *testing.T) {
 		`case a<-5:`:   {{}},
 		`default: a()`: {{ret, rparen, lparen, a}, {ret, rparen, lparen}, {ret}, {}},
 		`case <-a: b(); c()`: {
-			{ret, rparen, lparen, {tok: token.IDENT, lit: `c`}, semi, rparen, lparen, {tok: token.IDENT, lit: `b`}},
-			{ret, rparen, lparen, {tok: token.IDENT, lit: `c`}, semi, rparen, lparen},
-			{ret, rparen, lparen, {tok: token.IDENT, lit: `c`}, semi},
-			{ret, rparen, lparen, {tok: token.IDENT, lit: `c`}},
+			{ret, rparen, lparen, c, semi, rparen, lparen, b},
+			{ret, rparen, lparen, c, semi, rparen, lparen},
+			{ret, rparen, lparen, c, semi},
+			{ret, rparen, lparen, c},
 			{ret, rparen, lparen}, {ret}, {}},
 	})
 }
@@ -225,7 +231,7 @@ func TestConstSpec(t *testing.T) {
 	remaining(t, ConstSpec, Tmap{
 		`a = 1`:           {{ret}},
 		`a int = 1`:       {{ret}},
-		`a, b int = 1, 2`: {{ret, {tok: token.INT, lit: `2`}, comma}, {ret}},
+		`a, b int = 1, 2`: {{ret, two, comma}, {ret}},
 	})
 }
 
@@ -343,7 +349,7 @@ func TestFieldDecl(t *testing.T) {
 	remaining(t, FieldDecl, Tmap{
 		`a,a int`:    {{ret, _int, a, comma}, {ret}},
 		`*int`:       {{ret}},
-		`*int "foo"`: {{ret, {tok: token.STRING, lit: `"foo"`}}, {ret}},
+		`*int "foo"`: {{ret, {token.STRING, `"foo"`}}, {ret}},
 	})
 }
 
@@ -352,9 +358,9 @@ func TestForClause(t *testing.T) {
 		`;;`:       {{}, {}, {}, {}},
 		`a := 1;;`: {{}, {}},
 		`; a < 5;`: {{}, {}, {}, {}},
-		`;; a++`: {{ret, {tok: token.INC}, a}, {ret, {tok: token.INC}, a}, {ret, {tok: token.INC}, a},
-			{ret, {tok: token.INC}, a}, {ret, {tok: token.INC}}, {ret, {tok: token.INC}}, {ret}, {ret}},
-		`a := 1; a < 5; a++`: {{ret, {tok: token.INC}, a}, {ret, {tok: token.INC}, a}, {ret, {tok: token.INC}}, {ret}},
+		`;; a++`: {{ret, inc, a}, {ret, inc, a}, {ret, inc, a},
+			{ret, inc, a}, {ret, inc}, {ret, inc}, {ret}, {ret}},
+		`a := 1; a < 5; a++`: {{ret, inc, a}, {ret, inc, a}, {ret, inc}, {ret}},
 	})
 }
 
@@ -413,7 +419,7 @@ func TestGotoStmt(t *testing.T) {
 func TestIdentifierList(t *testing.T) {
 	resultState(t, IdentifierList, map[string][]StateOutput{
 		`a`:   {{[]string{``, `a`}, []*Token{ret}}},
-		`a,b`: {{[]string{``, `a`}, []*Token{ret, &Token{token.IDENT, `b`}, comma}}, {[]string{``, `a,b`}, []*Token{ret}}},
+		`a,b`: {{[]string{``, `a`}, []*Token{ret, b, comma}}, {[]string{``, `a,b`}, []*Token{ret}}},
 		`1`:   nil,
 		`_`:   {{[]string{``, `_`}, []*Token{ret}}},
 	})
@@ -428,8 +434,8 @@ func TestIfStmt(t *testing.T) {
 		`if a {}`:              {{ret}},
 		`if a := false; a {}`:  {{ret}},
 		`if a {} else {}`:      {{ret, rbrace, lbrace, _else}, {ret}},
-		`if a {} else if b {}`: {{ret, rbrace, lbrace, {tok: token.IDENT, lit: `b`}, _if, _else}, {ret}},
-		`if a := false; a {} else if b {} else {}`: {{ret, rbrace, lbrace, _else, rbrace, lbrace, {tok: token.IDENT, lit: `b`}, _if, _else},
+		`if a {} else if b {}`: {{ret, rbrace, lbrace, b, _if, _else}, {ret}},
+		`if a := false; a {} else if b {} else {}`: {{ret, rbrace, lbrace, _else, rbrace, lbrace, b, _if, _else},
 			{ret, rbrace, lbrace, _else}, {ret}},
 		`if a { b() }`: {{ret}},
 	})
@@ -495,7 +501,7 @@ func TestKeyedElement(t *testing.T) {
 
 func TestLabeledStmt(t *testing.T) {
 	remaining(t, LabeledStmt, Tmap{
-		`a: var b int`: {{ret}, {ret, _int, {tok: token.IDENT, lit: `b`}, {tok: token.VAR, lit: `var`}}},
+		`a: var b int`: {{ret}, {ret, _int, b, {token.VAR, `var`}}},
 	})
 }
 
@@ -553,10 +559,9 @@ func TestMethodExpr(t *testing.T) {
 
 func TestMethodSpec(t *testing.T) {
 	remaining(t, MethodSpec, Tmap{
-		`a()`: {{ret}, {ret, rparen, lparen}},
-		`a`:   {{ret}},
-		`a.a()`: {{ret, rparen, lparen},
-			{ret, rparen, lparen, a, dot}},
+		`a()`:   {{ret}, {ret, rparen, lparen}},
+		`a`:     {{ret}},
+		`a.a()`: {{ret, rparen, lparen}, {ret, rparen, lparen, a, dot}},
 	})
 }
 
@@ -611,7 +616,7 @@ func TestParameterDecl(t *testing.T) {
 	remaining(t, ParameterDecl, Tmap{
 		`int`:      {{ret}},
 		`...int`:   {{ret}},
-		`a, b int`: {{ret, _int, {tok: token.IDENT, lit: `b`}, comma}, {ret}},
+		`a, b int`: {{ret, _int, b, comma}, {ret}},
 		`b... int`: {{ret, _int, {tok: token.ELLIPSIS}}, {ret}},
 	})
 }
@@ -621,15 +626,13 @@ func TestParameterList(t *testing.T) {
 		`int`:      {{ret}},
 		`int, int`: {{ret, _int, comma}, {ret}},
 		`a, b int, c, d int`: {
-			{ret, _int, {tok: token.IDENT, lit: `d`}, comma, {tok: token.IDENT, lit: `c`}, comma,
-				_int, {tok: token.IDENT, lit: `b`}, comma},
-			{ret, _int, {tok: token.IDENT, lit: `d`}, comma, {tok: token.IDENT, lit: `c`}, comma},
-			{ret, _int, {tok: token.IDENT, lit: `d`}, comma, {tok: token.IDENT, lit: `c`}, comma,
-				_int},
-			{ret, _int, {tok: token.IDENT, lit: `d`}, comma},
-			{ret, _int, {tok: token.IDENT, lit: `d`}, comma, {tok: token.IDENT, lit: `c`}, comma},
+			{ret, _int, d, comma, c, comma, _int, b, comma},
+			{ret, _int, d, comma, c, comma},
+			{ret, _int, d, comma, c, comma, _int},
+			{ret, _int, d, comma},
+			{ret, _int, d, comma, c, comma},
 			{ret}, {ret, _int},
-			{ret, _int, {tok: token.IDENT, lit: `d`}, comma},
+			{ret, _int, d, comma},
 			{ret}, {ret}, {ret, _int}, {ret},
 		},
 	})
@@ -656,18 +659,18 @@ func TestPrimaryExpr(t *testing.T) {
 	remaining(t, PrimaryExpr, Tmap{
 		`1`: {{ret}},
 		`(a.a)("foo")`: {
-			{ret, rparen, {tok: token.STRING, lit: `"foo"`}, lparen},
-			{ret, rparen, {tok: token.STRING, lit: `"foo"`}, lparen},
-			{ret, rparen, {tok: token.STRING, lit: `"foo"`}, lparen},
+			{ret, rparen, {token.STRING, `"foo"`}, lparen},
+			{ret, rparen, {token.STRING, `"foo"`}, lparen},
+			{ret, rparen, {token.STRING, `"foo"`}, lparen},
 			{ret}, {ret}, {ret}, {ret}},
 		`a.a`:     {{ret, a, dot}, {ret}, {ret}, {ret}},
 		`a[1]`:    {{ret, {tok: token.RBRACK}, one, {tok: token.LBRACK}}, {ret}},
 		`a[:]`:    {{ret, {tok: token.RBRACK}, {tok: token.COLON}, {tok: token.LBRACK}}, {ret}},
 		`a.(int)`: {{ret, rparen, _int, lparen, dot}, {ret}},
-		`a(b...)`: {{ret, rparen, {tok: token.ELLIPSIS}, {tok: token.IDENT, lit: `b`}, lparen}, {ret}},
+		`a(b...)`: {{ret, rparen, {tok: token.ELLIPSIS}, b, lparen}, {ret}},
 		`a(b...)[:]`: {
 			{ret, {tok: token.RBRACK}, {tok: token.COLON}, {tok: token.LBRACK},
-				rparen, {tok: token.ELLIPSIS}, {tok: token.IDENT, lit: `b`}, lparen},
+				rparen, {tok: token.ELLIPSIS}, b, lparen},
 			{ret, {tok: token.RBRACK}, {tok: token.COLON}, {tok: token.LBRACK}},
 			{ret}},
 	})
@@ -704,13 +707,13 @@ func TestReceiverType(t *testing.T) {
 func TestRecvStmt(t *testing.T) {
 	remaining(t, RecvStmt, Tmap{
 		`<-a`: {{ret}},
-		`a[0], b = <-c`: {{ret, {tok: token.IDENT, lit: `c`}, {tok: token.ARROW}, {tok: token.ASSIGN}, {tok: token.IDENT, lit: `b`}, comma,
-			{tok: token.RBRACK}, {tok: token.INT, lit: `0`}, {tok: token.LBRACK}},
-			{ret, {tok: token.IDENT, lit: `c`}, {tok: token.ARROW}, {tok: token.ASSIGN}, {tok: token.IDENT, lit: `b`}, comma}, {ret}},
-		`a, b := <-c`: {{ret, {tok: token.IDENT, lit: `c`}, {tok: token.ARROW}, {tok: token.DEFINE}, {tok: token.IDENT, lit: `b`}, comma}, {ret}},
-		`a[0], b := <-c`: {{ret, {tok: token.IDENT, lit: `c`}, {tok: token.ARROW}, {tok: token.DEFINE}, {tok: token.IDENT, lit: `b`}, comma,
-			{tok: token.RBRACK}, {tok: token.INT, lit: `0`}, {tok: token.LBRACK}},
-			{ret, {tok: token.IDENT, lit: `c`}, {tok: token.ARROW}, {tok: token.DEFINE}, {tok: token.IDENT, lit: `b`}, comma}},
+		`a[0], b = <-c`: {{ret, c, {tok: token.ARROW}, {tok: token.ASSIGN}, b, comma,
+			{tok: token.RBRACK}, zero, {tok: token.LBRACK}},
+			{ret, c, {tok: token.ARROW}, {tok: token.ASSIGN}, b, comma}, {ret}},
+		`a, b := <-c`: {{ret, c, {tok: token.ARROW}, {tok: token.DEFINE}, b, comma}, {ret}},
+		`a[0], b := <-c`: {{ret, c, {tok: token.ARROW}, {tok: token.DEFINE}, b, comma,
+			{tok: token.RBRACK}, zero, {tok: token.LBRACK}},
+			{ret, c, {tok: token.ARROW}, {tok: token.DEFINE}, b, comma}},
 	})
 }
 
@@ -736,7 +739,7 @@ func TestResult(t *testing.T) {
 func TestReturnStmt(t *testing.T) {
 	remaining(t, ReturnStmt, Tmap{
 		`return 1`:    {{ret, one}, {ret}},
-		`return 1, 2`: {{ret, {tok: token.INT, lit: `2`}, comma, one}, {ret, {tok: token.INT, lit: `2`}, comma}, {ret}},
+		`return 1, 2`: {{ret, two, comma, one}, {ret, two, comma}, {ret}},
 	})
 }
 
@@ -766,7 +769,7 @@ func TestSendStmt(t *testing.T) {
 func TestShortVarDecl(t *testing.T) {
 	remaining(t, ShortVarDecl, Tmap{
 		`a := 1`:       {{ret}},
-		`a, b := 1, 2`: {{ret, {tok: token.INT, lit: `2`}, comma}, {ret}},
+		`a, b := 1, 2`: {{ret, two, comma}, {ret}},
 	})
 }
 
@@ -782,7 +785,7 @@ func TestSimpleStmt(t *testing.T) {
 	remaining(t, SimpleStmt, Tmap{
 		`1`:      {{ret, one}, {ret}},
 		`a <- 1`: {{ret, one, {tok: token.ARROW}, a}, {ret, one, {tok: token.ARROW}}, {ret}},
-		`a++`:    {{ret, {tok: token.INC}, a}, {ret, {tok: token.INC}}, {ret}},
+		`a++`:    {{ret, inc, a}, {ret, inc}, {ret}},
 		`a = 1`:  {{ret, one, {tok: token.ASSIGN}, a}, {ret, one, {tok: token.ASSIGN}}, {ret}},
 		`a := 1`: {{ret, one, {tok: token.DEFINE}, a}, {ret, one, {tok: token.DEFINE}}, {ret}},
 	})
@@ -806,50 +809,47 @@ func TestSliceType(t *testing.T) {
 func TestSourceFile(t *testing.T) {
 	remaining(t, SourceFile, Tmap{
 		`package p`:             {{}},
-		`package p; import "a"`: {{ret, {tok: token.STRING, lit: `"a"`}, {tok: token.IMPORT, lit: `import`}}, {}},
-		`package p; var a int`:  {{ret, _int, a, {tok: token.VAR, lit: `var`}}, {}},
+		`package p; import "a"`: {{ret, {token.STRING, `"a"`}, {token.IMPORT, `import`}}, {}},
+		`package p; var a int`:  {{ret, _int, a, {token.VAR, `var`}}, {}},
 		`package p; import "a"; import "b"; var c int; var d int`: {
-			{ret, _int, {tok: token.IDENT, lit: `d`}, {tok: token.VAR, lit: `var`}, semi, _int, {tok: token.IDENT, lit: `c`},
-				{tok: token.VAR, lit: `var`}, semi, {tok: token.STRING, lit: `"b"`}, {tok: token.IMPORT, lit: `import`}, semi,
-				{tok: token.STRING, lit: `"a"`}, {tok: token.IMPORT, lit: `import`}},
-			{ret, _int, {tok: token.IDENT, lit: `d`}, {tok: token.VAR, lit: `var`}, semi, _int, {tok: token.IDENT, lit: `c`},
-				{tok: token.VAR, lit: `var`}, semi, {tok: token.STRING, lit: `"b"`}, {tok: token.IMPORT, lit: `import`}},
-			{ret, _int, {tok: token.IDENT, lit: `d`}, {tok: token.VAR, lit: `var`}, semi, _int, {tok: token.IDENT, lit: `c`},
-				{tok: token.VAR, lit: `var`}},
-			{ret, _int, {tok: token.IDENT, lit: `d`}, {tok: token.VAR, lit: `var`}}, {}},
+			{ret, _int, d, {token.VAR, `var`}, semi, _int, c, {token.VAR, `var`}, semi, {token.STRING, `"b"`}, {token.IMPORT, `import`},
+				semi, {token.STRING, `"a"`}, {token.IMPORT, `import`}},
+			{ret, _int, d, {token.VAR, `var`}, semi, _int, c, {token.VAR, `var`}, semi, {token.STRING, `"b"`}, {token.IMPORT, `import`}},
+			{ret, _int, d, {token.VAR, `var`}, semi, _int, c, {token.VAR, `var`}},
+			{ret, _int, d, {token.VAR, `var`}}, {}},
 	})
 }
 
 func TestStatement(t *testing.T) {
 	remaining(t, Statement, Tmap{
-		`var a int`: {{ret}, {ret, _int, a, {tok: token.VAR, lit: `var`}}},
+		`var a int`: {{ret}, {ret, _int, a, {token.VAR, `var`}}},
 		`a: var b int`: {{ret},
-			{ret, _int, {tok: token.IDENT, lit: `b`}, {tok: token.VAR, lit: `var`}},
-			{ret, _int, {tok: token.IDENT, lit: `b`}, {tok: token.VAR, lit: `var`}, {tok: token.COLON}, a},
-			{ret, _int, {tok: token.IDENT, lit: `b`}, {tok: token.VAR, lit: `var`}, {tok: token.COLON}}},
+			{ret, _int, b, {token.VAR, `var`}},
+			{ret, _int, b, {token.VAR, `var`}, {tok: token.COLON}, a},
+			{ret, _int, b, {token.VAR, `var`}, {tok: token.COLON}}},
 		`a := 1`:      {{ret, one, {tok: token.DEFINE}, a}, {ret, one, {tok: token.DEFINE}}, {ret}},
-		`go a()`:      {{ret, rparen, lparen, a, {tok: token.GO, lit: `go`}}, {ret, rparen, lparen}, {ret}},
-		`return 1`:    {{ret, one, {tok: token.RETURN, lit: `return`}}, {ret, one}, {ret}},
-		`break a`:     {{ret, a, {tok: token.BREAK, lit: `break`}}, {ret, a}, {ret}},
-		`continue a`:  {{ret, a, {tok: token.CONTINUE, lit: `continue`}}, {ret, a}, {ret}},
-		`goto a`:      {{ret, a, {tok: token.GOTO, lit: `goto`}}, {ret}},
-		`fallthrough`: {{ret, {tok: token.FALLTHROUGH, lit: `fallthrough`}}, {ret}},
+		`go a()`:      {{ret, rparen, lparen, a, {token.GO, `go`}}, {ret, rparen, lparen}, {ret}},
+		`return 1`:    {{ret, one, {token.RETURN, `return`}}, {ret, one}, {ret}},
+		`break a`:     {{ret, a, {token.BREAK, `break`}}, {ret, a}, {ret}},
+		`continue a`:  {{ret, a, {token.CONTINUE, `continue`}}, {ret, a}, {ret}},
+		`goto a`:      {{ret, a, {token.GOTO, `goto`}}, {ret}},
+		`fallthrough`: {{ret, {token.FALLTHROUGH, `fallthrough`}}, {ret}},
 		`{a()}`:       {{ret, rbrace, rparen, lparen, a, lbrace}, {ret}},
 		`if a {}`:     {{ret, rbrace, lbrace, a, _if}, {ret}},
-		`switch {}`:   {{ret, rbrace, lbrace, {tok: token.SWITCH, lit: `switch`}}, {ret}},
-		`select {}`:   {{ret, rbrace, lbrace, {tok: token.SELECT, lit: `select`}}, {ret}},
-		`for {}`:      {{ret, rbrace, lbrace, {tok: token.FOR, lit: `for`}}, {ret}},
-		`defer a()`:   {{ret, rparen, lparen, a, {tok: token.DEFER, lit: `defer`}}, {ret, rparen, lparen}, {ret}},
+		`switch {}`:   {{ret, rbrace, lbrace, {token.SWITCH, `switch`}}, {ret}},
+		`select {}`:   {{ret, rbrace, lbrace, {token.SELECT, `select`}}, {ret}},
+		`for {}`:      {{ret, rbrace, lbrace, {token.FOR, `for`}}, {ret}},
+		`defer a()`:   {{ret, rparen, lparen, a, {token.DEFER, `defer`}}, {ret, rparen, lparen}, {ret}},
 	})
 }
 
 func TestStatementList(t *testing.T) {
 	remaining(t, StatementList, Tmap{
-		`fallthrough`:  {{ret, {tok: token.FALLTHROUGH, lit: `fallthrough`}}, {ret}, {}},
-		`fallthrough;`: {{semi, {tok: token.FALLTHROUGH, lit: `fallthrough`}}, {semi}, {}},
-		`fallthrough; fallthrough`: {{ret, {tok: token.FALLTHROUGH, lit: `fallthrough`}, semi, {tok: token.FALLTHROUGH, lit: `fallthrough`}},
-			{ret, {tok: token.FALLTHROUGH, lit: `fallthrough`}, semi},
-			{ret, {tok: token.FALLTHROUGH, lit: `fallthrough`}}, {ret}, {}},
+		`fallthrough`:  {{ret, {token.FALLTHROUGH, `fallthrough`}}, {ret}, {}},
+		`fallthrough;`: {{semi, {token.FALLTHROUGH, `fallthrough`}}, {semi}, {}},
+		`fallthrough; fallthrough`: {{ret, {token.FALLTHROUGH, `fallthrough`}, semi, {token.FALLTHROUGH, `fallthrough`}},
+			{ret, {token.FALLTHROUGH, `fallthrough`}, semi},
+			{ret, {token.FALLTHROUGH, `fallthrough`}}, {ret}, {}},
 	})
 }
 
@@ -903,13 +903,13 @@ func TestTypeAssertion(t *testing.T) {
 func TestTypeCaseClause(t *testing.T) {
 	remaining(t, TypeCaseClause, Tmap{
 		`case a:`:      {{}},
-		`case a: b()`:  {{ret, rparen, lparen, {tok: token.IDENT, lit: `b`}}, {ret, rparen, lparen}, {ret}, {}},
+		`case a: b()`:  {{ret, rparen, lparen, b}, {ret, rparen, lparen}, {ret}, {}},
 		`default: a()`: {{ret, rparen, lparen, a}, {ret, rparen, lparen}, {ret}, {}},
 		`case a, b: c(); d()`: {
-			{ret, rparen, lparen, {tok: token.IDENT, lit: `d`}, semi, rparen, lparen, {tok: token.IDENT, lit: `c`}},
-			{ret, rparen, lparen, {tok: token.IDENT, lit: `d`}, semi, rparen, lparen},
-			{ret, rparen, lparen, {tok: token.IDENT, lit: `d`}, semi},
-			{ret, rparen, lparen, {tok: token.IDENT, lit: `d`}},
+			{ret, rparen, lparen, d, semi, rparen, lparen, c},
+			{ret, rparen, lparen, d, semi, rparen, lparen},
+			{ret, rparen, lparen, d, semi},
+			{ret, rparen, lparen, d},
 			{ret, rparen, lparen}, {ret}, {}},
 	})
 }
@@ -927,8 +927,8 @@ func TestTypeDecl(t *testing.T) {
 func TestTypeList(t *testing.T) {
 	remaining(t, TypeList, Tmap{
 		`a`:     {{ret}},
-		`a, b`:  {{ret, {tok: token.IDENT, lit: `b`}, comma}, {ret}},
-		`a, b,`: {{comma, {tok: token.IDENT, lit: `b`}, comma}, {comma}},
+		`a, b`:  {{ret, b, comma}, {ret}},
+		`a, b,`: {{comma, b, comma}, {comma}},
 	})
 }
 
@@ -965,7 +965,7 @@ func TestTypeSwitchCase(t *testing.T) {
 	remaining(t, TypeSwitchCase, Tmap{
 		`default`:   {{}},
 		`case a`:    {{ret}},
-		`case a, b`: {{ret, {tok: token.IDENT, lit: `b`}, comma}, {ret}},
+		`case a, b`: {{ret, b, comma}, {ret}},
 	})
 }
 
@@ -1024,7 +1024,7 @@ func TestVarSpec(t *testing.T) {
 		`a int`:       {{ret}},
 		`a int = 1`:   {{ret, one, {tok: token.ASSIGN}}, {ret}},
 		`a = 1`:       {{ret}},
-		`a, b = 1, 2`: {{ret, {tok: token.INT, lit: `2`}, comma}, {ret}},
+		`a, b = 1, 2`: {{ret, two, comma}, {ret}},
 	})
 }
 
@@ -1043,7 +1043,7 @@ func TestTokenParser(t *testing.T) {
 	}
 	tree, state := tokenParser(toks, token.RPAREN)
 	defect.DeepEqual(t, state, [][]*Token{{ret}})
-	defect.DeepEqual(t, tree, []Renderer{&Token{tok: token.RPAREN}})
+	defect.DeepEqual(t, tree, []Renderer{rparen})
 }
 
 func TestTokenReaderState(t *testing.T) {
@@ -1061,5 +1061,5 @@ func TestTokenParserState(t *testing.T) {
 		{[]Renderer{e{}}, []*Token{ret, rparen, a, dot}},
 	}
 	newState := tokenParserState(state, token.RPAREN)
-	defect.DeepEqual(t, newState, []State{{[]Renderer{e{}, &Token{tok: token.RPAREN}}, []*Token{ret}}})
+	defect.DeepEqual(t, newState, []State{{[]Renderer{e{}, rparen}, []*Token{ret}}})
 }
