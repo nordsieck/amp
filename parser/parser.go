@@ -363,6 +363,54 @@ func FieldDecl(ts [][]*Token) [][]*Token {
 	return append(ts, tokenReader(ts, token.STRING)...)
 }
 
+// The problem is that the renderer slice gets copied
+func FieldDeclState(ss []State) []State {
+	typ := IdentifierList(ss)
+	if len(typ) != 0 {
+		typ = TypeState(typ)
+	}
+	typTag := tokenParserState(typ, token.STRING)
+
+	af := AnonymousField(ss)
+	afTag := tokenParserState(af, token.STRING)
+
+	for i, t := range typ {
+		fd := fieldDecl{idList: t.r[len(t.r)-2], typ: t.r[len(t.r)-1]}
+		typ[i].r = rAppend(t.r, 2, fd)
+	}
+	for i, t := range typTag {
+		fd := fieldDecl{idList: t.r[len(t.r)-3], typ: t.r[len(t.r)-2], tag: t.r[len(t.r)-1]}
+		typTag[i].r = rAppend(t.r, 3, fd)
+	}
+	for i, a := range af {
+		fd := fieldDecl{anonField: a.r[len(a.r)-1]}
+		af[i].r = rAppend(a.r, 1, fd)
+	}
+	for i, a := range afTag {
+		fd := fieldDecl{anonField: a.r[len(a.r)-2], tag: a.r[len(a.r)-1]}
+		afTag[i].r = rAppend(a.r, 2, fd)
+	}
+
+	return append(append(typ, typTag...), append(af, afTag...)...)
+}
+
+type fieldDecl struct {
+	idList, typ, anonField, tag Renderer
+}
+
+func (f fieldDecl) Render() []byte {
+	var ret []byte
+	if f.anonField != nil {
+		ret = f.anonField.Render()
+	} else {
+		ret = append(append(f.idList.Render(), ` `...), f.typ.Render()...)
+	}
+	if f.tag != nil {
+		ret = append(append(ret, ` `...), f.tag.Render()...)
+	}
+	return ret
+}
+
 func ForClause(ts [][]*Token) [][]*Token {
 	ts = append(ts, SimpleStmt(ts)...)
 	ts = tokenReader(ts, token.SEMICOLON)

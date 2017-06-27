@@ -344,6 +344,21 @@ func TestFieldDecl(t *testing.T) {
 	})
 }
 
+func TestFieldDeclState(t *testing.T) {
+	resultState(t, FieldDeclState, map[string][]StateOutput{
+		`a,a int`: {{[]string{``, `a,a int`}, []*Token{ret}}, {[]string{``, `a`}, []*Token{ret, _int, a, comma}}},
+		`a,a int "foo"`: {{[]string{``, `a,a int`}, []*Token{ret, {token.STRING, `"foo"`}}}, {[]string{``, `a,a int "foo"`}, []*Token{ret}},
+			{[]string{``, `a`}, []*Token{ret, {token.STRING, `"foo"`}, _int, a, comma}}},
+		`*int`:       {{[]string{``, `*int`}, []*Token{ret}}},
+		`*int "foo"`: {{[]string{``, `*int`}, []*Token{ret, {token.STRING, `"foo"`}}}, {[]string{``, `*int "foo"`}, []*Token{ret}}},
+	})
+}
+
+func TestFieldDecl_Render(t *testing.T) {
+	defect.Equal(t, string(fieldDecl{anonField: &Token{token.IDENT, `int`}, tag: &Token{token.STRING, `a`}}.Render()), `int a`)
+	defect.Equal(t, string(fieldDecl{idList: identifierList{&Token{token.IDENT, `a`}, &Token{token.IDENT, `b`}}, typ: &Token{token.IDENT, `int`}}.Render()), `a,b int`)
+}
+
 func TestForClause(t *testing.T) {
 	remaining(t, ForClause, Tmap{
 		`;;`:       {{}, {}, {}, {}},
