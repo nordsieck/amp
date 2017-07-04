@@ -1224,3 +1224,10 @@ func fromState(ss []State) [][]*Token {
 	}
 	return t
 }
+
+// TODO: confirm that all renderer slices that need to be copied use this function
+func rAppend(from []Renderer, truncate int, end Renderer) []Renderer {
+	to := make([]Renderer, len(from)-truncate, len(from)-truncate+1)
+	copy(to, from[:len(from)-truncate])
+	return append(to, end)
+}

@@ -708,6 +708,14 @@ func TestRangeClause(t *testing.T) {
 	})
 }
 
+func TestRAppend(t *testing.T) {
+	first := []Renderer{one, two, a, b, c, d}
+	second := rAppend(first, 2, _int)
+	defect.DeepEqual(t, second, []Renderer{one, two, a, b, _int})
+	first[0] = zero
+	defect.DeepEqual(t, second, []Renderer{one, two, a, b, _int})
+}
+
 func TestReceiverType(t *testing.T) {
 	remaining(t, ReceiverType, Tmap{
 		`1`:      empty,
