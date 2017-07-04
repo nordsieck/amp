@@ -432,7 +432,7 @@ func TestIdentifierList(t *testing.T) {
 }
 
 func TestIdentifierList_Render(t *testing.T) {
-	defect.DeepEqual(t, identifierList{a, one}.Render(), []byte(`a,1`))
+	defect.Equal(t, string(identifierList{a, one}.Render()), `a,1`)
 }
 
 func TestIfStmt(t *testing.T) {
@@ -911,6 +911,24 @@ func TestStructType(t *testing.T) {
 		`struct{a, b int;}`:             {{ret}},
 		`struct{a, b int; c, d string}`: {{ret}},
 	})
+}
+
+func TestStructTypeState(t *testing.T) {
+	resultState(t, StructTypeState, map[string][]StateOutput{
+		`struct{}`:                      {{[]string{``, `struct{}`}, []*Token{ret}}},
+		`struct{int}`:                   {{[]string{``, `struct{int;}`}, []*Token{ret}}},
+		`struct{int;}`:                  {{[]string{``, `struct{int;}`}, []*Token{ret}}},
+		`struct{int;float64;}`:          {{[]string{``, `struct{int;float64;}`}, []*Token{ret}}},
+		`struct{a int}`:                 {{[]string{``, `struct{a int;}`}, []*Token{ret}}},
+		`struct{a, b int}`:              {{[]string{``, `struct{a,b int;}`}, []*Token{ret}}},
+		`struct{a, b int;}`:             {{[]string{``, `struct{a,b int;}`}, []*Token{ret}}},
+		`struct{a, b int; c, d string}`: {{[]string{``, `struct{a,b int;c,d string;}`}, []*Token{ret}}},
+	})
+}
+
+func TestStructType_Render(t *testing.T) {
+	defect.Equal(t, string(structType{&Token{tok: token.FALLTHROUGH}}.Render()), `struct{fallthrough;}`)
+	defect.Equal(t, string(structType{&Token{tok: token.FALLTHROUGH}, &Token{tok: token.FALLTHROUGH}}.Render()), `struct{fallthrough;fallthrough;}`)
 }
 
 func TestSwitchStmt(t *testing.T) {

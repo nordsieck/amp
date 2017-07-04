@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"bytes"
 	"fmt"
 	"go/token"
 )
@@ -495,14 +496,11 @@ func IdentifierList(ss []State) []State {
 type identifierList []Renderer
 
 func (il identifierList) Render() []byte {
-	var result []byte
+	var result [][]byte
 	for i := 0; i < len(il); i++ {
-		result = append(result, il[i].Render()...)
-		if i != len(il)-1 {
-			result = append(result, `,`...)
-		}
+		result = append(result, il[i].Render())
 	}
-	return result
+	return bytes.Join(result, []byte(`,`))
 }
 
 func IfStmt(ts [][]*Token) [][]*Token {
@@ -1010,6 +1008,53 @@ func StructType(ts [][]*Token) [][]*Token {
 	}
 	fields = append(fields, tokenReader(fields, token.SEMICOLON)...)
 	return tokenReader(append(ts, fields...), token.RBRACE)
+}
+
+func StructTypeState(ss []State) []State {
+	ss = tokenParserState(ss, token.STRUCT)
+	ss = tokenReaderState(ss, token.LBRACE)
+	fields := FieldDeclState(ss)
+	next := fields
+	for len(next) != 0 {
+		field := tokenReaderState(next, token.SEMICOLON)
+		field = FieldDeclState(field)
+		fields = append(fields, field...)
+		next = field
+	}
+	fields = append(fields, tokenReaderState(fields, token.SEMICOLON)...)
+	ss = tokenReaderState(append(ss, fields...), token.RBRACE)
+
+	for i, s := range ss {
+		st := structType{}
+		for {
+			if tok, ok := s.r[len(s.r)-1].(*Token); !ok || tok.tok != token.STRUCT {
+				st = append(st, s.r[len(s.r)-1])
+				s.r = s.r[:len(s.r)-1]
+			} else {
+				s.r = s.r[:len(s.r)-1]
+				break
+			}
+		}
+
+		// reverse
+		for i := 0; i < len(st)/2; i++ {
+			st[i], st[len(st)-1-i] = st[len(st)-1-i], st[i]
+		}
+
+		ss[i].r = append(s.r, st)
+	}
+	return ss
+}
+
+type structType []Renderer
+
+func (st structType) Render() []byte {
+	result := []byte(`struct{`)
+	for i := 0; i < len(st); i++ {
+		result = append(result, st[i].Render()...)
+		result = append(result, `;`...)
+	}
+	return append(result, `}`...)
 }
 
 func SwitchStmt(ts [][]*Token) [][]*Token { return append(ExprSwitchStmt(ts), TypeSwitchStmt(ts)...) }
