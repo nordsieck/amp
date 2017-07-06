@@ -721,6 +721,50 @@ func ParameterDecl(ts [][]*Token) [][]*Token {
 	return Type(ts)
 }
 
+func ParameterDeclState(ss []State) []State {
+	ss = append(ss, IdentifierList(ss)...)
+	ss = append(ss, tokenParserState(ss, token.ELLIPSIS)...)
+	if len(ss) == 0 {
+		return nil
+	}
+	ss = TypeState(ss)
+
+	for i, s := range ss {
+		pd := parameterDecl{typ: s.r[len(s.r)-1]}
+		s.r = s.r[:len(s.r)-1]
+
+		if tok, ok := s.r[len(s.r)-1].(*Token); ok && tok.tok == token.ELLIPSIS {
+			pd.ellipsis = true
+			s.r = s.r[:len(s.r)-1]
+		}
+		if idList, ok := s.r[len(s.r)-1].(identifierList); ok {
+			pd.idList = idList
+			s.r = s.r[:len(s.r)-1]
+		}
+
+		ss[i].r = rAppend(s.r, 0, pd)
+	}
+	return ss
+}
+
+type parameterDecl struct {
+	idList   Renderer
+	ellipsis bool
+	typ      Renderer
+}
+
+func (pd parameterDecl) Render() []byte {
+	var ret []byte
+	if pd.idList != nil {
+		ret = append(ret, pd.idList.Render()...)
+		ret = append(ret, ` `...)
+	}
+	if pd.ellipsis {
+		ret = append(ret, `... `...)
+	}
+	return append(ret, pd.typ.Render()...)
+}
+
 func ParameterList(ts [][]*Token) [][]*Token {
 	ts = ParameterDecl(ts)
 	next := ts
