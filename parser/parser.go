@@ -850,6 +850,44 @@ func Parameters(ts [][]*Token) [][]*Token {
 	return tokenReader(ts, token.RPAREN)
 }
 
+func ParametersState(ss []State) []State {
+	ss = tokenParserState(ss, token.LPAREN)
+	params := ParameterListState(ss)
+	params = append(params, tokenParserState(params, token.COMMA)...)
+	ss = tokenReaderState(append(ss, params...), token.RPAREN)
+
+	for i, s := range ss {
+		p := parameters{}
+		if tok, ok := s.r[len(s.r)-1].(*Token); ok && tok.tok == token.COMMA {
+			p.comma = true
+			s.r = s.r[:len(s.r)-1]
+		}
+		if tok, ok := s.r[len(s.r)-1].(*Token); ok && tok.tok == token.LPAREN {
+			ss[i].r = rAppend(s.r, 1, p)
+		} else {
+			p.r = s.r[len(s.r)-1]
+			ss[i].r = rAppend(s.r, 2, p)
+		}
+	}
+	return ss
+}
+
+type parameters struct {
+	r     Renderer
+	comma bool
+}
+
+func (p parameters) Render() []byte {
+	ret := []byte(`(`)
+	if p.r != nil {
+		ret = append(ret, p.r.Render()...)
+		if p.comma {
+			ret = append(ret, `,`...)
+		}
+	}
+	return append(ret, `)`...)
+}
+
 func PointerType(ts [][]*Token) [][]*Token {
 	ts = tokenReader(ts, token.MUL)
 	if len(ts) == 0 {

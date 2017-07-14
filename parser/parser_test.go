@@ -719,6 +719,24 @@ func TestParameters(t *testing.T) {
 	})
 }
 
+func TestParametersState(t *testing.T) {
+	resultState(t, ParametersState, map[string][]StateOutput{
+		`()`:                    {{[]string{``, `()`}, []*Token{ret}}},
+		`(int)`:                 {{[]string{``, `(int)`}, []*Token{ret}}},
+		`(a, b)`:                {{[]string{``, `(a,b)`}, []*Token{ret}}},
+		`(a, b,)`:               {{[]string{``, `(a,b,)`}, []*Token{ret}}},
+		`(a, b int)`:            {{[]string{``, `(a,b int)`}, []*Token{ret}}},
+		`(a, b int, c ... int)`: {{[]string{``, `(a,b int,c ... int)`}, []*Token{ret}}},
+	})
+}
+
+func TestParameters_Render(t *testing.T) {
+	defect.Equal(t, string(parameters{}.Render()), `()`)
+	defect.Equal(t, string(parameters{comma: true}.Render()), `()`)
+	defect.Equal(t, string(parameters{r: parameterList{parameterDecl{typ: _int}}}.Render()), `(int)`)
+	defect.Equal(t, string(parameters{r: parameterList{parameterDecl{typ: _int}}, comma: true}.Render()), `(int,)`)
+}
+
 func TestPointerType(t *testing.T) {
 	remaining(t, PointerType, Tmap{
 		`*int`: {{ret}},
