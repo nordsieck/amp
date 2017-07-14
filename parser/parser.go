@@ -53,7 +53,7 @@ func AnonymousField(ss []State) []State {
 		} else {
 			s.r = s.r[:len(s.r)-1]
 		}
-		ss[i].r = append(s.r, af)
+		ss[i].r = rAppend(s.r, 0, af)
 	}
 	return ss
 }
@@ -488,7 +488,7 @@ func IdentifierList(ss []State) []State {
 			idList[i], idList[j] = idList[j], idList[i]
 		}
 
-		ss[i].r = append(s.r, idList)
+		ss[i].r = rAppend(s.r, 0, idList)
 	}
 	return ss
 }
@@ -642,9 +642,7 @@ func MapTypeState(ss []State) []State {
 	ss = TypeState(ss)
 	for i, s := range ss {
 		mt := mapType{s.r[len(s.r)-2], s.r[len(s.r)-1]}
-		s.r = s.r[:len(s.r)-2]
-		s.r = append(s.r, mt)
-		ss[i].r = s.r
+		ss[i].r = rAppend(s.r, 2, mt)
 	}
 	return ss
 }
@@ -831,7 +829,7 @@ func QualifiedIdent(ss []State) []State {
 	ss = tokenParserState(ss, token.IDENT)
 	for i, s := range ss {
 		qi := qualifiedIdent{s.r[len(s.r)-3], s.r[len(s.r)-1]}
-		ss[i].r = append(s.r[:len(s.r)-3], qi)
+		ss[i].r = rAppend(s.r, 3, qi)
 	}
 	return ss
 }
@@ -1085,7 +1083,7 @@ func StructTypeState(ss []State) []State {
 			st[i], st[len(st)-1-i] = st[len(st)-1-i], st[i]
 		}
 
-		ss[i].r = append(s.r, st)
+		ss[i].r = rAppend(s.r, 0, st)
 	}
 	return ss
 }
@@ -1363,7 +1361,6 @@ func fromState(ss []State) [][]*Token {
 	return t
 }
 
-// TODO: confirm that all renderer slices that need to be copied use this function
 func rAppend(from []Renderer, truncate int, end Renderer) []Renderer {
 	to := make([]Renderer, len(from)-truncate, len(from)-truncate+1)
 	copy(to, from[:len(from)-truncate])
