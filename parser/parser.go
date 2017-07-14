@@ -881,7 +881,7 @@ type qualifiedIdent struct{ pkg, name Renderer }
 func (q qualifiedIdent) Render() []byte {
 	var ret []byte
 	ret = append(ret, q.pkg.Render()...)
-	ret = append(ret, "."...)
+	ret = append(ret, `.`...)
 	return append(ret, q.name.Render()...)
 }
 
@@ -1376,7 +1376,7 @@ func print(ts [][]*Token) {
 	for _, t := range ts {
 		fmt.Println(t)
 	}
-	fmt.Println("-----")
+	fmt.Println(`-----`)
 }
 
 func empties(n int) []Renderer {
