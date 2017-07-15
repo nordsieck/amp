@@ -672,6 +672,38 @@ func TestParameterList(t *testing.T) {
 	})
 }
 
+func TestParamterListState(t *testing.T) {
+	resultState(t, ParameterListState, map[string][]StateOutput{
+		`int`:       {{[]string{``, `int`}, []*Token{ret}}},
+		`int, int`:  {{[]string{``, `int`}, []*Token{ret, _int, comma}}, {[]string{``, `int,int`}, []*Token{ret}}},
+		`a, int`:    {{[]string{``, `a`}, []*Token{ret, _int, comma}}, {[]string{``, `a,int`}, []*Token{ret}}},
+		`a int`:     {{[]string{``, `a`}, []*Token{ret, _int}}, {[]string{``, `a int`}, []*Token{ret}}},
+		`a ... int`: {{[]string{``, `a`}, []*Token{ret, _int, {tok: token.ELLIPSIS}}}, {[]string{``, `a ... int`}, []*Token{ret}}},
+		`a, b int`: {
+			{[]string{``, `a`}, []*Token{ret, _int, b, comma}},
+			{[]string{``, `a,b int`}, []*Token{ret}},
+			{[]string{``, `a,b`}, []*Token{ret, _int}},
+			{[]string{``, `a,b int`}, []*Token{ret}}}, // TODO: why are there duplicate successes here?
+		`a, b int, c ... int`: {
+			{[]string{``, `a`}, []*Token{ret, _int, {tok: token.ELLIPSIS}, c, comma, _int, b, comma}},
+			{[]string{``, `a,b int`}, []*Token{ret, _int, {tok: token.ELLIPSIS}, c, comma}},
+			{[]string{``, `a,b`}, []*Token{ret, _int, {tok: token.ELLIPSIS}, c, comma, _int}},
+			{[]string{``, `a,b int,c`}, []*Token{ret, _int, {tok: token.ELLIPSIS}}},
+			{[]string{``, `a,b int`}, []*Token{ret, _int, {tok: token.ELLIPSIS}, c, comma}},
+			{[]string{``, `a,b int,c ... int`}, []*Token{ret}},
+			{[]string{``, `a,b int,c`}, []*Token{ret, _int, {tok: token.ELLIPSIS}}},
+			{[]string{``, `a,b int,c ... int`}, []*Token{ret}}},
+	})
+}
+
+func TestParameterList_Render(t *testing.T) {
+	defect.Equal(t, string(parameterList{parameterDecl{typ: _int}}.Render()), `int`)
+	defect.Equal(t, string(parameterList{
+		parameterDecl{identifierList{a, b}, false, _int},
+		parameterDecl{identifierList{a}, true, _int},
+	}.Render()), `a,b int,a ... int`)
+}
+
 func TestParameters(t *testing.T) {
 	remaining(t, Parameters, Tmap{
 		`(int)`:                {{ret}},

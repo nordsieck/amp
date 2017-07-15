@@ -775,6 +775,48 @@ func ParameterList(ts [][]*Token) [][]*Token {
 	return ts
 }
 
+func ParameterListState(ss []State) []State {
+	ss = ParameterDeclState(ss)
+	loop := ss
+	for len(loop) != 0 {
+		loop = tokenParserState(loop, token.COMMA)
+		loop = ParameterDeclState(loop)
+		ss = append(ss, loop...)
+	}
+
+	for i, s := range ss {
+		pl := parameterList{s.r[len(s.r)-1]}
+		s.r = s.r[:len(s.r)-1]
+
+		for {
+			if tok, ok := s.r[len(s.r)-1].(*Token); ok && tok.tok == token.COMMA {
+				pl = append(pl, s.r[len(s.r)-2])
+				s.r = s.r[:len(s.r)-2]
+			} else {
+				break
+			}
+		}
+
+		// reverse
+		for i := 0; i < len(pl)/2; i++ {
+			pl[i], pl[len(pl)-1-i] = pl[len(pl)-1-i], pl[i]
+		}
+
+		ss[i].r = rAppend(s.r, 0, pl)
+	}
+	return ss
+}
+
+type parameterList []Renderer
+
+func (pl parameterList) Render() []byte {
+	var ret [][]byte
+	for _, r := range pl {
+		ret = append(ret, r.Render())
+	}
+	return bytes.Join(ret, []byte(`,`))
+}
+
 func Parameters(ts [][]*Token) [][]*Token {
 	ts = tokenReader(ts, token.LPAREN)
 	params := ParameterList(ts)
