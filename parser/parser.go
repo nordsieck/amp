@@ -23,17 +23,6 @@ type (
 
 func (_ e) Render() []byte { return nil }
 
-func (s *State) Copy() State {
-	ns := State{
-		r: make([]Renderer, 0, len(s.r)),
-		t: s.t,
-	}
-	for _, ri := range s.r {
-		ns.r = append(ns.r, ri)
-	}
-	return ns
-}
-
 func AddOp(ss []State) []State {
 	var result []State
 	for _, s := range ss {

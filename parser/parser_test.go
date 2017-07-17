@@ -54,17 +54,6 @@ var (
 	inc    = &Token{tok: token.INC}
 )
 
-func TestState_Copy(t *testing.T) {
-	cases := []State{
-		{r: []Renderer{}},
-		{r: []Renderer{a}, t: []*Token{a}},
-	}
-
-	for _, c := range cases {
-		defect.DeepEqual(t, c.Copy(), c)
-	}
-}
-
 func TestAddOp(t *testing.T) {
 	resultState(t, AddOp, map[string][]StateOutput{
 		`+`: {{[]string{``, `+`}, []*Token{}}},
