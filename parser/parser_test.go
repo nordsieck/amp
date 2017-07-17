@@ -648,6 +648,16 @@ func TestParameterDeclIDListState(t *testing.T) {
 	})
 }
 
+func TestParameterDeclNoListState(t *testing.T) {
+	resultState(t, ParameterDeclNoListState, map[string][]StateOutput{
+		`int`:      {{[]string{``, `int`}, []*Token{ret}}},
+		`...int`:   {{[]string{``, `... int`}, []*Token{ret}}},
+		`a, b int`: {{[]string{``, `a`}, []*Token{ret, _int, b, comma}}},
+		`b... int`: {{[]string{``, `b`}, []*Token{ret, _int, {tok: token.ELLIPSIS}}}},
+		`int, int`: {{[]string{``, `int`}, []*Token{ret, _int, comma}}},
+	})
+}
+
 func TestParameterDeclState(t *testing.T) {
 	resultState(t, ParameterDeclState, map[string][]StateOutput{
 		`int`:      {{[]string{``, `int`}, []*Token{ret}}},
