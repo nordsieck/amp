@@ -33,20 +33,6 @@ func remaining(t *testing.T, r Reader, m Tmap) {
 	}
 }
 
-func result(t *testing.T, p Parser, o Omap) {
-	for raw, left := range o {
-		toks := [][]*Token{Scan(newScanner(raw))}
-		tree, state := p(toks)
-		var rendered []string
-		for _, t := range tree {
-			rendered = append(rendered, string(t.Render()))
-		}
-		defect.DeepEqual(t, state, left.rest)
-		defect.DeepEqual(t, rendered, left.tree)
-		defect.Equal(t, len(tree), len(state))
-	}
-}
-
 func resultState(t *testing.T, s Stator, m map[string][]StateOutput) {
 	for raw, result := range m {
 		toks := Scan(newScanner(raw))

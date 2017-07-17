@@ -844,6 +844,17 @@ func TestResult(t *testing.T) {
 	})
 }
 
+func TestResultState(t *testing.T) {
+	resultState(t, ResultState, map[string][]StateOutput{
+		`int`: {{[]string{``, `int`}, []*Token{ret}}},
+		`()`:  {{[]string{``, `()`}, []*Token{ret}}},
+	})
+}
+
+func TestResult_Render(t *testing.T) {
+	defect.Equal(t, string(result{typ: typ{_int}}.Render()), `int`)
+}
+
 func TestReturnStmt(t *testing.T) {
 	remaining(t, ReturnStmt, Tmap{
 		`return 1`:    {{ret, one}, {ret}},

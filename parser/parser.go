@@ -1004,6 +1004,34 @@ func Result(ts [][]*Token) [][]*Token {
 	return append(Parameters(ts), Type(ts)...)
 }
 
+func ResultState(ss []State) []State {
+	if len(ss) == 0 {
+		return nil
+	}
+
+	pp := ParametersState(ss)
+	for i, p := range pp {
+		r := result{parameters: p.r[len(p.r)-1]}
+		pp[i].r = rAppend(p.r, 1, r)
+	}
+
+	tt := TypeState(ss)
+	for i, t := range tt {
+		r := result{typ: t.r[len(t.r)-1]}
+		tt[i].r = rAppend(t.r, 1, r)
+	}
+	return append(pp, tt...)
+}
+
+type result struct{ parameters, typ Renderer }
+
+func (r result) Render() []byte {
+	if r.parameters == nil {
+		return r.typ.Render()
+	}
+	return r.parameters.Render()
+}
+
 func ReturnStmt(ts [][]*Token) [][]*Token {
 	ts = tokenReader(ts, token.RETURN)
 	return append(ts, ExpressionList(ts)...)
