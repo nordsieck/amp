@@ -414,6 +414,18 @@ func TestFunctionType(t *testing.T) {
 	})
 }
 
+func TestFunctionTypeState(t *testing.T) {
+	resultState(t, FunctionTypeState, map[string][]StateOutput{
+		`func()`:             {{[]string{``, `func()`}, []*Token{ret}}},
+		`func()()`:           {{[]string{``, `func()`}, []*Token{ret, rparen, lparen}}, {[]string{``, `func()()`}, []*Token{ret}}},
+		`func(int, int) int`: {{[]string{``, `func(int,int)`}, []*Token{ret, _int}}, {[]string{``, `func(int,int)int`}, []*Token{ret}}},
+	})
+}
+
+func TestFunctionType_Render(t *testing.T) {
+	defect.Equal(t, string(functionType{signature{parameters: parameters{r: parameterList{}}}}.Render()), `func()`)
+}
+
 func TestGoStmt(t *testing.T) {
 	remaining(t, GoStmt, Tmap{`go a()`: {{ret, rparen, lparen}, {ret}}})
 }
@@ -1141,7 +1153,7 @@ func TestTypeLitState(t *testing.T) {
 		//`[1]int`:      {{[]string{``, `[1]int`}, []*Token{ret}}},
 		`struct{}`: {{[]string{``, `struct{}`}, []*Token{ret}}},
 		`*int`:     {{[]string{``, `*int`}, []*Token{ret}}},
-		//`func()`:      {{[]string{``, `func()`}, []*Token{ret}}},
+		`func()`:   {{[]string{``, `func()`}, []*Token{ret}}},
 		//`interface{}`: {{[]string{``, `interface{}`}, []*Token{ret}}},
 		`[]int`:       {{[]string{``, `[]int`}, []*Token{ret}}},
 		`map[int]int`: {{[]string{``, `map[int]int`}, []*Token{ret}}},

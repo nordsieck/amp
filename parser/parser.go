@@ -449,6 +449,21 @@ func FunctionType(ts [][]*Token) [][]*Token {
 	return Signature(ts)
 }
 
+func FunctionTypeState(ss []State) []State {
+	ss = tokenReaderState(ss, token.FUNC)
+	ss = SignatureState(ss)
+
+	for i, s := range ss {
+		ft := functionType{s.r[len(s.r)-1]}
+		ss[i].r = rAppend(s.r, 1, ft)
+	}
+	return ss
+}
+
+type functionType struct{ r Renderer }
+
+func (f functionType) Render() []byte { return append([]byte(`func`), f.r.Render()...) }
+
 func GoStmt(ts [][]*Token) [][]*Token {
 	ts = tokenReader(ts, token.GO)
 	return Expression(ts)
@@ -1364,10 +1379,10 @@ func TypeList(ts [][]*Token) [][]*Token {
 }
 
 func TypeLitState(ss []State) []State {
-	return append(append(
-		append(PointerTypeState(ss), SliceTypeState(ss)...),
-		append(MapTypeState(ss), ChannelTypeState(ss)...)...),
-		StructTypeState(ss)...)
+	return append(
+		append(append(PointerTypeState(ss), SliceTypeState(ss)...),
+			append(MapTypeState(ss), ChannelTypeState(ss)...)...),
+		append(StructTypeState(ss), FunctionTypeState(ss)...)...)
 }
 
 func TypeLit(ts [][]*Token) [][]*Token {
