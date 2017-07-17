@@ -658,16 +658,6 @@ func TestParameterDeclNoListState(t *testing.T) {
 	})
 }
 
-func TestParameterDeclState(t *testing.T) {
-	resultState(t, ParameterDeclState, map[string][]StateOutput{
-		`int`:      {{[]string{``, `int`}, []*Token{ret}}},
-		`...int`:   {{[]string{``, `... int`}, []*Token{ret}}},
-		`a, b int`: {{[]string{``, `a`}, []*Token{ret, _int, b, comma}}, {[]string{``, `a,b int`}, []*Token{ret}}},
-		`b... int`: {{[]string{``, `b`}, []*Token{ret, _int, {tok: token.ELLIPSIS}}}, {[]string{``, `b ... int`}, []*Token{ret}}},
-		`int, int`: {{[]string{``, `int`}, []*Token{ret, _int, comma}}},
-	})
-}
-
 func TestParameterDecl_Render(t *testing.T) {
 	defect.Equal(t, string(parameterDecl{nil, false, _int}.Render()), `int`)
 	defect.Equal(t, string(parameterDecl{nil, true, _int}.Render()), `... int`)

@@ -761,32 +761,6 @@ func ParameterDeclNoListState(ss []State) []State {
 	return ss
 }
 
-func ParameterDeclState(ss []State) []State {
-	ss = append(ss, IdentifierList(ss)...)
-	ss = append(ss, tokenParserState(ss, token.ELLIPSIS)...)
-	if len(ss) == 0 {
-		return nil
-	}
-	ss = TypeState(ss)
-
-	for i, s := range ss {
-		pd := parameterDecl{typ: s.r[len(s.r)-1]}
-		s.r = s.r[:len(s.r)-1]
-
-		if tok, ok := s.r[len(s.r)-1].(*Token); ok && tok.tok == token.ELLIPSIS {
-			pd.ellipsis = true
-			s.r = s.r[:len(s.r)-1]
-		}
-		if idList, ok := s.r[len(s.r)-1].(identifierList); ok {
-			pd.idList = idList
-			s.r = s.r[:len(s.r)-1]
-		}
-
-		ss[i].r = rAppend(s.r, 0, pd)
-	}
-	return ss
-}
-
 type parameterDecl struct {
 	idList   Renderer
 	ellipsis bool
