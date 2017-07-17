@@ -1042,6 +1042,8 @@ func TestTypeState(t *testing.T) {
 	})
 }
 
+func TestTyp_Render(t *testing.T) { defect.Equal(t, string(typ{_int}.Render()), `int`) }
+
 func TestTypeAssertion(t *testing.T) {
 	remaining(t, TypeAssertion, Tmap{
 		`.(int)`: {{ret}},

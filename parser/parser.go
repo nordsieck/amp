@@ -896,6 +896,8 @@ func PointerType(ts [][]*Token) [][]*Token {
 	return Type(ts)
 }
 
+// TODO: figure out how to treat pointers.  Are they part of the thing they are
+// attached to, or are they a universal wrapper?
 func PointerTypeState(ss []State) []State {
 	ss = tokenReaderState(ss, token.MUL)
 	if len(ss) == 0 {
@@ -1216,7 +1218,13 @@ func TypeState(ss []State) []State {
 		paren = TypeState(paren)
 	}
 	paren = tokenReaderState(paren, token.RPAREN)
-	return append(append(TypeName(ss), TypeLitState(ss)...), paren...)
+	ss = append(append(TypeName(ss), TypeLitState(ss)...), paren...)
+
+	for i, s := range ss {
+		t := typ{s.r[len(s.r)-1]}
+		ss[i].r = rAppend(s.r, 1, t)
+	}
+	return ss
 }
 
 func Type(ts [][]*Token) [][]*Token {
@@ -1228,6 +1236,10 @@ func Type(ts [][]*Token) [][]*Token {
 	tn := fromState(TypeName(toState(ts)))
 	return append(append(tn, TypeLit(ts)...), paren...)
 }
+
+type typ struct{ r Renderer }
+
+func (t typ) Render() []byte { return t.r.Render() }
 
 func TypeAssertion(ts [][]*Token) [][]*Token {
 	ts = tokenReader(ts, token.PERIOD)
