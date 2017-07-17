@@ -502,6 +502,23 @@ func TestInterfaceType(t *testing.T) {
 	})
 }
 
+func TestInterfaceTypeState(t *testing.T) {
+	resultState(t, InterfaceTypeState, map[string][]StateOutput{
+		`interface{}`:       {{[]string{``, `interface{}`}, []*Token{ret}}},
+		`interface{;}`:      nil,
+		`interface{a}`:      {{[]string{``, `interface{a;}`}, []*Token{ret}}},
+		`interface{a;}`:     {{[]string{``, `interface{a;}`}, []*Token{ret}}},
+		`interface{a()}`:    {{[]string{``, `interface{a();}`}, []*Token{ret}}},
+		`interface{a();a;}`: {{[]string{``, `interface{a();a;}`}, []*Token{ret}}},
+	})
+}
+
+func TestInterfaceType_Render(t *testing.T) {
+	defect.Equal(t, string(interfaceType{}.Render()), `interface{}`)
+	defect.Equal(t, string(interfaceType{methodSpec{iTypeName: a}}.Render()), `interface{a;}`)
+	defect.Equal(t, string(interfaceType{methodSpec{iTypeName: a}, methodSpec{iTypeName: b}}.Render()), `interface{a;b;}`)
+}
+
 func TestKey(t *testing.T) {
 	remaining(t, Key, Tmap{
 		`a`:     {{ret}, {ret}},
@@ -1151,10 +1168,10 @@ func TestTypeLit(t *testing.T) {
 func TestTypeLitState(t *testing.T) {
 	resultState(t, TypeLitState, map[string][]StateOutput{
 		//`[1]int`:      {{[]string{``, `[1]int`}, []*Token{ret}}},
-		`struct{}`: {{[]string{``, `struct{}`}, []*Token{ret}}},
-		`*int`:     {{[]string{``, `*int`}, []*Token{ret}}},
-		`func()`:   {{[]string{``, `func()`}, []*Token{ret}}},
-		//`interface{}`: {{[]string{``, `interface{}`}, []*Token{ret}}},
+		`struct{}`:    {{[]string{``, `struct{}`}, []*Token{ret}}},
+		`*int`:        {{[]string{``, `*int`}, []*Token{ret}}},
+		`func()`:      {{[]string{``, `func()`}, []*Token{ret}}},
+		`interface{}`: {{[]string{``, `interface{}`}, []*Token{ret}}},
 		`[]int`:       {{[]string{``, `[]int`}, []*Token{ret}}},
 		`map[int]int`: {{[]string{``, `map[int]int`}, []*Token{ret}}},
 		`chan int`:    {{[]string{``, `chan int`}, []*Token{ret}}},

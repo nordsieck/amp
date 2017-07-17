@@ -591,6 +591,50 @@ func InterfaceType(ts [][]*Token) [][]*Token {
 	return tokenReader(ts, token.RBRACE)
 }
 
+func InterfaceTypeState(ss []State) []State {
+	ss = tokenParserState(ss, token.INTERFACE)
+	ss = tokenReaderState(ss, token.LBRACE)
+	methods := MethodSpecState(ss)
+	loop := methods
+	for len(loop) != 0 {
+		loop = tokenReaderState(loop, token.SEMICOLON)
+		loop = MethodSpecState(loop)
+		methods = append(methods, loop...)
+	}
+	methods = append(methods, tokenReaderState(methods, token.SEMICOLON)...)
+	ss = append(ss, methods...)
+	ss = tokenReaderState(ss, token.RBRACE)
+
+	for i, s := range ss {
+		it := interfaceType{}
+		for {
+			if tok, ok := s.r[len(s.r)-1].(*Token); ok && tok.tok == token.INTERFACE {
+				break
+			}
+			it = append(it, s.r[len(s.r)-1])
+			s.r = s.r[:len(s.r)-1]
+		}
+
+		// reverse
+		for j := 0; j < len(it); j++ {
+			it[j], it[len(it)-1-i] = it[len(it)-1-i], it[j]
+		}
+
+		ss[i].r = rAppend(s.r, 1, it)
+	}
+	return ss
+}
+
+type interfaceType []Renderer
+
+func (it interfaceType) Render() []byte {
+	ret := []byte(`interface{`)
+	for _, i := range it {
+		ret = append(append(ret, i.Render()...), `;`...)
+	}
+	return append(ret, `}`...)
+}
+
 func Key(ts [][]*Token) [][]*Token {
 	return append(tokenReader(ts, token.IDENT), Expression(ts)...)
 }
@@ -1382,7 +1426,8 @@ func TypeLitState(ss []State) []State {
 	return append(
 		append(append(PointerTypeState(ss), SliceTypeState(ss)...),
 			append(MapTypeState(ss), ChannelTypeState(ss)...)...),
-		append(StructTypeState(ss), FunctionTypeState(ss)...)...)
+		append(append(StructTypeState(ss), FunctionTypeState(ss)...),
+			InterfaceTypeState(ss)...)...)
 }
 
 func TypeLit(ts [][]*Token) [][]*Token {
