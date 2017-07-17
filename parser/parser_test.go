@@ -701,17 +701,12 @@ func TestParamterListState(t *testing.T) {
 		`a ... int`: {{[]string{``, `a`}, []*Token{ret, _int, {tok: token.ELLIPSIS}}}, {[]string{``, `a ... int`}, []*Token{ret}}},
 		`a, b int`: {
 			{[]string{``, `a`}, []*Token{ret, _int, b, comma}},
-			{[]string{``, `a,b int`}, []*Token{ret}},
 			{[]string{``, `a,b`}, []*Token{ret, _int}},
-			{[]string{``, `a,b int`}, []*Token{ret}}}, // TODO: why are there duplicate successes here?
+			{[]string{``, `a,b int`}, []*Token{ret}}},
 		`a, b int, c ... int`: {
 			{[]string{``, `a`}, []*Token{ret, _int, {tok: token.ELLIPSIS}, c, comma, _int, b, comma}},
-			{[]string{``, `a,b int`}, []*Token{ret, _int, {tok: token.ELLIPSIS}, c, comma}},
 			{[]string{``, `a,b`}, []*Token{ret, _int, {tok: token.ELLIPSIS}, c, comma, _int}},
-			{[]string{``, `a,b int,c`}, []*Token{ret, _int, {tok: token.ELLIPSIS}}},
 			{[]string{``, `a,b int`}, []*Token{ret, _int, {tok: token.ELLIPSIS}, c, comma}},
-			{[]string{``, `a,b int,c ... int`}, []*Token{ret}},
-			{[]string{``, `a,b int,c`}, []*Token{ret, _int, {tok: token.ELLIPSIS}}},
 			{[]string{``, `a,b int,c ... int`}, []*Token{ret}}},
 	})
 }

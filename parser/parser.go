@@ -818,13 +818,22 @@ func ParameterList(ts [][]*Token) [][]*Token {
 }
 
 func ParameterListState(ss []State) []State {
-	ss = ParameterDeclState(ss)
-	loop := ss
+	list := ParameterDeclIDListState(ss)
+	loop := list
 	for len(loop) != 0 {
 		loop = tokenParserState(loop, token.COMMA)
-		loop = ParameterDeclState(loop)
-		ss = append(ss, loop...)
+		loop = ParameterDeclIDListState(loop)
+		list = append(list, loop...)
 	}
+
+	nolist := ParameterDeclNoListState(ss)
+	loop = nolist
+	for len(loop) != 0 {
+		loop = tokenParserState(loop, token.COMMA)
+		loop = ParameterDeclNoListState(loop)
+		nolist = append(nolist, loop...)
+	}
+	ss = append(nolist, list...)
 
 	for i, s := range ss {
 		pl := parameterList{s.r[len(s.r)-1]}
