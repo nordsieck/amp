@@ -1127,9 +1127,10 @@ func TypeList(ts [][]*Token) [][]*Token {
 }
 
 func TypeLitState(ss []State) []State {
-	return append(
+	return append(append(
 		append(PointerTypeState(ss), SliceTypeState(ss)...),
-		append(MapTypeState(ss), ChannelTypeState(ss)...)...)
+		append(MapTypeState(ss), ChannelTypeState(ss)...)...),
+		StructTypeState(ss)...)
 }
 
 func TypeLit(ts [][]*Token) [][]*Token {

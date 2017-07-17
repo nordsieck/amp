@@ -1025,8 +1025,8 @@ func TestTypeLit(t *testing.T) {
 func TestTypeLitState(t *testing.T) {
 	resultState(t, TypeLitState, map[string][]StateOutput{
 		//`[1]int`:      {{[]string{``, `[1]int`}, []*Token{ret}}},
-		//`struct{}`:    {{[]string{``, `struct{}`}, []*Token{ret}}},
-		`*int`: {{[]string{``, `*int`}, []*Token{ret}}},
+		`struct{}`: {{[]string{``, `struct{}`}, []*Token{ret}}},
+		`*int`:     {{[]string{``, `*int`}, []*Token{ret}}},
 		//`func()`:      {{[]string{``, `func()`}, []*Token{ret}}},
 		//`interface{}`: {{[]string{``, `interface{}`}, []*Token{ret}}},
 		`[]int`:       {{[]string{``, `[]int`}, []*Token{ret}}},
