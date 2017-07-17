@@ -54,19 +54,6 @@ var (
 	inc    = &Token{tok: token.INC}
 )
 
-func TestState_String(t *testing.T) {
-	states := map[string]State{
-		`{[],[]}`:                     {},
-		`{[],[{; ;}]}`:                {t: []*Token{semi}},
-		`{[],[{INT 1} {; ;}]}`:        {t: []*Token{one, semi}},
-		`{[{INT 1}],[]}`:              {r: []Renderer{one}},
-		`{[{INT 1}],[{INT 1} {; ;}]}`: {[]Renderer{one}, []*Token{one, semi}},
-	}
-	for expected, s := range states {
-		defect.Equal(t, s.String(), expected)
-	}
-}
-
 func TestState_Copy(t *testing.T) {
 	cases := []State{
 		{r: []Renderer{}},
