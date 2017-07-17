@@ -719,6 +719,28 @@ func ParameterDecl(ts [][]*Token) [][]*Token {
 	return Type(ts)
 }
 
+func ParameterDeclIDListState(ss []State) []State {
+	ss = IdentifierList(ss)
+	ss = append(ss, tokenParserState(ss, token.ELLIPSIS)...)
+	if len(ss) == 0 {
+		return nil
+	}
+	ss = TypeState(ss)
+
+	for i, s := range ss {
+		pd := parameterDecl{typ: s.r[len(s.r)-1]}
+		s.r = s.r[:len(s.r)-1]
+
+		if tok, ok := s.r[len(s.r)-1].(*Token); ok && tok.tok == token.ELLIPSIS {
+			pd.ellipsis = true
+			s.r = s.r[:len(s.r)-1]
+		}
+		pd.idList = s.r[len(s.r)-1]
+		ss[i].r = rAppend(s.r, 1, pd)
+	}
+	return ss
+}
+
 func ParameterDeclState(ss []State) []State {
 	ss = append(ss, IdentifierList(ss)...)
 	ss = append(ss, tokenParserState(ss, token.ELLIPSIS)...)
