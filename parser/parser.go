@@ -1077,6 +1077,31 @@ func Signature(ts [][]*Token) [][]*Token {
 	return append(ts, Result(ts)...)
 }
 
+func SignatureState(ss []State) []State {
+	pp := ParametersState(ss)
+	pr := ResultState(pp)
+
+	for i, p := range pp {
+		s := signature{parameters: p.r[len(p.r)-1]}
+		pp[i].r = rAppend(p.r, 1, s)
+	}
+	for i, p := range pr {
+		s := signature{parameters: p.r[len(p.r)-2], result: p.r[len(p.r)-1]}
+		pr[i].r = rAppend(p.r, 2, s)
+	}
+	return append(pp, pr...)
+}
+
+type signature struct{ parameters, result Renderer }
+
+func (s signature) Render() []byte {
+	ret := s.parameters.Render()
+	if s.result != nil {
+		ret = append(ret, s.result.Render()...)
+	}
+	return ret
+}
+
 func SimpleStmt(ts [][]*Token) [][]*Token {
 	return append(
 		append(append(EmptyStmt(ts), ExpressionStmt(ts)...),

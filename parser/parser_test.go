@@ -900,6 +900,22 @@ func TestSignature(t *testing.T) {
 	})
 }
 
+func TestSignatureState(t *testing.T) {
+	resultState(t, SignatureState, map[string][]StateOutput{
+		`()`:             {{[]string{``, `()`}, []*Token{ret}}},
+		`()()`:           {{[]string{``, `()`}, []*Token{ret, rparen, lparen}}, {[]string{``, `()()`}, []*Token{ret}}},
+		`(int, int) int`: {{[]string{``, `(int,int)`}, []*Token{ret, _int}}, {[]string{``, `(int,int)int`}, []*Token{ret}}},
+	})
+}
+
+func TestSignature_Render(t *testing.T) {
+	defect.Equal(t, string(signature{parameters: parameters{r: parameterList{}}}.Render()), `()`)
+	defect.Equal(t, string(signature{parameters: parameters{r: parameterList{}},
+		result: result{parameters: parameters{r: parameterList{}}}}.Render()), `()()`)
+	defect.Equal(t, string(signature{parameters: parameters{r: parameterList{parameterDecl{typ: typ{_int}}, parameterDecl{typ: typ{_int}}}},
+		result: result{typ: typ{_int}}}.Render()), `(int,int)int`)
+}
+
 func TestSimpleStmt(t *testing.T) {
 	remaining(t, SimpleStmt, Tmap{
 		`1`:      {{ret, one}, {ret}},
