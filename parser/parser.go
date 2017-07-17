@@ -675,6 +675,31 @@ func MethodSpec(ts [][]*Token) [][]*Token {
 	return append(sig, ts...)
 }
 
+func MethodSpecState(ss []State) []State {
+	sig := nonBlankIdent(ss)
+	sig = SignatureState(sig)
+	for i, s := range sig {
+		ms := methodSpec{name: s.r[len(s.r)-2], signature: s.r[len(s.r)-1]}
+		sig[i].r = rAppend(s.r, 2, ms)
+	}
+
+	tn := TypeName(ss)
+	for i, t := range tn {
+		ms := methodSpec{iTypeName: t.r[len(t.r)-1]}
+		tn[i].r = rAppend(t.r, 1, ms)
+	}
+	return append(sig, tn...)
+}
+
+type methodSpec struct{ name, signature, iTypeName Renderer }
+
+func (m methodSpec) Render() []byte {
+	if m.iTypeName == nil {
+		return append(m.name.Render(), m.signature.Render()...)
+	}
+	return m.iTypeName.Render()
+}
+
 func MulOp(ss []State) []State {
 	var result []State
 	for _, s := range ss {

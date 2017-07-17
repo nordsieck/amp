@@ -582,6 +582,19 @@ func TestMethodSpec(t *testing.T) {
 	})
 }
 
+func TestMethodSpecState(t *testing.T) {
+	resultState(t, MethodSpecState, map[string][]StateOutput{
+		`a()`:   {{[]string{``, `a()`}, []*Token{ret}}, {[]string{``, `a`}, []*Token{ret, rparen, lparen}}},
+		`a`:     {{[]string{``, `a`}, []*Token{ret}}},
+		`a.a()`: {{[]string{``, `a.a`}, []*Token{ret, rparen, lparen}}, {[]string{``, `a`}, []*Token{ret, rparen, lparen, a, dot}}},
+	})
+}
+
+func TestMethodSpec_Render(t *testing.T) {
+	defect.Equal(t, string(methodSpec{name: a, signature: signature{parameters: parameters{r: parameterList{}}}}.Render()), `a()`)
+	defect.Equal(t, string(methodSpec{iTypeName: a}.Render()), `a`)
+}
+
 func TestMulOp(t *testing.T) {
 	resultState(t, MulOp, map[string][]StateOutput{
 		`*`:  {{[]string{``, `*`}, []*Token{}}},
