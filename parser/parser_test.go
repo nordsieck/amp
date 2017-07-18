@@ -569,6 +569,17 @@ func TestLiteralType(t *testing.T) {
 	})
 }
 
+func TestLiteralTypeState(t *testing.T) {
+	resultState(t, LiteralTypeState, map[string][]StateOutput{
+		`struct{}`: {{[]string{``, `struct{}`}, []*Token{ret}}},
+		// `[1]int`: {{[]string{``, `[1]int`}, []*Token{ret}}},
+		`[...]int`:    {{[]string{``, `[...]int`}, []*Token{ret}}},
+		`[]int`:       {{[]string{``, `[]int`}, []*Token{ret}}},
+		`map[int]int`: {{[]string{``, `map[int]int`}, []*Token{ret}}},
+		`a.a`:         {{[]string{``, `a.a`}, []*Token{ret}}, {[]string{``, `a`}, []*Token{ret, a, dot}}},
+	})
+}
+
 func TestLiteralValue(t *testing.T) {
 	remaining(t, LiteralValue, Tmap{
 		`{1}`:           {{ret}},

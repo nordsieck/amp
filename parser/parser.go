@@ -688,6 +688,14 @@ func LiteralType(ts [][]*Token) [][]*Token {
 		append(MapType(ts), tn...)...)
 }
 
+// TODO: array type
+func LiteralTypeState(ss []State) []State {
+	return append(
+		append(append(StructTypeState(ss), EllipsisArrayTypeState(ss)...),
+			append(SliceTypeState(ss), MapTypeState(ss)...)...),
+		TypeName(ss)...)
+}
+
 func LiteralValue(ts [][]*Token) [][]*Token {
 	ts = tokenReader(ts, token.LBRACE)
 	if len(ts) == 0 {
@@ -1442,6 +1450,7 @@ func TypeList(ts [][]*Token) [][]*Token {
 	return ts
 }
 
+// TODO: array type
 func TypeLitState(ss []State) []State {
 	return append(
 		append(append(PointerTypeState(ss), SliceTypeState(ss)...),
