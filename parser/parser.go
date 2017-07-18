@@ -291,6 +291,26 @@ func EllipsisArrayType(ts [][]*Token) [][]*Token {
 	return Type(ts)
 }
 
+func EllipsisArrayTypeState(ss []State) []State {
+	ss = tokenReaderState(ss, token.LBRACK)
+	ss = tokenReaderState(ss, token.ELLIPSIS)
+	ss = tokenReaderState(ss, token.RBRACK)
+	if len(ss) == 0 {
+		return nil
+	}
+	ss = TypeState(ss)
+
+	for i, s := range ss {
+		eat := ellipsisArrayType{s.r[len(s.r)-1]}
+		ss[i].r = rAppend(s.r, 1, eat)
+	}
+	return ss
+}
+
+type ellipsisArrayType struct{ r Renderer }
+
+func (e ellipsisArrayType) Render() []byte { return append([]byte(`[...]`), e.r.Render()...) }
+
 func EmptyStmt(ts [][]*Token) [][]*Token { return ts }
 
 func ExprCaseClause(ts [][]*Token) [][]*Token {

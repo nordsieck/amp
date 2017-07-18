@@ -278,6 +278,14 @@ func TestEllipsisArrayType(t *testing.T) {
 	remaining(t, EllipsisArrayType, Tmap{`[...]int`: {{ret}}})
 }
 
+func TestEllipsisArrayTypeState(t *testing.T) {
+	resultState(t, EllipsisArrayTypeState, map[string][]StateOutput{`[...]int`: {{[]string{``, `[...]int`}, []*Token{ret}}}})
+}
+
+func TestEllipsisArrayType_Render(t *testing.T) {
+	defect.Equal(t, string(ellipsisArrayType{typ{_int}}.Render()), `[...]int`)
+}
+
 func TestEmptyStmt(t *testing.T) {
 	remaining(t, EmptyStmt, Tmap{`1`: {{ret, one}}})
 }
