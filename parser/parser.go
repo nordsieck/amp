@@ -90,6 +90,28 @@ func ArrayType(ts [][]*Token) [][]*Token {
 	return Type(ts)
 }
 
+func ArrayTypeState(ss []State) []State {
+	ss = tokenReaderState(ss, token.LBRACK)
+	if len(ss) == 0 {
+		return nil
+	}
+	ss = ExpressionState(ss)
+	ss = tokenReaderState(ss, token.RBRACK)
+	ss = TypeState(ss)
+
+	for i, s := range ss {
+		at := arrayType{s.r[len(s.r)-2], s.r[len(s.r)-1]}
+		ss[i].r = rAppend(s.r, 2, at)
+	}
+	return ss
+}
+
+type arrayType struct{ expr, typ Renderer }
+
+func (a arrayType) Render() []byte {
+	return append(append([]byte(`[`), a.expr.Render()...), append([]byte(`]`), a.typ.Render()...)...)
+}
+
 func Assignment(ts [][]*Token) [][]*Token {
 	ts = ExpressionList(ts)
 	ts = fromState(AssignOp(toState(ts)))
@@ -719,12 +741,11 @@ func LiteralType(ts [][]*Token) [][]*Token {
 		append(MapType(ts), tn...)...)
 }
 
-// TODO: array type
 func LiteralTypeState(ss []State) []State {
 	return append(
 		append(append(StructTypeState(ss), EllipsisArrayTypeState(ss)...),
 			append(SliceTypeState(ss), MapTypeState(ss)...)...),
-		TypeName(ss)...)
+		append(ArrayTypeState(ss), TypeName(ss)...)...)
 }
 
 func LiteralValue(ts [][]*Token) [][]*Token {
@@ -1506,7 +1527,7 @@ func TypeLitState(ss []State) []State {
 		append(append(PointerTypeState(ss), SliceTypeState(ss)...),
 			append(MapTypeState(ss), ChannelTypeState(ss)...)...),
 		append(append(StructTypeState(ss), FunctionTypeState(ss)...),
-			InterfaceTypeState(ss)...)...)
+			append(InterfaceTypeState(ss), ArrayTypeState(ss)...)...)...)
 }
 
 func TypeLit(ts [][]*Token) [][]*Token {

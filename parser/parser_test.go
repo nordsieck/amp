@@ -93,6 +93,17 @@ func TestArrayType(t *testing.T) {
 	})
 }
 
+func TestArrayTypeState(t *testing.T) {
+	resultState(t, ArrayTypeState, map[string][]StateOutput{
+		`[1]int`: {{[]string{``, `[1]int`}, []*Token{ret}}},
+		// `[a]int`: {{[]string{``, `[a]int`}, []*Token{ret}}},
+	})
+}
+
+func TestArrayType_Render(t *testing.T) {
+	defect.Equal(t, string(arrayType{one, _int}.Render()), `[1]int`)
+}
+
 func TestAssignment(t *testing.T) {
 	remaining(t, Assignment, Tmap{`a = 1`: {{ret}}})
 }
@@ -595,8 +606,8 @@ func TestLiteralType(t *testing.T) {
 
 func TestLiteralTypeState(t *testing.T) {
 	resultState(t, LiteralTypeState, map[string][]StateOutput{
-		`struct{}`: {{[]string{``, `struct{}`}, []*Token{ret}}},
-		// `[1]int`: {{[]string{``, `[1]int`}, []*Token{ret}}},
+		`struct{}`:    {{[]string{``, `struct{}`}, []*Token{ret}}},
+		`[1]int`:      {{[]string{``, `[1]int`}, []*Token{ret}}},
 		`[...]int`:    {{[]string{``, `[...]int`}, []*Token{ret}}},
 		`[]int`:       {{[]string{``, `[]int`}, []*Token{ret}}},
 		`map[int]int`: {{[]string{``, `map[int]int`}, []*Token{ret}}},
@@ -1231,7 +1242,7 @@ func TestTypeLit(t *testing.T) {
 
 func TestTypeLitState(t *testing.T) {
 	resultState(t, TypeLitState, map[string][]StateOutput{
-		//`[1]int`:      {{[]string{``, `[1]int`}, []*Token{ret}}},
+		`[1]int`:      {{[]string{``, `[1]int`}, []*Token{ret}}},
 		`struct{}`:    {{[]string{``, `struct{}`}, []*Token{ret}}},
 		`*int`:        {{[]string{``, `*int`}, []*Token{ret}}},
 		`func()`:      {{[]string{``, `func()`}, []*Token{ret}}},
