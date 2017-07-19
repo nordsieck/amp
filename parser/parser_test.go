@@ -304,6 +304,14 @@ func TestExpression(t *testing.T) {
 	})
 }
 
+func TestExpressionState(t *testing.T) {
+	resultState(t, ExpressionState, map[string][]StateOutput{
+		`1`: {{[]string{``, `1`}, []*Token{ret}}},
+		// `1+1`
+		// `1+-1`
+	})
+}
+
 func TestExpressionList(t *testing.T) {
 	remaining(t, ExpressionList, Tmap{
 		`1`:   {{ret}},
@@ -535,6 +543,12 @@ func TestKey(t *testing.T) {
 	})
 }
 
+func TestKeyState(t *testing.T) {
+	resultState(t, KeyState, map[string][]StateOutput{
+		`a`: {{[]string{``, `a`}, []*Token{ret}}},
+	})
+}
+
 func TestKeyedElement(t *testing.T) {
 	remaining(t, KeyedElement, Tmap{
 		`1`:   {{ret}},
@@ -555,6 +569,16 @@ func TestLiteral(t *testing.T) {
 		`a`:        empty,
 		`_`:        empty,
 		`func(){}`: {{ret}},
+	})
+}
+
+func TestLiteralState(t *testing.T) {
+	resultState(t, LiteralState, map[string][]StateOutput{
+		`1`: {{[]string{``, `1`}, []*Token{ret}}},
+		// `a{1}`: {{[]string{``, `a{1}`}, []*Token{ret}}},
+		`a`: nil,
+		`_`: nil,
+		// `func(){}`: {{[]string{``, `func(){}`}, []*Token{ret}}},
 	})
 }
 
@@ -661,6 +685,14 @@ func TestOperand(t *testing.T) {
 		`1`:     {{ret}},
 		`a.a`:   {{ret, a, dot}, {ret}, {ret}},
 		`(a.a)`: {{ret}, {ret}, {ret}},
+	})
+}
+
+func TestOperandState(t *testing.T) {
+	resultState(t, OperandState, map[string][]StateOutput{
+		`1`: {{[]string{``, `1`}, []*Token{ret}}},
+		// `a.a`: {{[]string{``, `a`}, []*Token{ret, a, dot}}, {[]string{``, `a.a`}, []*Token{ret}}},
+		// `(a.a)`: {{[]string{``, `(a.a)`}, []*Token{ret}}},
 	})
 }
 
@@ -834,6 +866,19 @@ func TestPrimaryExpr(t *testing.T) {
 				rparen, {tok: token.ELLIPSIS}, b, lparen},
 			{ret, {tok: token.RBRACK}, {tok: token.COLON}, {tok: token.LBRACK}},
 			{ret}},
+	})
+}
+
+func TestPrimaryExprState(t *testing.T) {
+	resultState(t, PrimaryExprState, map[string][]StateOutput{
+		`1`: {{[]string{``, `1`}, []*Token{ret}}},
+		// `(a.a)("foo")`
+		// `a.a`
+		// `a[1]`
+		// `a[:]`
+		// `a.(int)`
+		// `a(b...)`
+		// `a(b...)[:]`
 	})
 }
 
@@ -1245,6 +1290,14 @@ func TestUnaryExpr(t *testing.T) {
 		`1`:  {{ret}},
 		`-1`: {{ret}},
 		`!a`: {{ret}},
+	})
+}
+
+func TestUnaryExprState(t *testing.T) {
+	resultState(t, UnaryExprState, map[string][]StateOutput{
+		`1`: {{[]string{``, `1`}, []*Token{ret}}},
+		// `-1`
+		// `!a`
 	})
 }
 

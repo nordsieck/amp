@@ -329,6 +329,12 @@ func Expression(ts [][]*Token) [][]*Token {
 	return append(base, comp...)
 }
 
+func ExpressionState(ss []State) []State {
+	ss = UnaryExprState(ss)
+	// Expression binary_op Expression
+	return ss
+}
+
 func ExpressionList(ts [][]*Token) [][]*Token {
 	ts = Expression(ts)
 	next := ts
@@ -655,9 +661,28 @@ func (it interfaceType) Render() []byte {
 	return append(ret, `}`...)
 }
 
+// TODO: missing LiteralValue
 func Key(ts [][]*Token) [][]*Token {
 	return append(tokenReader(ts, token.IDENT), Expression(ts)...)
 }
+
+func KeyState(ss []State) []State {
+	fn := tokenParserState(ss, token.IDENT)
+	// expr := Expression(ss)
+	// lv := LiteralValue(ss)
+
+	for i, f := range fn {
+		k := key{f.r[len(f.r)-1]}
+		fn[i].r = rAppend(f.r, 1, k)
+	}
+
+	ss = fn
+	return ss
+}
+
+type key struct{ r Renderer }
+
+func (k key) Render() []byte { return k.r.Render() }
 
 func KeyedElement(ts [][]*Token) [][]*Token {
 	with := Key(ts)
@@ -677,6 +702,12 @@ func LabeledStmt(ts [][]*Token) [][]*Token {
 func Literal(ts [][]*Token) [][]*Token {
 	basicLit := fromState(BasicLit(toState(ts)))
 	return append(append(basicLit, CompositeLit(ts)...), FunctionLit(ts)...)
+}
+
+func LiteralState(ss []State) []State {
+	return BasicLit(ss)
+	// CompositeLit
+	// FunctionLit
 }
 
 func LiteralType(ts [][]*Token) [][]*Token {
@@ -807,6 +838,14 @@ func Operand(ts [][]*Token) [][]*Token {
 	}
 	xp = tokenReader(xp, token.RPAREN)
 	return append(append(Literal(ts), OperandName(ts)...), append(MethodExpr(ts), xp...)...)
+}
+
+func OperandState(ss []State) []State {
+	ss = LiteralState(ss)
+	// operand name
+	// methodexpr
+	// "(" expression ")"
+	return ss
 }
 
 func OperandName(ts [][]*Token) [][]*Token {
@@ -1040,6 +1079,17 @@ func PrimaryExpr(ts [][]*Token) [][]*Token {
 		newBase = additions
 	}
 	return base
+}
+
+func PrimaryExprState(ss []State) []State {
+	ss = OperandState(ss)
+	// conversion
+	// selector
+	// index
+	// slice
+	// type assertion
+	// arguments
+	return ss
 }
 
 func QualifiedIdent(ss []State) []State {
@@ -1518,6 +1568,12 @@ func UnaryExpr(ts [][]*Token) [][]*Token {
 		return PrimaryExpr(ts)
 	}
 	return append(PrimaryExpr(ts), UnaryExpr(uo)...)
+}
+
+func UnaryExprState(ss []State) []State {
+	ss = PrimaryExprState(ss)
+	// UnaryOp UnaryExpr
+	return ss
 }
 
 func UnaryOp(ss []State) []State {
