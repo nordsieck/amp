@@ -86,8 +86,8 @@ func TestArguments(t *testing.T) {
 	})
 }
 
-func TestArrayTypeState(t *testing.T) {
-	resultState(t, ArrayTypeState, map[string][]StateOutput{
+func TestArrayType(t *testing.T) {
+	resultState(t, ArrayType, map[string][]StateOutput{
 		`[1]int`: {{[]string{``, `[1]int`}, []*Token{ret}}},
 		// `[a]int`: {{[]string{``, `[a]int`}, []*Token{ret}}},
 	})
@@ -158,8 +158,8 @@ func TestBreakStmt(t *testing.T) {
 	})
 }
 
-func TestChannelTypeState(t *testing.T) {
-	resultState(t, ChannelTypeState, map[string][]StateOutput{
+func TestChannelType(t *testing.T) {
+	resultState(t, ChannelType, map[string][]StateOutput{
 		`chan int`:   {{[]string{``, `chan int`}, []*Token{ret}}},
 		`<-chan int`: {{[]string{``, `<-chan int`}, []*Token{ret}}},
 		`chan<- int`: {{[]string{``, `chan<- int`}, []*Token{ret}}},
@@ -269,8 +269,8 @@ func TestElementList(t *testing.T) {
 	})
 }
 
-func TestEllipsisArrayTypeState(t *testing.T) {
-	resultState(t, EllipsisArrayTypeState, map[string][]StateOutput{`[...]int`: {{[]string{``, `[...]int`}, []*Token{ret}}}})
+func TestEllipsisArrayType(t *testing.T) {
+	resultState(t, EllipsisArrayType, map[string][]StateOutput{`[...]int`: {{[]string{``, `[...]int`}, []*Token{ret}}}})
 }
 
 func TestEllipsisArrayType_Render(t *testing.T) {
@@ -343,8 +343,8 @@ func TestFallthroughStmt(t *testing.T) {
 	})
 }
 
-func TestFieldDeclState(t *testing.T) {
-	resultState(t, FieldDeclState, map[string][]StateOutput{
+func TestFieldDecl(t *testing.T) {
+	resultState(t, FieldDecl, map[string][]StateOutput{
 		`a,a int`: {{[]string{``, `a,a int`}, []*Token{ret}}, {[]string{``, `a`}, []*Token{ret, _int, a, comma}}},
 		`a,a int "foo"`: {{[]string{``, `a,a int`}, []*Token{ret, {token.STRING, `"foo"`}}}, {[]string{``, `a,a int "foo"`}, []*Token{ret}},
 			{[]string{``, `a`}, []*Token{ret, {token.STRING, `"foo"`}, _int, a, comma}}},
@@ -405,8 +405,8 @@ func TestFunctionLit(t *testing.T) {
 	})
 }
 
-func TestFunctionTypeState(t *testing.T) {
-	resultState(t, FunctionTypeState, map[string][]StateOutput{
+func TestFunctionType(t *testing.T) {
+	resultState(t, FunctionType, map[string][]StateOutput{
 		`func()`:             {{[]string{``, `func()`}, []*Token{ret}}},
 		`func()()`:           {{[]string{``, `func()`}, []*Token{ret, rparen, lparen}}, {[]string{``, `func()()`}, []*Token{ret}}},
 		`func(int, int) int`: {{[]string{``, `func(int,int)`}, []*Token{ret, _int}}, {[]string{``, `func(int,int)int`}, []*Token{ret}}},
@@ -484,8 +484,8 @@ func TestIndex(t *testing.T) {
 	})
 }
 
-func TestInterfaceTypeState(t *testing.T) {
-	resultState(t, InterfaceTypeState, map[string][]StateOutput{
+func TestInterfaceType(t *testing.T) {
+	resultState(t, InterfaceType, map[string][]StateOutput{
 		`interface{}`:       {{[]string{``, `interface{}`}, []*Token{ret}}},
 		`interface{;}`:      nil,
 		`interface{a}`:      {{[]string{``, `interface{a;}`}, []*Token{ret}}},
@@ -548,8 +548,8 @@ func TestLiteralState(t *testing.T) {
 	})
 }
 
-func TestLiteralTypeState(t *testing.T) {
-	resultState(t, LiteralTypeState, map[string][]StateOutput{
+func TestLiteralType(t *testing.T) {
+	resultState(t, LiteralType, map[string][]StateOutput{
 		`struct{}`:    {{[]string{``, `struct{}`}, []*Token{ret}}},
 		`[1]int`:      {{[]string{``, `[1]int`}, []*Token{ret}}},
 		`[...]int`:    {{[]string{``, `[...]int`}, []*Token{ret}}},
@@ -566,8 +566,8 @@ func TestLiteralValue(t *testing.T) {
 	})
 }
 
-func TestMapTypeState(t *testing.T) {
-	resultState(t, MapTypeState, map[string][]StateOutput{
+func TestMapType(t *testing.T) {
+	resultState(t, MapType, map[string][]StateOutput{
 		`map[int]int`: {{[]string{``, `map[int]int`}, []*Token{ret}}},
 		`int`:         nil,
 	})
@@ -597,8 +597,8 @@ func TestMethodExpr(t *testing.T) {
 	})
 }
 
-func TestMethodSpecState(t *testing.T) {
-	resultState(t, MethodSpecState, map[string][]StateOutput{
+func TestMethodSpec(t *testing.T) {
+	resultState(t, MethodSpec, map[string][]StateOutput{
 		`a()`:   {{[]string{``, `a()`}, []*Token{ret}}, {[]string{``, `a`}, []*Token{ret, rparen, lparen}}},
 		`a`:     {{[]string{``, `a`}, []*Token{ret}}},
 		`a.a()`: {{[]string{``, `a.a`}, []*Token{ret, rparen, lparen}}, {[]string{``, `a`}, []*Token{ret, rparen, lparen, a, dot}}},
@@ -665,8 +665,8 @@ func TestPackageClause(t *testing.T) {
 	})
 }
 
-func TestParameterDeclIDListState(t *testing.T) {
-	resultState(t, ParameterDeclIDListState, map[string][]StateOutput{
+func TestParameterDeclIDList(t *testing.T) {
+	resultState(t, ParameterDeclIDList, map[string][]StateOutput{
 		`int`:      nil,
 		`...int`:   nil,
 		`a, b int`: {{[]string{``, `a,b int`}, []*Token{ret}}},
@@ -675,8 +675,8 @@ func TestParameterDeclIDListState(t *testing.T) {
 	})
 }
 
-func TestParameterDeclNoListState(t *testing.T) {
-	resultState(t, ParameterDeclNoListState, map[string][]StateOutput{
+func TestParameterDeclNoList(t *testing.T) {
+	resultState(t, ParameterDeclNoList, map[string][]StateOutput{
 		`int`:      {{[]string{``, `int`}, []*Token{ret}}},
 		`...int`:   {{[]string{``, `... int`}, []*Token{ret}}},
 		`a, b int`: {{[]string{``, `a`}, []*Token{ret, _int, b, comma}}},
@@ -692,8 +692,8 @@ func TestParameterDecl_Render(t *testing.T) {
 	defect.Equal(t, string(parameterDecl{identifierList{a}, true, _int}.Render()), `a ... int`)
 }
 
-func TestParamterListState(t *testing.T) {
-	resultState(t, ParameterListState, map[string][]StateOutput{
+func TestParamterList(t *testing.T) {
+	resultState(t, ParameterList, map[string][]StateOutput{
 		`int`:       {{[]string{``, `int`}, []*Token{ret}}},
 		`int, int`:  {{[]string{``, `int`}, []*Token{ret, _int, comma}}, {[]string{``, `int,int`}, []*Token{ret}}},
 		`a, int`:    {{[]string{``, `a`}, []*Token{ret, _int, comma}}, {[]string{``, `a,int`}, []*Token{ret}}},
@@ -719,8 +719,8 @@ func TestParameterList_Render(t *testing.T) {
 	}.Render()), `a,b int,a ... int`)
 }
 
-func TestParametersState(t *testing.T) {
-	resultState(t, ParametersState, map[string][]StateOutput{
+func TestParameters(t *testing.T) {
+	resultState(t, Parameters, map[string][]StateOutput{
 		`()`:                    {{[]string{``, `()`}, []*Token{ret}}},
 		`(int)`:                 {{[]string{``, `(int)`}, []*Token{ret}}},
 		`(a, b)`:                {{[]string{``, `(a,b)`}, []*Token{ret}}},
@@ -737,8 +737,8 @@ func TestParameters_Render(t *testing.T) {
 	defect.Equal(t, string(parameters{r: parameterList{parameterDecl{typ: _int}}, comma: true}.Render()), `(int,)`)
 }
 
-func TestPointerTypeState(t *testing.T) {
-	resultState(t, PointerTypeState, map[string][]StateOutput{
+func TestPointerType(t *testing.T) {
+	resultState(t, PointerType, map[string][]StateOutput{
 		`*int`: {{[]string{``, `*int`}, []*Token{ret}}},
 		`int`:  nil,
 	})
@@ -843,8 +843,8 @@ func TestRelOp(t *testing.T) {
 	})
 }
 
-func TestResultState(t *testing.T) {
-	resultState(t, ResultState, map[string][]StateOutput{
+func TestResult(t *testing.T) {
+	resultState(t, Result, map[string][]StateOutput{
 		`int`: {{[]string{``, `int`}, []*Token{ret}}},
 		`()`:  {{[]string{``, `()`}, []*Token{ret}}},
 	})
@@ -891,8 +891,8 @@ func TestShortVarDecl(t *testing.T) {
 	})
 }
 
-func TestSignatureState(t *testing.T) {
-	resultState(t, SignatureState, map[string][]StateOutput{
+func TestSignature(t *testing.T) {
+	resultState(t, Signature, map[string][]StateOutput{
 		`()`:             {{[]string{``, `()`}, []*Token{ret}}},
 		`()()`:           {{[]string{``, `()`}, []*Token{ret, rparen, lparen}}, {[]string{``, `()()`}, []*Token{ret}}},
 		`(int, int) int`: {{[]string{``, `(int,int)`}, []*Token{ret, _int}}, {[]string{``, `(int,int)int`}, []*Token{ret}}},
@@ -928,8 +928,8 @@ func TestSlice(t *testing.T) {
 	})
 }
 
-func TestSliceTypeState(t *testing.T) {
-	resultState(t, SliceTypeState, map[string][]StateOutput{
+func TestSliceType(t *testing.T) {
+	resultState(t, SliceType, map[string][]StateOutput{
 		`[]int`: {{[]string{``, `[]int`}, []*Token{ret}}},
 		`int`:   nil,
 	})
@@ -986,8 +986,8 @@ func TestStatementList(t *testing.T) {
 	})
 }
 
-func TestStructTypeState(t *testing.T) {
-	resultState(t, StructTypeState, map[string][]StateOutput{
+func TestStructType(t *testing.T) {
+	resultState(t, StructType, map[string][]StateOutput{
 		`struct{}`:                      {{[]string{``, `struct{}`}, []*Token{ret}}},
 		`struct{int}`:                   {{[]string{``, `struct{int;}`}, []*Token{ret}}},
 		`struct{int;}`:                  {{[]string{``, `struct{int;}`}, []*Token{ret}}},
@@ -1019,8 +1019,8 @@ func TestTopLevelDecl(t *testing.T) {
 	})
 }
 
-func TestTypeState(t *testing.T) {
-	resultState(t, TypeState, map[string][]StateOutput{
+func TestType(t *testing.T) {
+	resultState(t, Type, map[string][]StateOutput{
 		`a`:        {{[]string{``, `a`}, []*Token{ret}}},
 		`a.a`:      {{[]string{``, `a.a`}, []*Token{ret}}, {[]string{``, `a`}, []*Token{ret, a, dot}}},
 		`1`:        nil,
@@ -1075,8 +1075,8 @@ func TestTypeList(t *testing.T) {
 	})
 }
 
-func TestTypeLitState(t *testing.T) {
-	resultState(t, TypeLitState, map[string][]StateOutput{
+func TestTypeLit(t *testing.T) {
+	resultState(t, TypeLit, map[string][]StateOutput{
 		`[1]int`:      {{[]string{``, `[1]int`}, []*Token{ret}}},
 		`struct{}`:    {{[]string{``, `struct{}`}, []*Token{ret}}},
 		`*int`:        {{[]string{``, `*int`}, []*Token{ret}}},
