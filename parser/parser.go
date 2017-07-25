@@ -772,8 +772,7 @@ func Operand(ts [][]*Token) [][]*Token {
 }
 
 func OperandState(ss []State) []State {
-	ss = LiteralState(ss)
-	// operand name
+	ss = append(LiteralState(ss), OperandNameState(ss)...)
 	// methodexpr
 	// "(" expression ")"
 	return ss

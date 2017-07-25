@@ -633,8 +633,8 @@ func TestOperand(t *testing.T) {
 
 func TestOperandState(t *testing.T) {
 	resultState(t, OperandState, map[string][]StateOutput{
-		`1`: {{[]string{``, `1`}, []*Token{ret}}},
-		// `a.a`: {{[]string{``, `a`}, []*Token{ret, a, dot}}, {[]string{``, `a.a`}, []*Token{ret}}},
+		`1`:   {{[]string{``, `1`}, []*Token{ret}}},
+		`a.a`: {{[]string{``, `a`}, []*Token{ret, a, dot}}, {[]string{``, `a.a`}, []*Token{ret}}},
 		// `(a.a)`: {{[]string{``, `(a.a)`}, []*Token{ret}}},
 	})
 }
