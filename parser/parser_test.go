@@ -86,13 +86,6 @@ func TestArguments(t *testing.T) {
 	})
 }
 
-func TestArrayType(t *testing.T) {
-	remaining(t, ArrayType, Tmap{
-		`[1]int`: {{ret}},
-		`[a]int`: {{ret}},
-	})
-}
-
 func TestArrayTypeState(t *testing.T) {
 	resultState(t, ArrayTypeState, map[string][]StateOutput{
 		`[1]int`: {{[]string{``, `[1]int`}, []*Token{ret}}},
@@ -162,15 +155,6 @@ func TestBreakStmt(t *testing.T) {
 	remaining(t, BreakStmt, Tmap{
 		`break a`: {{ret, a}, {ret}},
 		`a`:       empty,
-	})
-}
-
-func TestChannelType(t *testing.T) {
-	remaining(t, ChannelType, Tmap{
-		`chan int`:   {{ret}},
-		`<-chan int`: {{ret}},
-		`chan<- int`: {{ret}},
-		`int`:        empty,
 	})
 }
 
@@ -285,10 +269,6 @@ func TestElementList(t *testing.T) {
 	})
 }
 
-func TestEllipsisArrayType(t *testing.T) {
-	remaining(t, EllipsisArrayType, Tmap{`[...]int`: {{ret}}})
-}
-
 func TestEllipsisArrayTypeState(t *testing.T) {
 	resultState(t, EllipsisArrayTypeState, map[string][]StateOutput{`[...]int`: {{[]string{``, `[...]int`}, []*Token{ret}}}})
 }
@@ -363,14 +343,6 @@ func TestFallthroughStmt(t *testing.T) {
 	})
 }
 
-func TestFieldDecl(t *testing.T) {
-	remaining(t, FieldDecl, Tmap{
-		`a,a int`:    {{ret, _int, a, comma}, {ret}},
-		`*int`:       {{ret}},
-		`*int "foo"`: {{ret, {token.STRING, `"foo"`}}, {ret}},
-	})
-}
-
 func TestFieldDeclState(t *testing.T) {
 	resultState(t, FieldDeclState, map[string][]StateOutput{
 		`a,a int`: {{[]string{``, `a,a int`}, []*Token{ret}}, {[]string{``, `a`}, []*Token{ret, _int, a, comma}}},
@@ -430,14 +402,6 @@ func TestFunctionDecl(t *testing.T) {
 func TestFunctionLit(t *testing.T) {
 	remaining(t, FunctionLit, Tmap{
 		`func(){}`: {{ret}},
-	})
-}
-
-func TestFunctionType(t *testing.T) {
-	remaining(t, FunctionType, Tmap{
-		`func()`:             {{ret}},
-		`func()()`:           {{ret, rparen, lparen}, {ret}},
-		`func(int, int) int`: {{ret, _int}, {ret}},
 	})
 }
 
@@ -520,15 +484,6 @@ func TestIndex(t *testing.T) {
 	})
 }
 
-func TestInterfaceType(t *testing.T) {
-	remaining(t, InterfaceType, Tmap{
-		`interface{}`:       {{ret}},
-		`interface{a}`:      {{ret}},
-		`interface{a()}`:    {{ret}},
-		`interface{a();a;}`: {{ret}},
-	})
-}
-
 func TestInterfaceTypeState(t *testing.T) {
 	resultState(t, InterfaceTypeState, map[string][]StateOutput{
 		`interface{}`:       {{[]string{``, `interface{}`}, []*Token{ret}}},
@@ -593,17 +548,6 @@ func TestLiteralState(t *testing.T) {
 	})
 }
 
-func TestLiteralType(t *testing.T) {
-	remaining(t, LiteralType, Tmap{
-		`struct{}`:    {{ret}},
-		`[1]int`:      {{ret}},
-		`[...]int`:    {{ret}},
-		`[]int`:       {{ret}},
-		`map[int]int`: {{ret}},
-		`a.a`:         {{ret}, {ret, a, dot}},
-	})
-}
-
 func TestLiteralTypeState(t *testing.T) {
 	resultState(t, LiteralTypeState, map[string][]StateOutput{
 		`struct{}`:    {{[]string{``, `struct{}`}, []*Token{ret}}},
@@ -620,10 +564,6 @@ func TestLiteralValue(t *testing.T) {
 		`{1}`:           {{ret}},
 		`{0: 1, 1: 2,}`: {{ret}},
 	})
-}
-
-func TestMapType(t *testing.T) {
-	remaining(t, MapType, Tmap{`map[int]int`: {{ret}}})
 }
 
 func TestMapTypeState(t *testing.T) {
@@ -654,14 +594,6 @@ func TestMethodExpr(t *testing.T) {
 		`(a).a`:    {{ret}},
 		`(a.a).a`:  {{ret}},
 		`(*a.a).a`: {{ret}},
-	})
-}
-
-func TestMethodSpec(t *testing.T) {
-	remaining(t, MethodSpec, Tmap{
-		`a()`:   {{ret}, {ret, rparen, lparen}},
-		`a`:     {{ret}},
-		`a.a()`: {{ret, rparen, lparen}, {ret, rparen, lparen, a, dot}},
 	})
 }
 
@@ -733,15 +665,6 @@ func TestPackageClause(t *testing.T) {
 	})
 }
 
-func TestParameterDecl(t *testing.T) {
-	remaining(t, ParameterDecl, Tmap{
-		`int`:      {{ret}},
-		`...int`:   {{ret}},
-		`a, b int`: {{ret, _int, b, comma}, {ret}},
-		`b... int`: {{ret, _int, {tok: token.ELLIPSIS}}, {ret}},
-	})
-}
-
 func TestParameterDeclIDListState(t *testing.T) {
 	resultState(t, ParameterDeclIDListState, map[string][]StateOutput{
 		`int`:      nil,
@@ -767,23 +690,6 @@ func TestParameterDecl_Render(t *testing.T) {
 	defect.Equal(t, string(parameterDecl{nil, true, _int}.Render()), `... int`)
 	defect.Equal(t, string(parameterDecl{identifierList{a, b}, false, _int}.Render()), `a,b int`)
 	defect.Equal(t, string(parameterDecl{identifierList{a}, true, _int}.Render()), `a ... int`)
-}
-
-func TestParameterList(t *testing.T) {
-	remaining(t, ParameterList, Tmap{
-		`int`:      {{ret}},
-		`int, int`: {{ret, _int, comma}, {ret}},
-		`a, b int, c, d int`: {
-			{ret, _int, d, comma, c, comma, _int, b, comma},
-			{ret, _int, d, comma, c, comma},
-			{ret, _int, d, comma, c, comma, _int},
-			{ret, _int, d, comma},
-			{ret, _int, d, comma, c, comma},
-			{ret}, {ret, _int},
-			{ret, _int, d, comma},
-			{ret}, {ret}, {ret, _int}, {ret},
-		},
-	})
 }
 
 func TestParamterListState(t *testing.T) {
@@ -813,16 +719,6 @@ func TestParameterList_Render(t *testing.T) {
 	}.Render()), `a,b int,a ... int`)
 }
 
-func TestParameters(t *testing.T) {
-	remaining(t, Parameters, Tmap{
-		`(int)`:                {{ret}},
-		`(int, int)`:           {{ret}},
-		`(int, int,)`:          {{ret}},
-		`(a, b int)`:           {{ret}, {ret}},
-		`(a, b int, c, d int)`: {{ret}, {ret}, {ret}, {ret}},
-	})
-}
-
 func TestParametersState(t *testing.T) {
 	resultState(t, ParametersState, map[string][]StateOutput{
 		`()`:                    {{[]string{``, `()`}, []*Token{ret}}},
@@ -839,13 +735,6 @@ func TestParameters_Render(t *testing.T) {
 	defect.Equal(t, string(parameters{comma: true}.Render()), `()`)
 	defect.Equal(t, string(parameters{r: parameterList{parameterDecl{typ: _int}}}.Render()), `(int)`)
 	defect.Equal(t, string(parameters{r: parameterList{parameterDecl{typ: _int}}, comma: true}.Render()), `(int,)`)
-}
-
-func TestPointerType(t *testing.T) {
-	remaining(t, PointerType, Tmap{
-		`*int`: {{ret}},
-		`int`:  empty,
-	})
 }
 
 func TestPointerTypeState(t *testing.T) {
@@ -954,13 +843,6 @@ func TestRelOp(t *testing.T) {
 	})
 }
 
-func TestResult(t *testing.T) {
-	remaining(t, Result, Tmap{
-		`int`:        {{ret}},
-		`(int, int)`: {{ret}},
-	})
-}
-
 func TestResultState(t *testing.T) {
 	resultState(t, ResultState, map[string][]StateOutput{
 		`int`: {{[]string{``, `int`}, []*Token{ret}}},
@@ -1009,14 +891,6 @@ func TestShortVarDecl(t *testing.T) {
 	})
 }
 
-func TestSignature(t *testing.T) {
-	remaining(t, Signature, Tmap{
-		`()`:             {{ret}},
-		`()()`:           {{ret, rparen, lparen}, {ret}},
-		`(int, int) int`: {{ret, _int}, {ret}},
-	})
-}
-
 func TestSignatureState(t *testing.T) {
 	resultState(t, SignatureState, map[string][]StateOutput{
 		`()`:             {{[]string{``, `()`}, []*Token{ret}}},
@@ -1052,10 +926,6 @@ func TestSlice(t *testing.T) {
 		`[:1:1]`:  {{ret}},
 		`[1:1:1]`: {{ret}},
 	})
-}
-
-func TestSliceType(t *testing.T) {
-	remaining(t, SliceType, Tmap{`[]int`: {{ret}}})
 }
 
 func TestSliceTypeState(t *testing.T) {
@@ -1116,19 +986,6 @@ func TestStatementList(t *testing.T) {
 	})
 }
 
-func TestStructType(t *testing.T) {
-	remaining(t, StructType, Tmap{
-		`struct{}`:                      {{ret}},
-		`struct{int}`:                   {{ret}},
-		`struct{int;}`:                  {{ret}},
-		`struct{int;float64;}`:          {{ret}},
-		`struct{a int}`:                 {{ret}},
-		`struct{a, b int}`:              {{ret}},
-		`struct{a, b int;}`:             {{ret}},
-		`struct{a, b int; c, d string}`: {{ret}},
-	})
-}
-
 func TestStructTypeState(t *testing.T) {
 	resultState(t, StructTypeState, map[string][]StateOutput{
 		`struct{}`:                      {{[]string{``, `struct{}`}, []*Token{ret}}},
@@ -1159,18 +1016,6 @@ func TestTopLevelDecl(t *testing.T) {
 		`var a int`:        {{ret}},
 		`func f(){}`:       {{ret}},
 		`func (m M) f(){}`: {{ret}},
-	})
-}
-
-func TestType(t *testing.T) {
-	remaining(t, Type, Tmap{
-		`a`:        {{ret}},
-		`a.a`:      {{ret}, {ret, a, dot}},
-		`1`:        empty,
-		`_`:        {{ret}},
-		`(a.a)`:    {{ret}},
-		`(((_)))`:  {{ret}},
-		`chan int`: {{ret}},
 	})
 }
 
@@ -1227,19 +1072,6 @@ func TestTypeList(t *testing.T) {
 		`a`:     {{ret}},
 		`a, b`:  {{ret, b, comma}, {ret}},
 		`a, b,`: {{comma, b, comma}, {comma}},
-	})
-}
-
-func TestTypeLit(t *testing.T) {
-	remaining(t, TypeLit, Tmap{
-		`[1]int`:      {{ret}},
-		`struct{}`:    {{ret}},
-		`*int`:        {{ret}},
-		`func()`:      {{ret}},
-		`interface{}`: {{ret}},
-		`[]int`:       {{ret}},
-		`map[int]int`: {{ret}},
-		`chan int`:    {{ret}},
 	})
 }
 

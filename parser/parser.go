@@ -80,16 +80,6 @@ func Arguments(ts [][]*Token) [][]*Token {
 	return tokenReader(append(ts, newTs...), token.RPAREN)
 }
 
-func ArrayType(ts [][]*Token) [][]*Token {
-	ts = tokenReader(ts, token.LBRACK)
-	if len(ts) == 0 {
-		return nil
-	}
-	ts = Expression(ts)
-	ts = tokenReader(ts, token.RBRACK)
-	return Type(ts)
-}
-
 func ArrayTypeState(ss []State) []State {
 	ss = tokenReaderState(ss, token.LBRACK)
 	if len(ss) == 0 {
@@ -160,18 +150,6 @@ func BreakStmt(ts [][]*Token) [][]*Token {
 	return append(ts, tokenReader(ts, token.IDENT)...)
 }
 
-func ChannelType(ts [][]*Token) [][]*Token {
-	plain := tokenReader(ts, token.CHAN)
-	after := tokenReader(plain, token.ARROW)
-	before := tokenReader(ts, token.ARROW)
-	before = tokenReader(before, token.CHAN)
-	together := append(append(plain, after...), before...)
-	if len(together) == 0 {
-		return nil
-	}
-	return Type(together)
-}
-
 func ChannelTypeState(ss []State) []State {
 	plain := tokenReaderState(ss, token.CHAN)
 	after := tokenReaderState(plain, token.ARROW)
@@ -231,7 +209,7 @@ func CommClause(ts [][]*Token) [][]*Token {
 }
 
 func CompositeLit(ts [][]*Token) [][]*Token {
-	ts = LiteralType(ts)
+	ts = fromState(LiteralTypeState(toState(ts)))
 	return LiteralValue(ts)
 }
 
@@ -257,7 +235,7 @@ func ConstDecl(ts [][]*Token) [][]*Token {
 // IdentifierLit [ Type ] "=" ExpressionList
 func ConstSpec(ts [][]*Token) [][]*Token {
 	ts = fromState(IdentifierList(toState(ts)))
-	ts = append(ts, Type(ts)...)
+	ts = append(ts, fromState(TypeState(toState(ts)))...)
 	ts = tokenReader(ts, token.ASSIGN)
 	return ExpressionList(ts)
 }
@@ -268,7 +246,7 @@ func ContinueStmt(ts [][]*Token) [][]*Token {
 }
 
 func Conversion(ts [][]*Token) [][]*Token {
-	ts = Type(ts)
+	ts = fromState(TypeState(toState(ts)))
 	ts = tokenReader(ts, token.LPAREN)
 	if len(ts) == 0 {
 		return nil
@@ -301,16 +279,6 @@ func ElementList(ts [][]*Token) [][]*Token {
 		base = next
 	}
 	return ts
-}
-
-func EllipsisArrayType(ts [][]*Token) [][]*Token {
-	ts = tokenReader(ts, token.LBRACK)
-	ts = tokenReader(ts, token.ELLIPSIS)
-	ts = tokenReader(ts, token.RBRACK)
-	if len(ts) == 0 {
-		return nil
-	}
-	return Type(ts)
 }
 
 func EllipsisArrayTypeState(ss []State) []State {
@@ -403,16 +371,6 @@ func ExprSwitchStmt(ts [][]*Token) [][]*Token {
 
 func FallthroughStmt(ss []State) []State { return tokenParserState(ss, token.FALLTHROUGH) }
 
-func FieldDecl(ts [][]*Token) [][]*Token {
-	a := fromState(IdentifierList(toState(ts)))
-	if len(a) != 0 {
-		a = Type(a)
-	}
-	ts = append(fromState(AnonymousField(toState(ts))), a...)
-	return append(ts, tokenReader(ts, token.STRING)...)
-}
-
-// The problem is that the renderer slice gets copied
 func FieldDeclState(ss []State) []State {
 	typ := IdentifierList(ss)
 	if len(typ) != 0 {
@@ -475,7 +433,7 @@ func ForStmt(ts [][]*Token) [][]*Token {
 }
 
 func Function(ts [][]*Token) [][]*Token {
-	ts = Signature(ts)
+	ts = fromState(SignatureState(toState(ts)))
 	return Block(ts)
 }
 
@@ -490,11 +448,6 @@ func FunctionDecl(ts [][]*Token) [][]*Token {
 func FunctionLit(ts [][]*Token) [][]*Token {
 	ts = tokenReader(ts, token.FUNC)
 	return Function(ts)
-}
-
-func FunctionType(ts [][]*Token) [][]*Token {
-	ts = tokenReader(ts, token.FUNC)
-	return Signature(ts)
 }
 
 func FunctionTypeState(ss []State) []State {
@@ -623,22 +576,6 @@ func Index(ts [][]*Token) [][]*Token {
 
 // bad spec
 // "interface" "{" [ MethodSpec { ";" MethodSpec } [ ";" ]] "}"
-func InterfaceType(ts [][]*Token) [][]*Token {
-	ts = tokenReader(ts, token.INTERFACE)
-	ts = tokenReader(ts, token.LBRACE)
-	list := MethodSpec(ts)
-	next := list
-	for len(next) != 0 {
-		ms := tokenReader(next, token.SEMICOLON)
-		ms = MethodSpec(ms)
-		list = append(list, ms...)
-		next = ms
-	}
-	list = append(list, tokenReader(list, token.SEMICOLON)...)
-	ts = append(ts, list...)
-	return tokenReader(ts, token.RBRACE)
-}
-
 func InterfaceTypeState(ss []State) []State {
 	ss = tokenParserState(ss, token.INTERFACE)
 	ss = tokenReaderState(ss, token.LBRACE)
@@ -732,15 +669,6 @@ func LiteralState(ss []State) []State {
 	// FunctionLit
 }
 
-func LiteralType(ts [][]*Token) [][]*Token {
-	tn := fromState(TypeName(toState(ts)))
-	return append(
-		append(
-			append(StructType(ts), ArrayType(ts)...),
-			append(EllipsisArrayType(ts), SliceType(ts)...)...),
-		append(MapType(ts), tn...)...)
-}
-
 func LiteralTypeState(ss []State) []State {
 	return append(
 		append(append(StructTypeState(ss), EllipsisArrayTypeState(ss)...),
@@ -757,17 +685,6 @@ func LiteralValue(ts [][]*Token) [][]*Token {
 	list = append(list, tokenReader(list, token.COMMA)...)
 	ts = append(ts, list...)
 	return tokenReader(ts, token.RBRACE)
-}
-
-func MapType(ts [][]*Token) [][]*Token {
-	ts = tokenReader(ts, token.MAP)
-	ts = tokenReader(ts, token.LBRACK)
-	if len(ts) == 0 {
-		return nil
-	}
-	ts = Type(ts)
-	ts = tokenReader(ts, token.RBRACK)
-	return Type(ts)
 }
 
 func MapTypeState(ss []State) []State {
@@ -796,7 +713,7 @@ func (m mapType) Render() []byte {
 // "func" Reciever MethodName Function
 func MethodDecl(ts [][]*Token) [][]*Token {
 	ts = tokenReader(ts, token.FUNC)
-	ts = Parameters(ts)
+	ts = fromState(ParametersState(toState(ts)))
 	ts = fromState(nonBlankIdent(toState(ts)))
 	return Function(ts)
 }
@@ -805,13 +722,6 @@ func MethodExpr(ts [][]*Token) [][]*Token {
 	ts = ReceiverType(ts)
 	ts = tokenReader(ts, token.PERIOD)
 	return tokenReader(ts, token.IDENT)
-}
-
-func MethodSpec(ts [][]*Token) [][]*Token {
-	sig := fromState(nonBlankIdent(toState(ts)))
-	sig = Signature(sig)
-	ts = fromState(TypeName(toState(ts)))
-	return append(sig, ts...)
 }
 
 func MethodSpecState(ss []State) []State {
@@ -881,16 +791,6 @@ func PackageClause(ts [][]*Token) [][]*Token {
 
 func PackageName(ss []State) []State { return nonBlankIdent(ss) }
 
-func ParameterDecl(ts [][]*Token) [][]*Token {
-	idList := fromState(IdentifierList(toState(ts)))
-	ts = append(ts, idList...)
-	ts = append(ts, tokenReader(ts, token.ELLIPSIS)...)
-	if len(ts) == 0 {
-		return nil
-	}
-	return Type(ts)
-}
-
 func ParameterDeclIDListState(ss []State) []State {
 	ss = IdentifierList(ss)
 	ss = append(ss, tokenParserState(ss, token.ELLIPSIS)...)
@@ -951,18 +851,6 @@ func (pd parameterDecl) Render() []byte {
 	return append(ret, pd.typ.Render()...)
 }
 
-func ParameterList(ts [][]*Token) [][]*Token {
-	ts = ParameterDecl(ts)
-	next := ts
-	for len(next) != 0 {
-		decl := tokenReader(next, token.COMMA)
-		decl = ParameterDecl(decl)
-		ts = append(ts, decl...)
-		next = decl
-	}
-	return ts
-}
-
 func ParameterListState(ss []State) []State {
 	list := ParameterDeclIDListState(ss)
 	loop := list
@@ -1014,14 +902,6 @@ func (pl parameterList) Render() []byte {
 	return bytes.Join(ret, []byte(`,`))
 }
 
-func Parameters(ts [][]*Token) [][]*Token {
-	ts = tokenReader(ts, token.LPAREN)
-	params := ParameterList(ts)
-	params = append(params, tokenReader(params, token.COMMA)...)
-	ts = append(ts, params...)
-	return tokenReader(ts, token.RPAREN)
-}
-
 func ParametersState(ss []State) []State {
 	ss = tokenParserState(ss, token.LPAREN)
 	params := ParameterListState(ss)
@@ -1058,14 +938,6 @@ func (p parameters) Render() []byte {
 		}
 	}
 	return append(ret, `)`...)
-}
-
-func PointerType(ts [][]*Token) [][]*Token {
-	ts = tokenReader(ts, token.MUL)
-	if len(ts) == 0 {
-		return nil
-	}
-	return Type(ts)
 }
 
 // TODO: figure out how to treat pointers.  Are they part of the thing they are
@@ -1180,13 +1052,6 @@ func RelOp(ss []State) []State {
 	return result
 }
 
-func Result(ts [][]*Token) [][]*Token {
-	if len(ts) == 0 {
-		return nil
-	}
-	return append(Parameters(ts), Type(ts)...)
-}
-
 func ResultState(ss []State) []State {
 	if len(ss) == 0 {
 		return nil
@@ -1255,11 +1120,6 @@ func ShortVarDecl(ts [][]*Token) [][]*Token {
 	return ExpressionList(ts)
 }
 
-func Signature(ts [][]*Token) [][]*Token {
-	ts = Parameters(ts)
-	return append(ts, Result(ts)...)
-}
-
 func SignatureState(ss []State) []State {
 	pp := ParametersState(ss)
 	pr := ResultState(pp)
@@ -1304,15 +1164,6 @@ func Slice(ts [][]*Token) [][]*Token {
 	b = Expression(b)
 
 	return tokenReader(append(a, b...), token.RBRACK)
-}
-
-func SliceType(ts [][]*Token) [][]*Token {
-	ts = tokenReader(ts, token.LBRACK)
-	ts = tokenReader(ts, token.RBRACK)
-	if len(ts) == 0 {
-		return nil
-	}
-	return Type(ts)
 }
 
 func SliceTypeState(ss []State) []State {
@@ -1380,21 +1231,6 @@ func StatementList(ts [][]*Token) [][]*Token {
 
 // bad spec
 // "struct" "{" [ FieldDecl { ";" FieldDecl } [ ";" ]] "}"
-func StructType(ts [][]*Token) [][]*Token {
-	ts = tokenReader(ts, token.STRUCT)
-	ts = tokenReader(ts, token.LBRACE)
-	fields := FieldDecl(ts)
-	next := fields
-	for len(next) != 0 {
-		field := tokenReader(next, token.SEMICOLON)
-		field = FieldDecl(field)
-		fields = append(fields, field...)
-		next = field
-	}
-	fields = append(fields, tokenReader(fields, token.SEMICOLON)...)
-	return tokenReader(append(ts, fields...), token.RBRACE)
-}
-
 func StructTypeState(ss []State) []State {
 	ss = tokenParserState(ss, token.STRUCT)
 	ss = tokenReaderState(ss, token.LBRACE)
@@ -1477,16 +1313,6 @@ func TypeState(ss []State) []State {
 	return ss
 }
 
-func Type(ts [][]*Token) [][]*Token {
-	paren := tokenReader(ts, token.LPAREN)
-	if len(paren) != 0 {
-		paren = Type(paren)
-	}
-	paren = tokenReader(paren, token.RPAREN)
-	tn := fromState(TypeName(toState(ts)))
-	return append(append(tn, TypeLit(ts)...), paren...)
-}
-
 type typ struct {
 	r      Renderer
 	parens int
@@ -1538,11 +1364,11 @@ func TypeDecl(ts [][]*Token) [][]*Token {
 }
 
 func TypeList(ts [][]*Token) [][]*Token {
-	ts = Type(ts)
+	ts = fromState(TypeState(toState(ts)))
 	next := ts
 	for len(next) != 0 {
 		current := tokenReader(next, token.COMMA)
-		current = Type(current)
+		current = fromState(TypeState(toState(current)))
 		ts = append(ts, current...)
 		next = current
 	}
@@ -1557,21 +1383,13 @@ func TypeLitState(ss []State) []State {
 			append(MapTypeState(ss), ChannelTypeState(ss)...)...)...)
 }
 
-func TypeLit(ts [][]*Token) [][]*Token {
-	return append(
-		append(append(ArrayType(ts), StructType(ts)...),
-			append(PointerType(ts), FunctionType(ts)...)...),
-		append(append(InterfaceType(ts), SliceType(ts)...),
-			append(MapType(ts), ChannelType(ts)...)...)...)
-}
-
 func TypeName(ss []State) []State {
 	return append(QualifiedIdent(ss), tokenParserState(ss, token.IDENT)...)
 }
 
 func TypeSpec(ts [][]*Token) [][]*Token {
 	ts = tokenReader(ts, token.IDENT)
-	return Type(ts)
+	return fromState(TypeState(toState(ts)))
 }
 
 func TypeSwitchCase(ts [][]*Token) [][]*Token {
@@ -1655,7 +1473,7 @@ func VarDecl(ts [][]*Token) [][]*Token {
 
 func VarSpec(ts [][]*Token) [][]*Token {
 	ts = fromState(IdentifierList(toState(ts)))
-	typ := Type(ts)
+	typ := fromState(TypeState(toState(ts)))
 	extra := tokenReader(typ, token.ASSIGN)
 	extra = ExpressionList(extra)
 	typ = append(typ, extra...)
