@@ -1521,13 +1521,12 @@ func TypeList(ts [][]*Token) [][]*Token {
 	return ts
 }
 
-// TODO: array type
 func TypeLitState(ss []State) []State {
 	return append(
-		append(append(PointerTypeState(ss), SliceTypeState(ss)...),
-			append(MapTypeState(ss), ChannelTypeState(ss)...)...),
-		append(append(StructTypeState(ss), FunctionTypeState(ss)...),
-			append(InterfaceTypeState(ss), ArrayTypeState(ss)...)...)...)
+		append(append(ArrayTypeState(ss), StructTypeState(ss)...),
+			append(PointerTypeState(ss), FunctionTypeState(ss)...)...),
+		append(append(InterfaceTypeState(ss), SliceTypeState(ss)...),
+			append(MapTypeState(ss), ChannelTypeState(ss)...)...)...)
 }
 
 func TypeLit(ts [][]*Token) [][]*Token {
