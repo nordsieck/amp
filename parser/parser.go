@@ -784,6 +784,12 @@ func OperandName(ts [][]*Token) [][]*Token {
 	return append(tokenReader(ts, token.IDENT), qi...)
 }
 
+func OperandNameState(ss []State) []State {
+	id := tokenParserState(ss, token.IDENT)
+	qi := QualifiedIdent(ss)
+	return append(id, qi...)
+}
+
 func PackageClause(ts [][]*Token) [][]*Token {
 	ts = tokenReader(ts, token.PACKAGE)
 	return fromState(PackageName(toState(ts)))

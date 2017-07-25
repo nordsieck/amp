@@ -648,6 +648,15 @@ func TestOperandName(t *testing.T) {
 	})
 }
 
+func TestOperandNameState(t *testing.T) {
+	resultState(t, OperandNameState, map[string][]StateOutput{
+		`1`:   nil,
+		`_`:   {min(`_`)},
+		`a`:   {min(`a`)},
+		`a.a`: {{[]string{``, `a`}, []*Token{ret, a, dot}}, min(`a.a`)},
+	})
+}
+
 func TestPackageName(t *testing.T) {
 	resultState(t, PackageName, map[string][]StateOutput{
 		`a`: {{[]string{``, `a`}, []*Token{ret}}},
@@ -1214,3 +1223,5 @@ func TestTokenParserState(t *testing.T) {
 	newState := tokenParserState(state, token.RPAREN)
 	defect.DeepEqual(t, newState, []State{{[]Renderer{e{}, rparen}, []*Token{ret}}})
 }
+
+func min(s string) StateOutput { return StateOutput{[]string{``, s}, []*Token{ret}} }
