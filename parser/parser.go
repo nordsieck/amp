@@ -1449,16 +1449,30 @@ func TopLevelDecl(ts [][]*Token) [][]*Token {
 }
 
 func TypeState(ss []State) []State {
-	paren := tokenReaderState(ss, token.LPAREN) // TODO: wrap this in a struct to preserve the parens
+	paren := tokenParserState(ss, token.LPAREN) // TODO: wrap this in a struct to preserve the parens
 	if len(paren) != 0 {
 		paren = TypeState(paren)
 	}
-	paren = tokenReaderState(paren, token.RPAREN)
+	paren = tokenParserState(paren, token.RPAREN)
 	ss = append(append(TypeName(ss), TypeLitState(ss)...), paren...)
 
 	for i, s := range ss {
-		t := typ{s.r[len(s.r)-1]}
-		ss[i].r = rAppend(s.r, 1, t)
+		var p int
+		for {
+			if tok, ok := s.r[len(s.r)-1].(*Token); ok && tok.tok == token.RPAREN {
+				p += 1
+				s.r = s.r[:len(s.r)-1]
+			} else {
+				break
+			}
+		}
+		t := typ{s.r[len(s.r)-1], p}
+		for pPrime := 0; pPrime < p; pPrime++ {
+			if tok, ok := s.r[len(s.r)-1].(*Token); !ok || tok.tok != token.LPAREN {
+				continue
+			}
+		}
+		ss[i].r = rAppend(s.r, p+1, t)
 	}
 	return ss
 }
@@ -1473,9 +1487,23 @@ func Type(ts [][]*Token) [][]*Token {
 	return append(append(tn, TypeLit(ts)...), paren...)
 }
 
-type typ struct{ r Renderer }
+type typ struct {
+	r      Renderer
+	parens int
+}
 
-func (t typ) Render() []byte { return t.r.Render() }
+func (t typ) Render() []byte {
+	var ret []byte
+
+	for i := 0; i < t.parens; i++ {
+		ret = append(ret, `(`...)
+	}
+	ret = append(ret, t.r.Render()...)
+	for i := 0; i < t.parens; i++ {
+		ret = append(ret, `)`...)
+	}
+	return ret
+}
 
 func TypeAssertion(ts [][]*Token) [][]*Token {
 	ts = tokenReader(ts, token.PERIOD)

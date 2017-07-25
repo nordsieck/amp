@@ -294,7 +294,7 @@ func TestEllipsisArrayTypeState(t *testing.T) {
 }
 
 func TestEllipsisArrayType_Render(t *testing.T) {
-	defect.Equal(t, string(ellipsisArrayType{typ{_int}}.Render()), `[...]int`)
+	defect.Equal(t, string(ellipsisArrayType{typ{_int, 0}}.Render()), `[...]int`)
 }
 
 func TestEmptyStmt(t *testing.T) {
@@ -969,7 +969,7 @@ func TestResultState(t *testing.T) {
 }
 
 func TestResult_Render(t *testing.T) {
-	defect.Equal(t, string(result{typ: typ{_int}}.Render()), `int`)
+	defect.Equal(t, string(result{typ: typ{_int, 0}}.Render()), `int`)
 }
 
 func TestReturnStmt(t *testing.T) {
@@ -1029,8 +1029,8 @@ func TestSignature_Render(t *testing.T) {
 	defect.Equal(t, string(signature{parameters: parameters{r: parameterList{}}}.Render()), `()`)
 	defect.Equal(t, string(signature{parameters: parameters{r: parameterList{}},
 		result: result{parameters: parameters{r: parameterList{}}}}.Render()), `()()`)
-	defect.Equal(t, string(signature{parameters: parameters{r: parameterList{parameterDecl{typ: typ{_int}}, parameterDecl{typ: typ{_int}}}},
-		result: result{typ: typ{_int}}}.Render()), `(int,int)int`)
+	defect.Equal(t, string(signature{parameters: parameters{r: parameterList{parameterDecl{typ: typ{_int, 0}}, parameterDecl{typ: typ{_int, 0}}}},
+		result: result{typ: typ{_int, 0}}}.Render()), `(int,int)int`)
 }
 
 func TestSimpleStmt(t *testing.T) {
@@ -1176,17 +1176,20 @@ func TestType(t *testing.T) {
 
 func TestTypeState(t *testing.T) {
 	resultState(t, TypeState, map[string][]StateOutput{
-		`a`:   {{[]string{``, `a`}, []*Token{ret}}},
-		`a.a`: {{[]string{``, `a.a`}, []*Token{ret}}, {[]string{``, `a`}, []*Token{ret, a, dot}}},
-		`1`:   nil,
-		`_`:   {{[]string{``, `_`}, []*Token{ret}}},
-		//`(a.a)`:    {{[]string{``, `(a.a)`}, []*Token{ret}}},
-		//`(((_)))`:  {{[]string{``, `(((_)))`}, []*Token{ret}}},
+		`a`:        {{[]string{``, `a`}, []*Token{ret}}},
+		`a.a`:      {{[]string{``, `a.a`}, []*Token{ret}}, {[]string{``, `a`}, []*Token{ret, a, dot}}},
+		`1`:        nil,
+		`_`:        {{[]string{``, `_`}, []*Token{ret}}},
+		`(a.a)`:    {{[]string{``, `(a.a)`}, []*Token{ret}}},
+		`(((_)))`:  {{[]string{``, `(((_)))`}, []*Token{ret}}},
 		`chan int`: {{[]string{``, `chan int`}, []*Token{ret}}},
 	})
 }
 
-func TestTyp_Render(t *testing.T) { defect.Equal(t, string(typ{_int}.Render()), `int`) }
+func TestTyp_Render(t *testing.T) {
+	defect.Equal(t, string(typ{_int, 0}.Render()), `int`)
+	defect.Equal(t, string(typ{_int, 2}.Render()), `((int))`)
+}
 
 func TestTypeAssertion(t *testing.T) {
 	remaining(t, TypeAssertion, Tmap{
