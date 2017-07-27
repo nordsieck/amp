@@ -773,7 +773,7 @@ func Operand(ts [][]*Token) [][]*Token {
 
 func OperandState(ss []State) []State {
 	ss = append(LiteralState(ss), OperandNameState(ss)...)
-	// methodexpr
+	// methodexpr // TODO: need a way to differentiate between methodExpr and operandName
 	// "(" expression ")"
 	return ss
 }
@@ -1036,6 +1036,72 @@ func ReceiverType(ts [][]*Token) [][]*Token {
 	return append(append(ptr, par...), ts...)
 }
 
+func ReceiverTypeState(ss []State) []State {
+	paren := tokenParserState(ss, token.LPAREN)
+	if len(paren) != 0 {
+		paren = ReceiverTypeState(paren)
+	}
+	paren = tokenParserState(paren, token.RPAREN)
+
+	tn := TypeName(ss)
+	ptr := tokenParserState(ss, token.LPAREN)
+	ptr = tokenParserState(ptr, token.MUL)
+	ptr = TypeName(ptr)
+	ptr = tokenParserState(ptr, token.RPAREN)
+
+	ss = append(append(tn, ptr...), paren...)
+ssloop:
+	for i, s := range ss {
+		var p int
+		for {
+			if tok, ok := s.r[len(s.r)-1].(*Token); ok && tok.tok == token.RPAREN {
+				p += 1
+				s.r = s.r[:len(s.r)-1]
+			} else {
+				break
+			}
+		}
+
+		rt := receiverType{r: s.r[len(s.r)-1], parens: p}
+		s.r = s.r[:len(s.r)-1]
+
+		if tok, ok := s.r[len(s.r)-1].(*Token); ok && tok.tok == token.MUL {
+			rt.pointer = true
+			s.r = s.r[:len(s.r)-1]
+		}
+		for i := 0; i < p; i++ {
+			if tok, ok := s.r[len(s.r)-1].(*Token); !ok || tok.tok != token.LPAREN {
+				continue ssloop
+			} else {
+				s.r = s.r[:len(s.r)-1]
+			}
+		}
+		ss[i].r = rAppend(s.r, 0, rt)
+	}
+	return ss
+}
+
+type receiverType struct {
+	r       Renderer
+	parens  int
+	pointer bool
+}
+
+func (r receiverType) Render() []byte {
+	var ret []byte
+	for i := 0; i < r.parens; i++ {
+		ret = append(ret, `(`...)
+	}
+	if r.pointer {
+		ret = append(ret, `*`...)
+	}
+	ret = append(ret, r.r.Render()...)
+	for i := 0; i < r.parens; i++ {
+		ret = append(ret, `)`...)
+	}
+	return ret
+}
+
 func RecvStmt(ts [][]*Token) [][]*Token {
 	expr := ExpressionList(ts)
 	expr = tokenReader(expr, token.ASSIGN)
@@ -1292,7 +1358,7 @@ func TopLevelDecl(ts [][]*Token) [][]*Token {
 func Type(ss []State) []State {
 	paren := tokenParserState(ss, token.LPAREN) // TODO: wrap this in a struct to preserve the parens
 	if len(paren) != 0 {
-		paren = Type(paren)
+		paren = Type(paren) // TODO: solve without nexted data structure
 	}
 	paren = tokenParserState(paren, token.RPAREN)
 	ss = append(append(TypeName(ss), TypeLit(ss)...), paren...)

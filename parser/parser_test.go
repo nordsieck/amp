@@ -827,6 +827,21 @@ func TestReceiverType(t *testing.T) {
 	})
 }
 
+func TestReceiverTypeState(t *testing.T) {
+	resultState(t, ReceiverTypeState, map[string][]StateOutput{
+		`1`:       nil,
+		`a.a`:     {min(`a.a`), {[]string{``, `a`}, []*Token{ret, a, dot}}},
+		`(a.a)`:   {min(`(a.a)`)},
+		`((a.a))`: {min(`((a.a))`)},
+		`(*a.a)`:  {min(`(*a.a)`)},
+	})
+}
+
+func TestReceiverType_Render(t *testing.T) {
+	defect.Equal(t, string(receiverType{r: _int}.Render()), `int`)
+	defect.Equal(t, string(receiverType{_int, 2, true}.Render()), `((*int))`)
+}
+
 func TestRecvStmt(t *testing.T) {
 	remaining(t, RecvStmt, Tmap{
 		`<-a`: {{ret}},
