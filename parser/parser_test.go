@@ -597,6 +597,23 @@ func TestMethodExpr(t *testing.T) {
 	})
 }
 
+func TestMethodExprState(t *testing.T) {
+	resultState(t, MethodExprState, map[string][]StateOutput{
+		`1`:        nil,
+		`a.a`:      {min(`a.a`)},
+		`a.a.a`:    {min(`a.a.a`), {[]string{``, `a.a`}, []*Token{ret, a, dot}}},
+		`(a).a`:    {min(`(a).a`)},
+		`(a.a).a`:  {min(`(a.a).a`)},
+		`(*a.a).a`: {min(`(*a.a).a`)},
+	})
+}
+
+func TestMethodExpr_Render(t *testing.T) {
+	defect.Equal(t, string(methodExpr{receiverType{r: qualifiedIdent{a, a}}, a}.Render()), `a.a.a`)
+	defect.Equal(t, string(methodExpr{receiverType{r: qualifiedIdent{a, a}, parens: 2}, a}.Render()), `((a.a)).a`)
+	defect.Equal(t, string(methodExpr{receiverType{r: qualifiedIdent{a, a}, parens: 1, pointer: true}, a}.Render()), `(*a.a).a`)
+}
+
 func TestMethodSpec(t *testing.T) {
 	resultState(t, MethodSpec, map[string][]StateOutput{
 		`a()`:   {{[]string{``, `a()`}, []*Token{ret}}, {[]string{``, `a`}, []*Token{ret, rparen, lparen}}},

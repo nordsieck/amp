@@ -724,6 +724,24 @@ func MethodExpr(ts [][]*Token) [][]*Token {
 	return tokenReader(ts, token.IDENT)
 }
 
+func MethodExprState(ss []State) []State {
+	ss = ReceiverTypeState(ss)
+	ss = tokenReaderState(ss, token.PERIOD)
+	ss = tokenParserState(ss, token.IDENT)
+
+	for i, s := range ss {
+		me := methodExpr{s.r[len(s.r)-2], s.r[len(s.r)-1]}
+		ss[i].r = rAppend(s.r, 2, me)
+	}
+	return ss
+}
+
+type methodExpr struct{ receiverType, methodName Renderer }
+
+func (m methodExpr) Render() []byte {
+	return append(append(m.receiverType.Render(), `.`...), m.methodName.Render()...)
+}
+
 func MethodSpec(ss []State) []State {
 	sig := nonBlankIdent(ss)
 	sig = Signature(sig)
