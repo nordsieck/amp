@@ -851,6 +851,7 @@ func TestReceiverTypeState(t *testing.T) {
 		`(a.a)`:   {min(`(a.a)`)},
 		`((a.a))`: {min(`((a.a))`)},
 		`(*a.a)`:  {min(`(*a.a)`)},
+		`*a.a`:    nil,
 	})
 }
 
