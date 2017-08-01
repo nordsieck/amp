@@ -789,11 +789,37 @@ func Operand(ts [][]*Token) [][]*Token {
 	return append(append(Literal(ts), OperandName(ts)...), append(MethodExpr(ts), xp...)...)
 }
 
+// TODO: need a way to differentiate between methodExpr and operandName
 func OperandState(ss []State) []State {
-	ss = append(LiteralState(ss), OperandNameState(ss)...)
-	// methodexpr // TODO: need a way to differentiate between methodExpr and operandName
-	// "(" expression ")"
-	return ss
+	parens := tokenReaderState(ss, token.LPAREN)
+	if len(parens) != 0 {
+		parens = ExpressionState(parens)
+	}
+	parens = tokenReaderState(parens, token.RPAREN)
+	for i, p := range parens {
+		o := operand{p.r[len(p.r)-1], true}
+		parens[i].r = rAppend(p.r, 1, o)
+	}
+
+	noParens := append(append(LiteralState(ss), OperandNameState(ss)...), MethodExprState(ss)...)
+	for i, n := range noParens {
+		o := operand{n.r[len(n.r)-1], false}
+		noParens[i].r = rAppend(n.r, 1, o)
+	}
+	return append(noParens, parens...)
+}
+
+type operand struct {
+	r      Renderer
+	parens bool
+}
+
+func (o operand) Render() []byte {
+	ret := o.r.Render()
+	if o.parens {
+		ret = append(append([]byte(`(`), ret...), `)`...)
+	}
+	return ret
 }
 
 func OperandName(ts [][]*Token) [][]*Token {

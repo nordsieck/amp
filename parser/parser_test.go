@@ -650,10 +650,17 @@ func TestOperand(t *testing.T) {
 
 func TestOperandState(t *testing.T) {
 	resultState(t, OperandState, map[string][]StateOutput{
-		`1`:   {{[]string{``, `1`}, []*Token{ret}}},
-		`a.a`: {{[]string{``, `a`}, []*Token{ret, a, dot}}, {[]string{``, `a.a`}, []*Token{ret}}},
-		// `(a.a)`: {{[]string{``, `(a.a)`}, []*Token{ret}}},
+		`1`:         {{[]string{``, `1`}, []*Token{ret}}},
+		`a`:         {min(`a`)},
+		`a.a`:       {{[]string{``, `a`}, []*Token{ret, a, dot}}, min(`a.a`), min(`a.a`)}, // TODO: there can be only one
+		`((a.a).a)`: {min(`((a.a).a)`)},
+		`(1)`:       {min(`(1)`)},
 	})
+}
+
+func TestOperand_Render(t *testing.T) {
+	defect.Equal(t, string(operand{a, false}.Render()), `a`)
+	defect.Equal(t, string(operand{a, true}.Render()), `(a)`)
 }
 
 func TestOperandName(t *testing.T) {
