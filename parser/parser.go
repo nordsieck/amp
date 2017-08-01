@@ -751,6 +751,8 @@ func MethodDecl(ts [][]*Token) [][]*Token {
 	return Function(ts)
 }
 
+// If the receiver has parens or is a qualified ident, leave it alone.  If it's just an ident,
+// transform it into an OR
 func MethodExpr(ts [][]*Token) [][]*Token {
 	ts = ReceiverType(ts)
 	ts = tokenReader(ts, token.PERIOD)
@@ -1126,41 +1128,21 @@ func ReceiverTypeState(ss []State) []State {
 	}
 
 	tn := TypeName(ss)
+	for i, t := range tn {
+		rt := receiverType{r: t.r[len(t.r)-1]}
+		tn[i].r = rAppend(t.r, 1, rt)
+	}
+
 	ptr := tokenParserState(ss, token.LPAREN)
 	ptr = tokenParserState(ptr, token.MUL)
 	ptr = TypeName(ptr)
 	ptr = tokenParserState(ptr, token.RPAREN)
-
-	ss = append(tn, ptr...)
-ssloop:
-	for i, s := range ss {
-		var p int
-		for {
-			if tok, ok := s.r[len(s.r)-1].(*Token); ok && tok.tok == token.RPAREN {
-				p += 1
-				s.r = s.r[:len(s.r)-1]
-			} else {
-				break
-			}
-		}
-
-		rt := receiverType{r: s.r[len(s.r)-1], parens: p}
-		s.r = s.r[:len(s.r)-1]
-
-		if tok, ok := s.r[len(s.r)-1].(*Token); ok && tok.tok == token.MUL {
-			rt.pointer = true
-			s.r = s.r[:len(s.r)-1]
-		}
-		for i := 0; i < p; i++ {
-			if tok, ok := s.r[len(s.r)-1].(*Token); !ok || tok.tok != token.LPAREN {
-				continue ssloop
-			} else {
-				s.r = s.r[:len(s.r)-1]
-			}
-		}
-		ss[i].r = rAppend(s.r, 0, rt)
+	for i, p := range ptr {
+		rt := receiverType{p.r[len(p.r)-2], 1, true}
+		ptr[i].r = rAppend(p.r, 4, rt)
 	}
-	return append(ss, paren...)
+
+	return append(append(tn, ptr...), paren...)
 }
 
 type receiverType struct {
