@@ -1114,11 +1114,16 @@ func ReceiverType(ts [][]*Token) [][]*Token {
 }
 
 func ReceiverTypeState(ss []State) []State {
-	paren := tokenParserState(ss, token.LPAREN)
+	paren := tokenReaderState(ss, token.LPAREN)
 	if len(paren) != 0 {
 		paren = ReceiverTypeState(paren)
 	}
-	paren = tokenParserState(paren, token.RPAREN)
+	paren = tokenReaderState(paren, token.RPAREN)
+	for i, p := range paren {
+		rt := p.r[len(p.r)-1].(receiverType)
+		rt.parens += 1
+		paren[i].r = rAppend(p.r, 1, rt)
+	}
 
 	tn := TypeName(ss)
 	ptr := tokenParserState(ss, token.LPAREN)
@@ -1126,7 +1131,7 @@ func ReceiverTypeState(ss []State) []State {
 	ptr = TypeName(ptr)
 	ptr = tokenParserState(ptr, token.RPAREN)
 
-	ss = append(append(tn, ptr...), paren...)
+	ss = append(tn, ptr...)
 ssloop:
 	for i, s := range ss {
 		var p int
@@ -1155,7 +1160,7 @@ ssloop:
 		}
 		ss[i].r = rAppend(s.r, 0, rt)
 	}
-	return ss
+	return append(ss, paren...)
 }
 
 type receiverType struct {
@@ -1433,32 +1438,24 @@ func TopLevelDecl(ts [][]*Token) [][]*Token {
 }
 
 func Type(ss []State) []State {
-	paren := tokenParserState(ss, token.LPAREN) // TODO: wrap this in a struct to preserve the parens
+	paren := tokenReaderState(ss, token.LPAREN)
 	if len(paren) != 0 {
-		paren = Type(paren) // TODO: solve without nexted data structure
+		paren = Type(paren)
 	}
-	paren = tokenParserState(paren, token.RPAREN)
-	ss = append(append(TypeName(ss), TypeLit(ss)...), paren...)
+	paren = tokenReaderState(paren, token.RPAREN)
+	for i, p := range paren {
+		thisParen := p.r[len(p.r)-1].(typ)
+		thisParen.parens += 1
+		paren[i].r = rAppend(p.r, 1, thisParen)
+	}
+
+	ss = append(TypeName(ss), TypeLit(ss)...)
 
 	for i, s := range ss {
-		var p int
-		for {
-			if tok, ok := s.r[len(s.r)-1].(*Token); ok && tok.tok == token.RPAREN {
-				p += 1
-				s.r = s.r[:len(s.r)-1]
-			} else {
-				break
-			}
-		}
-		t := typ{s.r[len(s.r)-1], p}
-		for pPrime := 0; pPrime < p; pPrime++ {
-			if tok, ok := s.r[len(s.r)-1].(*Token); !ok || tok.tok != token.LPAREN {
-				continue
-			}
-		}
-		ss[i].r = rAppend(s.r, p+1, t)
+		t := typ{s.r[len(s.r)-1], 0}
+		ss[i].r = rAppend(s.r, 1, t)
 	}
-	return ss
+	return append(ss, paren...)
 }
 
 type typ struct {
