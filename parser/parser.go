@@ -256,6 +256,39 @@ func Conversion(ts [][]*Token) [][]*Token {
 	return tokenReader(ts, token.RPAREN)
 }
 
+func ConversionState(ss []State) []State {
+	ss = Type(ss)
+	ss = tokenReaderState(ss, token.LPAREN)
+	ss = ExpressionState(ss)
+	ss = append(ss, tokenParserState(ss, token.COMMA)...)
+	ss = tokenReaderState(ss, token.RPAREN)
+
+	for i, s := range ss {
+		var c conversion
+		if tok, ok := s.r[len(s.r)-1].(*Token); ok && tok.tok == token.COMMA {
+			c.comma = true
+			s.r = s.r[:len(s.r)-1]
+		}
+		c.expr = s.r[len(s.r)-1]
+		c.typ = s.r[len(s.r)-2]
+		ss[i].r = rAppend(s.r, 2, c)
+	}
+	return ss
+}
+
+type conversion struct {
+	typ, expr Renderer
+	comma     bool
+}
+
+func (c conversion) Render() []byte {
+	ret := append(append(c.typ.Render(), `(`...), c.expr.Render()...)
+	if c.comma {
+		ret = append(ret, `,`...)
+	}
+	return append(ret, `)`...)
+}
+
 func Declaration(ts [][]*Token) [][]*Token {
 	return append(append(ConstDecl(ts), TypeDecl(ts)...), VarDecl(ts)...)
 }

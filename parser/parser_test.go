@@ -236,6 +236,19 @@ func TestConversion(t *testing.T) {
 	})
 }
 
+func TestConversionState(t *testing.T) {
+	resultState(t, ConversionState, map[string][]StateOutput{
+		`float(1)`:   {min(`float(1)`)},
+		`(int)(5,)`:  {min(`(int)(5,)`)},
+		`a.a("foo")`: {min(`a.a("foo")`)},
+	})
+}
+
+func TestConversion_Render(t *testing.T) {
+	defect.Equal(t, string(conversion{_int, a, false}.Render()), `int(a)`)
+	defect.Equal(t, string(conversion{_int, a, true}.Render()), `int(a,)`)
+}
+
 func TestDeclaration(t *testing.T) {
 	remaining(t, Declaration, Tmap{
 		`const a = 1`: {{ret}},
