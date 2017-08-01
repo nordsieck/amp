@@ -763,8 +763,7 @@ func MethodDecl(ts [][]*Token) [][]*Token {
 	return Function(ts)
 }
 
-// If the receiver has parens or is a qualified ident, leave it alone.  If it's just an ident,
-// transform it into an OR
+// TODO: double check that the OR case is actually doing what it's supposed to do
 func MethodExpr(ts [][]*Token) [][]*Token {
 	ts = ReceiverType(ts)
 	ts = tokenReader(ts, token.PERIOD)
@@ -778,7 +777,13 @@ func MethodExprState(ss []State) []State {
 
 	for i, s := range ss {
 		me := methodExpr{s.r[len(s.r)-2], s.r[len(s.r)-1]}
-		ss[i].r = rAppend(s.r, 2, me)
+		rt := me.receiverType.(receiverType)
+		if tok, ok := rt.r.(*Token); ok && tok.tok == token.IDENT {
+			or := operandNameOrMethodExpr{qualifiedIdent{me.receiverType, me.methodName}}
+			ss[i].r = rAppend(s.r, 2, or)
+		} else {
+			ss[i].r = rAppend(s.r, 2, me)
+		}
 	}
 	return ss
 }
@@ -874,11 +879,11 @@ func OperandName(ts [][]*Token) [][]*Token {
 	return append(tokenReader(ts, token.IDENT), qi...)
 }
 
-func OperandNameState(ss []State) []State {
-	id := tokenParserState(ss, token.IDENT)
-	qi := QualifiedIdent(ss)
-	return append(id, qi...)
-}
+func OperandNameState(ss []State) []State { return tokenParserState(ss, token.IDENT) }
+
+type operandNameOrMethodExpr struct{ r Renderer }
+
+func (o operandNameOrMethodExpr) Render() []byte { return o.r.Render() }
 
 func PackageClause(ts [][]*Token) [][]*Token {
 	ts = tokenReader(ts, token.PACKAGE)

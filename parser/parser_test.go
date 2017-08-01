@@ -670,7 +670,7 @@ func TestOperandState(t *testing.T) {
 	resultState(t, OperandState, map[string][]StateOutput{
 		`1`:         {{[]string{``, `1`}, []*Token{ret}}},
 		`a`:         {min(`a`)},
-		`a.a`:       {{[]string{``, `a`}, []*Token{ret, a, dot}}, min(`a.a`), min(`a.a`)}, // TODO: there can be only one
+		`a.a`:       {{[]string{``, `a`}, []*Token{ret, a, dot}}, min(`a.a`)},
 		`((a.a).a)`: {min(`((a.a).a)`)},
 		`(1)`:       {min(`(1)`)},
 	})
@@ -695,7 +695,7 @@ func TestOperandNameState(t *testing.T) {
 		`1`:   nil,
 		`_`:   {min(`_`)},
 		`a`:   {min(`a`)},
-		`a.a`: {{[]string{``, `a`}, []*Token{ret, a, dot}}, min(`a.a`)},
+		`a.a`: {{[]string{``, `a`}, []*Token{ret, a, dot}}},
 	})
 }
 
@@ -822,11 +822,8 @@ func TestPrimaryExpr(t *testing.T) {
 
 func TestPrimaryExprState(t *testing.T) {
 	resultState(t, PrimaryExprState, map[string][]StateOutput{
-		`1`: {{[]string{``, `1`}, []*Token{ret}}},
-		`(a.a)("foo")`: {
-			{[]string{``, `(a.a)`}, []*Token{ret, rparen, {tok: token.STRING, lit: `"foo"`}, lparen}},
-			{[]string{``, `(a.a)`}, []*Token{ret, rparen, {tok: token.STRING, lit: `"foo"`}, lparen}},
-			min(`(a.a)("foo")`)},
+		`1`:            {{[]string{``, `1`}, []*Token{ret}}},
+		`(a.a)("foo")`: {{[]string{``, `(a.a)`}, []*Token{ret, rparen, {tok: token.STRING, lit: `"foo"`}, lparen}}, min(`(a.a)("foo")`)},
 		// `a.a`
 		// `a[1]`
 		// `a[:]`
