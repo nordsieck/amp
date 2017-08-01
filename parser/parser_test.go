@@ -491,10 +491,15 @@ func TestIncDecStmt(t *testing.T) {
 }
 
 func TestIndex(t *testing.T) {
-	remaining(t, Index, Tmap{
-		`[a]`: {{ret}},
-		`[1]`: {{ret}},
+	resultState(t, Index, map[string][]StateOutput{
+		`a`:   nil,
+		`[a]`: {min(`[a]`)},
+		`[1]`: {min(`[1]`)},
 	})
+}
+
+func TestIndex_Render(t *testing.T) {
+	defect.Equal(t, string(index{one}.Render()), `[1]`)
 }
 
 func TestInterfaceType(t *testing.T) {

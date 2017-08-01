@@ -601,14 +601,23 @@ func IncDecStmt(ts [][]*Token) [][]*Token {
 	return append(tokenReader(ts, token.INC), tokenReader(ts, token.DEC)...)
 }
 
-func Index(ts [][]*Token) [][]*Token {
-	ts = tokenReader(ts, token.LBRACK)
-	if len(ts) == 0 {
+func Index(ss []State) []State {
+	ss = tokenReaderState(ss, token.LBRACK)
+	if len(ss) == 0 {
 		return nil
 	}
-	ts = Expression(ts)
-	return tokenReader(ts, token.RBRACK)
+	ss = ExpressionState(ss)
+	ss = tokenReaderState(ss, token.RBRACK)
+	for i, s := range ss {
+		idx := index{s.r[len(s.r)-1]}
+		ss[i].r = rAppend(s.r, 1, idx)
+	}
+	return ss
 }
+
+type index struct{ r Renderer }
+
+func (i index) Render() []byte { return append(append([]byte(`[`), i.r.Render()...), `]`...) }
 
 // bad spec
 // "interface" "{" [ MethodSpec { ";" MethodSpec } [ ";" ]] "}"
@@ -1051,7 +1060,7 @@ func PrimaryExpr(ts [][]*Token) [][]*Token {
 	newBase := base
 	for len(newBase) != 0 {
 		additions := fromState(Selector(toState(newBase)))
-		additions = append(additions, Index(newBase)...)
+		additions = append(additions, fromState(Index(toState(newBase)))...)
 		additions = append(additions, Slice(newBase)...)
 		additions = append(additions, TypeAssertion(newBase)...)
 		additions = append(additions, Arguments(newBase)...)
