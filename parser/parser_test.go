@@ -927,10 +927,10 @@ func TestReturnStmt(t *testing.T) {
 }
 
 func TestSelector(t *testing.T) {
-	remaining(t, Selector, Tmap{
-		`1`:  empty,
-		`a`:  empty,
-		`.a`: {{ret}},
+	resultState(t, Selector, map[string][]StateOutput{
+		`1`:  nil,
+		`a`:  nil,
+		`.a`: {min(`.a`)},
 	})
 }
 

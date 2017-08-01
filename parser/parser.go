@@ -1050,7 +1050,7 @@ func PrimaryExpr(ts [][]*Token) [][]*Token {
 	base := append(Operand(ts), Conversion(ts)...)
 	newBase := base
 	for len(newBase) != 0 {
-		additions := Selector(newBase)
+		additions := fromState(Selector(toState(newBase)))
 		additions = append(additions, Index(newBase)...)
 		additions = append(additions, Slice(newBase)...)
 		additions = append(additions, TypeAssertion(newBase)...)
@@ -1222,10 +1222,19 @@ func ReturnStmt(ts [][]*Token) [][]*Token {
 	return append(ts, ExpressionList(ts)...)
 }
 
-func Selector(ts [][]*Token) [][]*Token {
-	ts = tokenReader(ts, token.PERIOD)
-	return tokenReader(ts, token.IDENT)
+func Selector(ss []State) []State {
+	ss = tokenReaderState(ss, token.PERIOD)
+	ss = tokenParserState(ss, token.IDENT)
+	for i, s := range ss {
+		sel := selector{s.r[len(s.r)-1]}
+		ss[i].r = rAppend(s.r, 1, sel)
+	}
+	return ss
 }
+
+type selector struct{ r Renderer }
+
+func (s selector) Render() []byte { return append([]byte(`.`), s.r.Render()...) }
 
 // bad spec
 // "select" "{" [ CommClause { ";" CommClause } [ ";" ]] "}"
