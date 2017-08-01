@@ -818,7 +818,10 @@ func TestPrimaryExpr(t *testing.T) {
 func TestPrimaryExprState(t *testing.T) {
 	resultState(t, PrimaryExprState, map[string][]StateOutput{
 		`1`: {{[]string{``, `1`}, []*Token{ret}}},
-		// `(a.a)("foo")`
+		`(a.a)("foo")`: {
+			{[]string{``, `(a.a)`}, []*Token{ret, rparen, {tok: token.STRING, lit: `"foo"`}, lparen}},
+			{[]string{``, `(a.a)`}, []*Token{ret, rparen, {tok: token.STRING, lit: `"foo"`}, lparen}},
+			min(`(a.a)("foo")`)},
 		// `a.a`
 		// `a[1]`
 		// `a[:]`

@@ -259,6 +259,9 @@ func Conversion(ts [][]*Token) [][]*Token {
 func ConversionState(ss []State) []State {
 	ss = Type(ss)
 	ss = tokenReaderState(ss, token.LPAREN)
+	if len(ss) == 0 {
+		return nil
+	}
 	ss = ExpressionState(ss)
 	ss = append(ss, tokenParserState(ss, token.COMMA)...)
 	ss = tokenReaderState(ss, token.RPAREN)
@@ -1059,8 +1062,7 @@ func PrimaryExpr(ts [][]*Token) [][]*Token {
 }
 
 func PrimaryExprState(ss []State) []State {
-	ss = OperandState(ss)
-	// conversion
+	ss = append(OperandState(ss), ConversionState(ss)...)
 	// selector
 	// index
 	// slice
