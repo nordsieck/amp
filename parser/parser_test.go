@@ -88,8 +88,9 @@ func TestArguments(t *testing.T) {
 
 func TestArrayType(t *testing.T) {
 	resultState(t, ArrayType, map[string][]StateOutput{
-		`[1]int`: {{[]string{``, `[1]int`}, []*Token{ret}}},
-		// `[a]int`: {{[]string{``, `[a]int`}, []*Token{ret}}},
+		`[1]int`:   {min(`[1]int`)},
+		`[a]int`:   {min(`[a]int`)},
+		`[a.a]int`: {min(`[a.a]int`)},
 	})
 }
 
