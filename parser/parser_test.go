@@ -324,6 +324,13 @@ func TestExpressionList(t *testing.T) {
 	})
 }
 
+func TestExpressionListState(t *testing.T) {
+	resultState(t, ExpressionListState, map[string][]StateOutput{
+		`1`:   {min(`1`)},
+		`a,b`: {{[]string{``, `a`}, []*Token{ret, b, comma}}, min(`a,b`)},
+	})
+}
+
 func TestExpressionList_Render(t *testing.T) {
 	defect.Equal(t, string(expressionList{}.Render()), ``)
 	defect.Equal(t, string(expressionList{a}.Render()), `a`)

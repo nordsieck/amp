@@ -373,6 +373,36 @@ func ExpressionList(ts [][]*Token) [][]*Token {
 	return ts
 }
 
+func ExpressionListState(ss []State) []State {
+	ss = ExpressionState(ss)
+	loop := ss
+	for len(loop) != 0 {
+		loop = tokenParserState(loop, token.COMMA)
+		loop = ExpressionState(loop)
+		ss = append(ss, loop...)
+	}
+	for i, s := range ss {
+		el := expressionList{s.r[len(s.r)-1]}
+		s.r = s.r[:len(s.r)-1]
+		for {
+			if tok, ok := s.r[len(s.r)-1].(*Token); ok && tok.tok == token.COMMA {
+				el = append(el, s.r[len(s.r)-2])
+				s.r = s.r[:len(s.r)-2]
+			} else {
+				break
+			}
+		}
+
+		// reverse
+		for i := 0; i < len(el)/2; i++ {
+			el[i], el[len(el)-1-i] = el[len(el)-1-i], el[i]
+		}
+
+		ss[i].r = rAppend(s.r, 0, el)
+	}
+	return ss
+}
+
 type expressionList []Renderer
 
 func (e expressionList) Render() []byte {
