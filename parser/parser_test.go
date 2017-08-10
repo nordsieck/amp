@@ -986,14 +986,23 @@ func TestSimpleStmt(t *testing.T) {
 }
 
 func TestSlice(t *testing.T) {
-	remaining(t, Slice, Tmap{
-		`[:]`:     {{ret}},
-		`[1:]`:    {{ret}},
-		`[:1]`:    {{ret}},
-		`[1:1]`:   {{ret}},
-		`[:1:1]`:  {{ret}},
-		`[1:1:1]`: {{ret}},
+	resultState(t, Slice, map[string][]StateOutput{
+		`[:]`:     {min(`[:]`)},
+		`[a:]`:    {min(`[a:]`)},
+		`[:b]`:    {min(`[:b]`)},
+		`[a:b]`:   {min(`[a:b]`)},
+		`[:b:c]`:  {min(`[:b:c]`)},
+		`[a:b:c]`: {min(`[a:b:c]`)},
 	})
+}
+
+func TestSlice_Render(t *testing.T) {
+	defect.Equal(t, string(slice{nil, nil, nil}.Render()), `[:]`)
+	defect.Equal(t, string(slice{a, nil, nil}.Render()), `[a:]`)
+	defect.Equal(t, string(slice{nil, b, nil}.Render()), `[:b]`)
+	defect.Equal(t, string(slice{a, b, nil}.Render()), `[a:b]`)
+	defect.Equal(t, string(slice{nil, b, c}.Render()), `[:b:c]`)
+	defect.Equal(t, string(slice{a, b, c}.Render()), `[a:b:c]`)
 }
 
 func TestSliceType(t *testing.T) {

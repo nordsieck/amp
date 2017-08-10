@@ -1066,7 +1066,7 @@ func PrimaryExpr(ts [][]*Token) [][]*Token {
 	for len(newBase) != 0 {
 		additions := fromState(Selector(toState(newBase)))
 		additions = append(additions, fromState(Index(toState(newBase)))...)
-		additions = append(additions, Slice(newBase)...)
+		additions = append(additions, fromState(Slice(toState(newBase)))...)
 		additions = append(additions, TypeAssertion(newBase)...)
 		additions = append(additions, Arguments(newBase)...)
 		base = append(base, additions...)
@@ -1312,18 +1312,62 @@ func SimpleStmt(ts [][]*Token) [][]*Token {
 		append(Assignment(ts), ShortVarDecl(ts)...)...)
 }
 
-func Slice(ts [][]*Token) [][]*Token {
-	ts = tokenReader(ts, token.LBRACK)
-	ts = append(ts, Expression(ts)...)
-	ts = tokenReader(ts, token.COLON)
+func Slice(ss []State) []State {
+	ss = tokenParserState(ss, token.LBRACK)
+	ss = append(ss, ExpressionState(ss)...)
+	ss = tokenParserState(ss, token.COLON)
 
-	a := append(ts, Expression(ts)...)
+	two := append(ss, ExpressionState(ss)...)
+	two = tokenReaderState(two, token.RBRACK)
+	for i, t := range two {
+		s := slice{}
+		if tok, ok := t.r[len(t.r)-1].(*Token); ok && tok.tok == token.COLON {
+			t.r = t.r[:len(t.r)-1]
+		} else {
+			s[1] = t.r[len(t.r)-1]
+			t.r = t.r[:len(t.r)-2]
+		}
+		if tok, ok := t.r[len(t.r)-1].(*Token); ok && tok.tok == token.LBRACK {
+			two[i].r = rAppend(t.r, 1, s)
+		} else {
+			s[0] = t.r[len(t.r)-1]
+			two[i].r = rAppend(t.r, 2, s)
+		}
+	}
 
-	b := Expression(ts)
-	b = tokenReader(b, token.COLON)
-	b = Expression(b)
+	three := ExpressionState(ss)
+	three = tokenReaderState(three, token.COLON)
+	three = ExpressionState(three)
+	three = tokenReaderState(three, token.RBRACK)
+	for i, t := range three {
+		s := slice{1: t.r[len(t.r)-2], 2: t.r[len(t.r)-1]}
+		if tok, ok := t.r[len(t.r)-4].(*Token); ok && tok.tok == token.LBRACK {
+			three[i].r = rAppend(t.r, 4, s)
+		} else {
+			s[0] = t.r[len(t.r)-4]
+			three[i].r = rAppend(t.r, 5, s)
+		}
+	}
 
-	return tokenReader(append(a, b...), token.RBRACK)
+	return append(two, three...)
+}
+
+type slice [3]Renderer
+
+func (s slice) Render() []byte {
+	ret := []byte(`[`)
+	if s[0] != nil {
+		ret = append(ret, s[0].Render()...)
+	}
+	ret = append(ret, `:`...)
+	if s[1] != nil {
+		ret = append(ret, s[1].Render()...)
+	}
+	if s[2] != nil {
+		ret = append(ret, `:`...)
+		ret = append(ret, s[2].Render()...)
+	}
+	return append(ret, `]`...)
 }
 
 func SliceType(ss []State) []State {
