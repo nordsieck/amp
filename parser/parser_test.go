@@ -324,6 +324,12 @@ func TestExpressionList(t *testing.T) {
 	})
 }
 
+func TestExpressionList_Render(t *testing.T) {
+	defect.Equal(t, string(expressionList{}.Render()), ``)
+	defect.Equal(t, string(expressionList{a}.Render()), `a`)
+	defect.Equal(t, string(expressionList{a, b, c}.Render()), `a,b,c`)
+}
+
 func TestExpressionStmt(t *testing.T) {
 	remaining(t, ExpressionStmt, Tmap{`1`: {{ret}}})
 }

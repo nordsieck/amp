@@ -373,6 +373,20 @@ func ExpressionList(ts [][]*Token) [][]*Token {
 	return ts
 }
 
+type expressionList []Renderer
+
+func (e expressionList) Render() []byte {
+	if len(e) == 0 {
+		return nil
+	}
+	var ret []byte
+	for i := 0; i < len(e)-1; i++ {
+		ret = append(ret, e[i].Render()...)
+		ret = append(ret, `,`...)
+	}
+	return append(ret, e[len(e)-1].Render()...)
+}
+
 func ExpressionStmt(ts [][]*Token) [][]*Token { return Expression(ts) }
 
 func ExprSwitchCase(ts [][]*Token) [][]*Token {
