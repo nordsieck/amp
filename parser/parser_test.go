@@ -77,13 +77,19 @@ func TestAnonymousField_Render(t *testing.T) {
 }
 
 func TestArguments(t *testing.T) {
-	remaining(t, Arguments, Tmap{
-		`()`:        {{ret}},
-		`(a)`:       {{ret}},
-		`(a,a)`:     {{ret}},
-		`(a,a,)`:    {{ret}},
-		`(a,a...,)`: {{ret}},
+	resultState(t, Arguments, map[string][]StateOutput{
+		`()`:        {min(`()`)},
+		`(a)`:       {min(`(a)`)},
+		`(a,a)`:     {min(`(a,a)`)},
+		`(a,a,)`:    {min(`(a,a,)`)},
+		`(a,a...,)`: {min(`(a,a...,)`)},
 	})
+}
+
+func TestArguments_Render(t *testing.T) {
+	defect.Equal(t, string(arguments{}.Render()), `()`)
+	defect.Equal(t, string(arguments{expressionList: expressionList{a, b}}.Render()), `(a,b)`)
+	defect.Equal(t, string(arguments{expressionList: expressionList{a, b}, ellipsis: true, comma: true}.Render()), `(a,b...,)`)
 }
 
 func TestArrayType(t *testing.T) {

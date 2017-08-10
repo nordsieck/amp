@@ -72,12 +72,51 @@ func (a anonymousField) Render() []byte {
 
 // bad spec
 // "(" [ ExpressionList [ "..." ] [ "," ]] ")"
-func Arguments(ts [][]*Token) [][]*Token {
-	ts = tokenReader(ts, token.LPAREN)
-	newTs := ExpressionList(ts)
-	newTs = append(newTs, tokenReader(newTs, token.ELLIPSIS)...)
-	newTs = append(newTs, tokenReader(newTs, token.COMMA)...)
-	return tokenReader(append(ts, newTs...), token.RPAREN)
+func Arguments(ss []State) []State {
+	ss = tokenParserState(ss, token.LPAREN)
+	expr := ExpressionListState(ss)
+	expr = append(expr, tokenParserState(expr, token.ELLIPSIS)...)
+	expr = append(expr, tokenParserState(expr, token.COMMA)...)
+	ss = append(ss, expr...)
+	ss = tokenReaderState(ss, token.RPAREN)
+
+	for i, s := range ss {
+		var arg arguments
+		if tok, ok := s.r[len(s.r)-1].(*Token); ok && tok.tok == token.COMMA {
+			arg.comma = true
+			s.r = s.r[:len(s.r)-1]
+		}
+		if tok, ok := s.r[len(s.r)-1].(*Token); ok && tok.tok == token.ELLIPSIS {
+			arg.ellipsis = true
+			s.r = s.r[:len(s.r)-1]
+		}
+		if tok, ok := s.r[len(s.r)-1].(*Token); ok && tok.tok == token.LPAREN {
+			ss[i].r = rAppend(s.r, 1, arg)
+		} else {
+			arg.expressionList = s.r[len(s.r)-1]
+			ss[i].r = rAppend(s.r, 2, arg)
+		}
+	}
+	return ss
+}
+
+type arguments struct {
+	expressionList  Renderer
+	ellipsis, comma bool
+}
+
+func (a arguments) Render() []byte {
+	ret := []byte(`(`)
+	if a.expressionList != nil {
+		ret = append(ret, a.expressionList.Render()...)
+	}
+	if a.ellipsis {
+		ret = append(ret, `...`...)
+	}
+	if a.comma {
+		ret = append(ret, `,`...)
+	}
+	return append(ret, `)`...)
 }
 
 func ArrayType(ss []State) []State {
@@ -1112,7 +1151,7 @@ func PrimaryExpr(ts [][]*Token) [][]*Token {
 		additions = append(additions, fromState(Index(toState(newBase)))...)
 		additions = append(additions, fromState(Slice(toState(newBase)))...)
 		additions = append(additions, fromState(TypeAssertion(toState(newBase)))...)
-		additions = append(additions, Arguments(newBase)...)
+		additions = append(additions, fromState(Arguments(toState(newBase)))...)
 		base = append(base, additions...)
 		newBase = additions
 	}
