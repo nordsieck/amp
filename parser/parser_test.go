@@ -1114,9 +1114,9 @@ func TestTyp_Render(t *testing.T) {
 }
 
 func TestTypeAssertion(t *testing.T) {
-	remaining(t, TypeAssertion, Tmap{
-		`.(int)`: {{ret}},
-		`1`:      empty,
+	resultState(t, TypeAssertion, map[string][]StateOutput{
+		`.(int)`: {min(`.(int)`)},
+		`1`:      nil,
 	})
 }
 

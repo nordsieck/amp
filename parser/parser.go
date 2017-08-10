@@ -1067,7 +1067,7 @@ func PrimaryExpr(ts [][]*Token) [][]*Token {
 		additions := fromState(Selector(toState(newBase)))
 		additions = append(additions, fromState(Index(toState(newBase)))...)
 		additions = append(additions, fromState(Slice(toState(newBase)))...)
-		additions = append(additions, TypeAssertion(newBase)...)
+		additions = append(additions, fromState(TypeAssertion(toState(newBase)))...)
 		additions = append(additions, Arguments(newBase)...)
 		base = append(base, additions...)
 		newBase = additions
@@ -1527,15 +1527,21 @@ func (t typ) Render() []byte {
 	return ret
 }
 
-func TypeAssertion(ts [][]*Token) [][]*Token {
-	ts = tokenReader(ts, token.PERIOD)
-	ts = tokenReader(ts, token.LPAREN)
-	if len(ts) == 0 {
-		return nil
+func TypeAssertion(ss []State) []State {
+	ss = tokenReaderState(ss, token.PERIOD)
+	ss = tokenReaderState(ss, token.LPAREN)
+	ss = Type(ss)
+	ss = tokenReaderState(ss, token.RPAREN)
+	for i, s := range ss {
+		t := typeAssertion{s.r[len(s.r)-1]}
+		ss[i].r = rAppend(s.r, 1, t)
 	}
-	ts = Expression(ts)
-	return tokenReader(ts, token.RPAREN)
+	return ss
 }
+
+type typeAssertion struct{ r Renderer }
+
+func (t typeAssertion) Render() []byte { return append(append([]byte(`.(`), t.r.Render()...), `)`...) }
 
 func TypeCaseClause(ts [][]*Token) [][]*Token {
 	ts = TypeSwitchCase(ts)
