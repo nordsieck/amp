@@ -66,8 +66,8 @@ func TestAddOp(t *testing.T) {
 
 func TestAnonymousField(t *testing.T) {
 	resultState(t, AnonymousField, map[string][]StateOutput{
-		`a.a`:  {{[]string{``, `a.a`}, []*Token{ret}}},
-		`*a.a`: {{[]string{``, `*a.a`}, []*Token{ret}}},
+		`a.a`:  {{[]string{``, `a.a`}, []*Token{ret}}, {[]string{``, `a`}, []*Token{ret, a, dot}}},
+		`*a.a`: {{[]string{``, `*a.a`}, []*Token{ret}}, {[]string{``, `*a`}, []*Token{ret, a, dot}}},
 	})
 }
 
@@ -593,7 +593,7 @@ func TestLiteralType(t *testing.T) {
 		`[...]int`:    {{[]string{``, `[...]int`}, []*Token{ret}}},
 		`[]int`:       {{[]string{``, `[]int`}, []*Token{ret}}},
 		`map[int]int`: {{[]string{``, `map[int]int`}, []*Token{ret}}},
-		`a.a`:         {{[]string{``, `a.a`}, []*Token{ret}}},
+		`a.a`:         {{[]string{``, `a.a`}, []*Token{ret}}, {[]string{``, `a`}, []*Token{ret, a, dot}}},
 	})
 }
 
@@ -627,7 +627,8 @@ func TestMethodDecl(t *testing.T) {
 func TestMethodExpr(t *testing.T) {
 	remaining(t, MethodExpr, Tmap{
 		`1`:        empty,
-		`a.a.a`:    {{ret}},
+		`a.a`:      {{ret}},
+		`a.a.a`:    {{ret}, {ret, a, dot}},
 		`(a).a`:    {{ret}},
 		`(a.a).a`:  {{ret}},
 		`(*a.a).a`: {{ret}},
@@ -637,7 +638,8 @@ func TestMethodExpr(t *testing.T) {
 func TestMethodExprState(t *testing.T) {
 	resultState(t, MethodExprState, map[string][]StateOutput{
 		`1`:        nil,
-		`a.a.a`:    {min(`a.a.a`)},
+		`a.a`:      {min(`a.a`)},
+		`a.a.a`:    {min(`a.a.a`), {[]string{``, `a.a`}, []*Token{ret, a, dot}}},
 		`(a).a`:    {min(`(a).a`)},
 		`(a.a).a`:  {min(`(a.a).a`)},
 		`(*a.a).a`: {min(`(*a.a).a`)},
@@ -654,7 +656,7 @@ func TestMethodSpec(t *testing.T) {
 	resultState(t, MethodSpec, map[string][]StateOutput{
 		`a()`:   {{[]string{``, `a()`}, []*Token{ret}}, {[]string{``, `a`}, []*Token{ret, rparen, lparen}}},
 		`a`:     {{[]string{``, `a`}, []*Token{ret}}},
-		`a.a()`: {{[]string{``, `a.a`}, []*Token{ret, rparen, lparen}}},
+		`a.a()`: {{[]string{``, `a.a`}, []*Token{ret, rparen, lparen}}, {[]string{``, `a`}, []*Token{ret, rparen, lparen, a, dot}}},
 	})
 }
 
@@ -679,8 +681,8 @@ func TestMulOp(t *testing.T) {
 func TestOperand(t *testing.T) {
 	remaining(t, Operand, Tmap{
 		`1`:     {{ret}},
-		`a.a`:   {{ret, a, dot}, {ret}},
-		`(a.a)`: {{ret}, {ret}},
+		`a.a`:   {{ret, a, dot}, {ret}, {ret}},
+		`(a.a)`: {{ret}, {ret}, {ret}},
 	})
 }
 
@@ -688,7 +690,7 @@ func TestOperandState(t *testing.T) {
 	resultState(t, OperandState, map[string][]StateOutput{
 		`1`:         {{[]string{``, `1`}, []*Token{ret}}},
 		`a`:         {min(`a`)},
-		`a.a`:       {min(`a.a`)},
+		`a.a`:       {{[]string{``, `a`}, []*Token{ret, a, dot}}, min(`a.a`)},
 		`((a.a).a)`: {min(`((a.a).a)`)},
 		`(1)`:       {min(`(1)`)},
 	})
@@ -713,7 +715,7 @@ func TestOperandNameState(t *testing.T) {
 		`1`:   nil,
 		`_`:   {min(`_`)},
 		`a`:   {min(`a`)},
-		`a.a`: {min(`a.a`)},
+		`a.a`: {{[]string{``, `a`}, []*Token{ret, a, dot}}},
 	})
 }
 
@@ -823,8 +825,9 @@ func TestPrimaryExpr(t *testing.T) {
 		`(a.a)("foo")`: {
 			{ret, rparen, {token.STRING, `"foo"`}, lparen},
 			{ret, rparen, {token.STRING, `"foo"`}, lparen},
-			{ret}, {ret}, {ret}},
-		`a.a`:     {{ret, a, dot}, {ret}, {ret}},
+			{ret, rparen, {token.STRING, `"foo"`}, lparen},
+			{ret}, {ret}, {ret}, {ret}},
+		`a.a`:     {{ret, a, dot}, {ret}, {ret}, {ret}},
 		`a[1]`:    {{ret, {tok: token.RBRACK}, one, {tok: token.LBRACK}}, {ret}},
 		`a[:]`:    {{ret, {tok: token.RBRACK}, {tok: token.COLON}, {tok: token.LBRACK}}, {ret}},
 		`a.(int)`: {{ret, rparen, _int, lparen, dot}, {ret}},
@@ -880,7 +883,7 @@ func TestRAppend(t *testing.T) {
 func TestReceiverType(t *testing.T) {
 	remaining(t, ReceiverType, Tmap{
 		`1`:      empty,
-		`a.a`:    {{ret}},
+		`a.a`:    {{ret}, {ret, a, dot}},
 		`(a.a)`:  {{ret}},
 		`(*a.a)`: {{ret}},
 	})
@@ -889,7 +892,7 @@ func TestReceiverType(t *testing.T) {
 func TestReceiverTypeState(t *testing.T) {
 	resultState(t, ReceiverTypeState, map[string][]StateOutput{
 		`1`:       nil,
-		`a.a`:     {min(`a.a`)},
+		`a.a`:     {min(`a.a`), {[]string{``, `a`}, []*Token{ret, a, dot}}},
 		`(a.a)`:   {min(`(a.a)`)},
 		`((a.a))`: {min(`((a.a))`)},
 		`(*a.a)`:  {min(`(*a.a)`)},
@@ -1115,7 +1118,7 @@ func TestTopLevelDecl(t *testing.T) {
 func TestType(t *testing.T) {
 	resultState(t, Type, map[string][]StateOutput{
 		`a`:        {{[]string{``, `a`}, []*Token{ret}}},
-		`a.a`:      {{[]string{``, `a.a`}, []*Token{ret}}},
+		`a.a`:      {{[]string{``, `a.a`}, []*Token{ret}}, {[]string{``, `a`}, []*Token{ret, a, dot}}},
 		`1`:        nil,
 		`_`:        {{[]string{``, `_`}, []*Token{ret}}},
 		`(a.a)`:    {{[]string{``, `(a.a)`}, []*Token{ret}}},
@@ -1184,7 +1187,7 @@ func TestTypeLit(t *testing.T) {
 func TestTypeName(t *testing.T) {
 	resultState(t, TypeName, map[string][]StateOutput{
 		`a`:   {{[]string{``, `a`}, []*Token{ret}}},
-		`a.a`: {{[]string{``, `a.a`}, []*Token{ret}}},
+		`a.a`: {{[]string{``, `a.a`}, []*Token{ret}}, {[]string{``, `a`}, []*Token{ret, a, dot}}},
 		`1`:   nil,
 		`_`:   {{[]string{``, `_`}, []*Token{ret}}},
 	})

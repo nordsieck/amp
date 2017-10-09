@@ -962,18 +962,7 @@ func OperandName(ts [][]*Token) [][]*Token {
 	return append(tokenReader(ts, token.IDENT), qi...)
 }
 
-// greedy
-func OperandNameState(ss []State) []State {
-	var ret []State
-	for _, s := range ss {
-		if full := QualifiedIdent([]State{s}); len(full) != 0 {
-			ret = append(ret, full...)
-		} else if demi := tokenParserState(ss, token.IDENT); len(demi) != 0 {
-			ret = append(ret, demi...)
-		}
-	}
-	return ret
-}
+func OperandNameState(ss []State) []State { return tokenParserState(ss, token.IDENT) }
 
 type operandNameOrMethodExpr struct{ r Renderer }
 
@@ -1679,18 +1668,8 @@ func TypeLit(ss []State) []State {
 			append(MapType(ss), ChannelType(ss)...)...)...)
 }
 
-// greedy
 func TypeName(ss []State) []State {
-	var ret []State
-
-	for _, s := range ss {
-		if full := QualifiedIdent([]State{s}); len(full) != 0 {
-			ret = append(ret, full...)
-		} else if demi := tokenParserState([]State{s}, token.IDENT); len(demi) != 0 {
-			ret = append(ret, demi...)
-		}
-	}
-	return ret
+	return append(QualifiedIdent(ss), tokenParserState(ss, token.IDENT)...)
 }
 
 func TypeSpec(ts [][]*Token) [][]*Token {
