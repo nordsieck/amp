@@ -45,13 +45,16 @@ var (
 	two    = &Token{token.INT, `2`}
 	dot    = &Token{tok: token.PERIOD}
 	comma  = &Token{tok: token.COMMA}
-	lparen = &Token{tok: token.LPAREN}
-	rparen = &Token{tok: token.RPAREN}
+	colon  = &Token{tok: token.COLON}
 	_if    = &Token{token.IF, `if`}
 	_else  = &Token{token.ELSE, `else`}
-	rbrace = &Token{tok: token.RBRACE}
-	lbrace = &Token{tok: token.LBRACE}
 	inc    = &Token{tok: token.INC}
+	lparen = &Token{tok: token.LPAREN}
+	rparen = &Token{tok: token.RPAREN}
+	lbrace = &Token{tok: token.LBRACE}
+	rbrace = &Token{tok: token.RBRACE}
+	lbrack = &Token{tok: token.LBRACK}
+	rbrack = &Token{tok: token.RBRACK}
 )
 
 func TestAddOp(t *testing.T) {
@@ -844,13 +847,20 @@ func TestPrimaryExpr(t *testing.T) {
 func TestPrimaryExprState(t *testing.T) {
 	resultState(t, PrimaryExprState, map[string][]StateOutput{
 		`1`:            {{[]string{``, `1`}, []*Token{ret}}},
+		`(a)("foo")`:   {{[]string{``, `(a)`}, []*Token{ret, rparen, {tok: token.STRING, lit: `"foo"`}, lparen}}, min(`(a)("foo")`)},
 		`(a.a)("foo")`: {{[]string{``, `(a.a)`}, []*Token{ret, rparen, {tok: token.STRING, lit: `"foo"`}, lparen}}, min(`(a.a)("foo")`)},
-		// `a.a`
-		// `a[1]`
-		// `a[:]`
-		// `a.(int)`
-		// `a(b...)`
-		// `a(b...)[:]`
+		`a.a`:          {{[]string{``, `a`}, []*Token{ret, a, dot}}, min(`a.a`)},
+		`a.a.a`:        {{[]string{``, `a`}, []*Token{ret, a, dot, a, dot}}, min(`a.a.a`), {[]string{``, `a.a`}, []*Token{ret, a, dot}}},
+		`(a).a`:        {min(`(a).a`), {[]string{``, `(a)`}, []*Token{ret, a, dot}}},
+		`(a).a.a`:      {{[]string{``, `(a).a`}, []*Token{ret, a, dot}}, {[]string{``, `(a)`}, []*Token{ret, a, dot, a, dot}}, min(`(a).a.a`)},
+		`(a.a).a`:      {min(`(a.a).a`), {[]string{``, `(a.a)`}, []*Token{ret, a, dot}}},
+		`a[1]`:         {{[]string{``, `a`}, []*Token{ret, rbrack, one, lbrack}}, min(`a[1]`)},
+		`a[:]`:         {{[]string{``, `a`}, []*Token{ret, rbrack, colon, lbrack}}, min(`a[:]`)},
+		`a.(int)`:      {{[]string{``, `a`}, []*Token{ret, rparen, _int, lparen, dot}}, min(`a.(int)`)},
+		`a(b...)`:      {{[]string{``, `a`}, []*Token{ret, rparen, {tok: token.ELLIPSIS}, b, lparen}}, min(`a(b...)`)},
+		`a(b,c)`:       {{[]string{``, `a`}, []*Token{ret, rparen, c, comma, b, lparen}}, min(`a(b,c)`)},
+		`a(b)(c)`:      {{[]string{``, `a`}, []*Token{ret, rparen, c, lparen, rparen, b, lparen}}, {[]string{``, `a(b)`}, []*Token{ret, rparen, c, lparen}}, min(`a(b)(c)`)},
+		`a(b...)[:]`:   {{[]string{``, `a`}, []*Token{ret, rbrack, colon, lbrack, rparen, {tok: token.ELLIPSIS}, b, lparen}}, {[]string{``, `a(b...)`}, []*Token{ret, rbrack, colon, lbrack}}, min(`a(b...)[:]`)},
 	})
 }
 

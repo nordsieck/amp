@@ -315,14 +315,11 @@ func ConversionState(ss []State) []State {
 		c.typ = s.r[len(s.r)-2]
 
 		typ := c.typ.(typ)
-		_, ok := typ.r.(*Token)
-		tok := ok
-		_, ok = typ.r.(qualifiedIdent)
-		qi := ok
-		parens := typ.parens == 0
+		_, tok := typ.r.(*Token)
+		_, qi := typ.r.(qualifiedIdent)
 
-		if parens && (tok || qi) {
-			ss[i].r = rAppend(s.r, 2, conversionOrArgument{c})
+		if tok || qi {
+			ss[i].r = rAppend(s.r, 2, conversionOrArguments{c})
 		} else {
 			ss[i].r = rAppend(s.r, 2, c)
 		}
@@ -330,9 +327,9 @@ func ConversionState(ss []State) []State {
 	return ss
 }
 
-type conversionOrArgument struct{ r Renderer }
+type conversionOrArguments struct{ r Renderer }
 
-func (c conversionOrArgument) Render() []byte { return c.r.Render() }
+func (c conversionOrArguments) Render() []byte { return c.r.Render() }
 
 type conversion struct {
 	typ, expr Renderer
@@ -1174,12 +1171,98 @@ func PrimaryExpr(ts [][]*Token) [][]*Token {
 
 func PrimaryExprState(ss []State) []State {
 	ss = append(OperandState(ss), ConversionState(ss)...)
-	// selector
-	// index
-	// slice
-	// type assertion
-	// arguments
-	return ss
+	for i, s := range ss {
+		pe := primaryExpr{s.r[len(s.r)-1]}
+		ss[i].r = rAppend(s.r, 1, pe)
+	}
+
+	loop := ss
+	for len(loop) != 0 {
+		sel := Selector(loop)
+		idx := Index(loop)
+		slc := Slice(loop)
+		typ := TypeAssertion(loop)
+		arg := Arguments(loop)
+		loop = append(append(append(sel, idx...), append(slc, typ...)...), arg...)
+		for i, s := range loop {
+			pe := s.r[len(s.r)-2].(primaryExpr)
+			pe = append(pe, s.r[len(s.r)-1])
+			loop[i].r = rAppend(s.r, 2, pe)
+		}
+
+		ss = append(ss, loop...)
+	}
+
+	// filter for uniqueness of parse
+	var newss []State
+	for _, s := range ss {
+		pe := s.r[len(s.r)-1].(primaryExpr)
+		if len(pe) == 1 {
+			newss = append(newss, s)
+			continue
+		}
+
+		if op, ok := pe[0].(operand); ok {
+			if _, sel := pe[1].(selector); sel {
+				// a.a or (a).a
+				_, tok := op.r.(*Token)
+				_, or := op.r.(operandNameOrMethodExpr)
+
+				if tok || or || op.parens {
+					continue
+				}
+			}
+			if arg, ok := pe[1].(arguments); ok && !arg.ellipsis {
+				el := arg.expressionList.(expressionList)
+				if len(el) != 1 {
+					newss = append(newss, s)
+					continue
+				}
+
+				// get the root level operand
+				add := false
+				for op.parens {
+					if pe, ok := op.r.(primaryExpr); ok && len(pe) == 1 {
+						if op, ok = pe[0].(operand); !ok {
+							add = true
+							break
+						}
+					} else {
+						add = true
+						break
+					}
+				}
+
+				if add {
+					newss = append(newss, s)
+					continue
+				}
+
+				// (a)(a)
+				if tok, ok := op.r.(*Token); ok && tok.tok == token.IDENT {
+					continue
+				}
+
+				// (a.a)(a)
+				if _, ok = op.r.(operandNameOrMethodExpr); ok {
+					continue
+				}
+			}
+		}
+		newss = append(newss, s)
+	}
+
+	return newss
+}
+
+type primaryExpr []Renderer
+
+func (pe primaryExpr) Render() []byte {
+	var out []byte
+	for _, elem := range pe {
+		out = append(out, elem.Render()...)
+	}
+	return out
 }
 
 func QualifiedIdent(ss []State) []State {
@@ -1254,7 +1337,6 @@ func ReceiverTypeState(ss []State) []State {
 		rt := receiverType{p.r[len(p.r)-2], 1, true}
 		ptr[i].r = rAppend(p.r, 4, rt)
 	}
-
 	return append(append(tn, ptr...), paren...)
 }
 
