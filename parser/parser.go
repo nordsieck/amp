@@ -748,9 +748,9 @@ func (it interfaceType) Render() []byte {
 	return append(ret, `}`...)
 }
 
-// TODO: missing LiteralValue
 func Key(ts [][]*Token) [][]*Token {
-	return append(tokenReader(ts, token.IDENT), Expression(ts)...)
+	return append(append(tokenReader(ts, token.IDENT), Expression(ts)...),
+		LiteralValue(ts)...)
 }
 
 func KeyState(ss []State) []State {

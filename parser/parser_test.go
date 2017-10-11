@@ -544,6 +544,7 @@ func TestKey(t *testing.T) {
 		`a`:     {{ret}, {ret}},
 		`1+a`:   {{ret, a, {tok: token.ADD}}, {ret}},
 		`"foo"`: {{ret}},
+		`{a}`:   {{ret}},
 	})
 }
 
