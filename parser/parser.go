@@ -1124,8 +1124,6 @@ func (p parameters) Render() []byte {
 	return append(ret, `)`...)
 }
 
-// TODO: figure out how to treat pointers.  Are they part of the thing they are
-// attached to, or are they a universal wrapper?
 func PointerType(ss []State) []State {
 	ss = tokenReaderState(ss, token.MUL)
 	if len(ss) == 0 {
