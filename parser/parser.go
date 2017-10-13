@@ -861,7 +861,7 @@ func MethodExprState(ss []State) []State {
 	for i, s := range ss {
 		me := methodExpr{s.r[len(s.r)-2], s.r[len(s.r)-1]}
 		rt := me.receiverType.(receiverType)
-		if tok, ok := rt.r.(*Token); ok && tok.tok == token.IDENT {
+		if tok, ok := rt.r.(*Token); ok && tok.tok == token.IDENT && rt.parens == 0 && !rt.pointer {
 			or := operandNameOrMethodExpr{qualifiedIdent{me.receiverType, me.methodName}}
 			ss[i].r = rAppend(s.r, 2, or)
 		} else {
