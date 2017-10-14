@@ -1248,10 +1248,14 @@ func TestUnaryExpr(t *testing.T) {
 
 func TestUnaryExprState(t *testing.T) {
 	resultState(t, UnaryExprState, map[string][]StateOutput{
-		`1`: {{[]string{``, `1`}, []*Token{ret}}},
-		// `-1`
-		// `!a`
+		`1`:  {{[]string{``, `1`}, []*Token{ret}}},
+		`-1`: {min(`-1`)},
+		`!a`: {min(`!a`)},
 	})
+}
+
+func TestUnaryExpr_Render(t *testing.T) {
+	defect.Equal(t, string(unaryExpr{a, &Token{tok: token.ADD}, &Token{tok: token.ARROW}}.Render()), `<-+a`)
 }
 
 func TestUnaryOp(t *testing.T) {

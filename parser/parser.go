@@ -1222,11 +1222,17 @@ func PrimaryExprState(ss []State) []State {
 				// get the root level operand
 				add := false
 				for op.parens {
-					if pe, ok := op.r.(primaryExpr); ok && len(pe) == 1 {
-						if op, ok = pe[0].(operand); !ok {
+					if ue, ok := op.r.(unaryExpr); ok && len(ue) == 1 {
+						if pe, ok := ue[0].(primaryExpr); ok && len(pe) == 1 {
+							if op, ok = pe[0].(operand); !ok {
+								add = true
+								break
+							}
+						} else {
 							add = true
 							break
 						}
+
 					} else {
 						add = true
 						break
@@ -1818,9 +1824,33 @@ func UnaryExpr(ts [][]*Token) [][]*Token {
 }
 
 func UnaryExprState(ss []State) []State {
-	ss = PrimaryExprState(ss)
-	// UnaryOp UnaryExpr
-	return ss
+	uo := UnaryOp(ss)
+	if len(uo) != 0 {
+		uo = UnaryExprState(uo)
+	}
+	for i, u := range uo {
+		ue := u.r[len(u.r)-1].(unaryExpr)
+		ue = append(ue, u.r[len(u.r)-2])
+		uo[i].r = rAppend(u.r, 2, ue)
+	}
+
+	pe := PrimaryExprState(ss)
+	for i, p := range pe {
+		ue := unaryExpr{p.r[len(p.r)-1]}
+		pe[i].r = rAppend(p.r, 1, ue)
+	}
+	return append(pe, uo...)
+}
+
+// slice is in reverse order
+type unaryExpr []Renderer
+
+func (u unaryExpr) Render() []byte {
+	var ret []byte
+	for i := len(u) - 1; i >= 0; i-- {
+		ret = append(ret, u[i].Render()...)
+	}
+	return ret
 }
 
 func UnaryOp(ss []State) []State {
