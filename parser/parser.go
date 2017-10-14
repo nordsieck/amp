@@ -147,6 +147,27 @@ func Assignment(ts [][]*Token) [][]*Token {
 	return ExpressionList(ts)
 }
 
+func AssignmentState(ss []State) []State {
+	ss = ExpressionListState(ss)
+	ss = AssignOp(ss)
+	ss = ExpressionListState(ss)
+	for i, s := range ss {
+		a := assignment{s.r[len(s.r)-3], s.r[len(s.r)-2], s.r[len(s.r)-1]}
+		ss[i].r = rAppend(s.r, 3, a)
+	}
+	return ss
+}
+
+type assignment struct {
+	first Renderer
+	op    Renderer
+	last  Renderer
+}
+
+func (a assignment) Render() []byte {
+	return append(append(a.first.Render(), a.op.Render()...), a.last.Render()...)
+}
+
 func AssignOp(ss []State) []State {
 	var result []State
 	for _, s := range ss {

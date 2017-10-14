@@ -111,6 +111,10 @@ func TestAssignment(t *testing.T) {
 	remaining(t, Assignment, Tmap{`a = 1`: {{ret}}})
 }
 
+func TestAssignmentState(t *testing.T) {
+	resultState(t, AssignmentState, map[string][]StateOutput{`a=1`: {min(`a=1`)}})
+}
+
 func TestAssignOp(t *testing.T) {
 	resultState(t, AssignOp, map[string][]StateOutput{
 		`+=`:  {{[]string{``, `+=`}, []*Token{}}},
