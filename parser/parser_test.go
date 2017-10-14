@@ -389,6 +389,10 @@ func TestExpressionStmt(t *testing.T) {
 	remaining(t, ExpressionStmt, Tmap{`1`: {{ret}}})
 }
 
+func TestExpressionStmtState(t *testing.T) {
+	resultState(t, ExpressionStmtState, map[string][]StateOutput{`1`: {min(`1`)}})
+}
+
 func TestExprSwitchCase(t *testing.T) {
 	remaining(t, ExprSwitchCase, Tmap{
 		`case 1`:    {{ret}},

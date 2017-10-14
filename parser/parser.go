@@ -566,6 +566,8 @@ func (e expressionList) Render() []byte {
 
 func ExpressionStmt(ts [][]*Token) [][]*Token { return Expression(ts) }
 
+func ExpressionStmtState(ss []State) []State { return ExpressionState(ss) }
+
 func ExprSwitchCase(ts [][]*Token) [][]*Token {
 	cas := tokenReader(ts, token.CASE)
 	cas = ExpressionList(cas)
