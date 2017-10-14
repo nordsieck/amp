@@ -1069,6 +1069,13 @@ func TestShortVarDecl(t *testing.T) {
 	})
 }
 
+func TestShortVarDeclState(t *testing.T) {
+	resultState(t, ShortVarDeclState, map[string][]StateOutput{
+		`a:=1`:     {min(`a:=1`)},
+		`a,b:=1,2`: {{[]string{``, `a,b:=1`}, []*Token{ret, two, comma}}, min(`a,b:=1,2`)},
+	})
+}
+
 func TestSignature(t *testing.T) {
 	resultState(t, Signature, map[string][]StateOutput{
 		`()`:             {{[]string{``, `()`}, []*Token{ret}}},

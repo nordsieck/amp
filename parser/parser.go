@@ -1712,6 +1712,23 @@ func ShortVarDecl(ts [][]*Token) [][]*Token {
 	return ExpressionList(ts)
 }
 
+func ShortVarDeclState(ss []State) []State {
+	ss = IdentifierList(ss)
+	ss = tokenReaderState(ss, token.DEFINE)
+	ss = ExpressionListState(ss)
+	for i, s := range ss {
+		svd := shortVarDecl{s.r[len(s.r)-2], s.r[len(s.r)-1]}
+		ss[i].r = rAppend(s.r, 2, svd)
+	}
+	return ss
+}
+
+type shortVarDecl struct{ id, expr Renderer }
+
+func (svd shortVarDecl) Render() []byte {
+	return append(append(svd.id.Render(), `:=`...), svd.expr.Render()...)
+}
+
 func Signature(ss []State) []State {
 	pp := Parameters(ss)
 	pr := Result(pp)
