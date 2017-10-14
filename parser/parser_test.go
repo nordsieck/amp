@@ -556,6 +556,13 @@ func TestIncDecStmt(t *testing.T) {
 	})
 }
 
+func TestIncDecStmtState(t *testing.T) {
+	resultState(t, IncDecStmtState, map[string][]StateOutput{
+		`a++`: {min(`a++`)},
+		`a--`: {min(`a--`)},
+	})
+}
+
 func TestIndex(t *testing.T) {
 	resultState(t, Index, map[string][]StateOutput{
 		`a`:   nil,

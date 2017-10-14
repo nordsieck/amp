@@ -794,6 +794,35 @@ func IncDecStmt(ts [][]*Token) [][]*Token {
 	return append(tokenReader(ts, token.INC), tokenReader(ts, token.DEC)...)
 }
 
+func IncDecStmtState(ss []State) []State {
+	ss = ExpressionState(ss)
+	inc := tokenReaderState(ss, token.INC)
+	for i, n := range inc {
+		ids := incDecStmt{n.r[len(n.r)-1], true}
+		inc[i].r = rAppend(n.r, 1, ids)
+	}
+
+	dec := tokenReaderState(ss, token.DEC)
+	for i, d := range dec {
+		ids := incDecStmt{d.r[len(d.r)-1], false}
+		dec[i].r = rAppend(d.r, 1, ids)
+	}
+	return append(inc, dec...)
+}
+
+type incDecStmt struct {
+	r   Renderer
+	inc bool
+}
+
+func (ids incDecStmt) Render() []byte {
+	ret := ids.r.Render()
+	if ids.inc {
+		return append(ret, `++`...)
+	}
+	return append(ret, `--`...)
+}
+
 func Index(ss []State) []State {
 	ss = tokenReaderState(ss, token.LBRACK)
 	if len(ss) == 0 {
