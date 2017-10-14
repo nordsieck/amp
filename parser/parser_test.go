@@ -282,6 +282,13 @@ func TestElement(t *testing.T) {
 	})
 }
 
+func TestElementState(t *testing.T) {
+	resultState(t, ElementState, map[string][]StateOutput{
+		`1+1`:   {{[]string{``, `1`}, []*Token{ret, one, {tok: token.ADD}}}, min(`1+1`)},
+		`{1+1}`: {min(`{1+1}`)},
+	})
+}
+
 func TestElementList(t *testing.T) {
 	remaining(t, ElementList, Tmap{
 		`1:1`: {{ret, one, {tok: token.COLON}}, {ret}},
@@ -290,6 +297,22 @@ func TestElementList(t *testing.T) {
 			{ret, one, {tok: token.COLON}, one, comma},
 			{ret, one, {tok: token.COLON}}, {ret}},
 	})
+}
+
+func TestElementListState(t *testing.T) {
+	resultState(t, ElementListState, map[string][]StateOutput{
+		`1:1`: {{[]string{``, `1`}, []*Token{ret, one, colon}}, min(`1:1`)},
+		`1:1,1:1`: {
+			{[]string{``, `1`}, []*Token{ret, one, colon, one, comma, one, colon}},
+			{[]string{``, `1:1`}, []*Token{ret, one, colon, one, comma}},
+			{[]string{``, `1:1,1`}, []*Token{ret, one, colon}},
+			min(`1:1,1:1`)},
+	})
+}
+
+func TestElementList_Render(t *testing.T) {
+	defect.Equal(t, string(elementList{a}.Render()), `a`)
+	defect.Equal(t, string(elementList{a, b}.Render()), `a,b`)
 }
 
 func TestEllipsisArrayType(t *testing.T) {
@@ -558,7 +581,10 @@ func TestKey(t *testing.T) {
 
 func TestKeyState(t *testing.T) {
 	resultState(t, KeyState, map[string][]StateOutput{
-		`a`: {{[]string{``, `a`}, []*Token{ret}}},
+		`a`:     {{[]string{``, `a`}, []*Token{ret}}},
+		`1+a`:   {{[]string{``, `1`}, []*Token{ret, a, {tok: token.ADD}}}, min(`1+a`)},
+		`"foo"`: {min(`"foo"`)},
+		`{a}`:   {min(`{a}`)},
 	})
 }
 
@@ -567,6 +593,18 @@ func TestKeyedElement(t *testing.T) {
 		`1`:   {{ret}},
 		`1:1`: {{ret, one, {tok: token.COLON}}, {ret}},
 	})
+}
+
+func TestKeyedElementState(t *testing.T) {
+	resultState(t, KeyedElementState, map[string][]StateOutput{
+		`1`:   {min(`1`)},
+		`1:1`: {{[]string{``, `1`}, []*Token{ret, one, colon}}, min(`1:1`)},
+	})
+}
+
+func TestKeyedElement_Render(t *testing.T) {
+	defect.Equal(t, string(keyedElement{element: b}.Render()), `b`)
+	defect.Equal(t, string(keyedElement{a, b}.Render()), `a:b`)
 }
 
 func TestLabeledStmt(t *testing.T) {
@@ -610,6 +648,13 @@ func TestLiteralValue(t *testing.T) {
 	remaining(t, LiteralValue, Tmap{
 		`{1}`:           {{ret}},
 		`{0: 1, 1: 2,}`: {{ret}},
+	})
+}
+
+func TestLiteralValueState(t *testing.T) {
+	resultState(t, LiteralValueState, map[string][]StateOutput{
+		`{1}`:        {min(`{1}`)},
+		`{0:1,1:2,}`: {min(`{0:1,1:2,}`)},
 	})
 }
 

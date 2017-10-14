@@ -357,6 +357,19 @@ func Element(ts [][]*Token) [][]*Token {
 	return append(Expression(ts), LiteralValue(ts)...)
 }
 
+func ElementState(ss []State) []State {
+	ss = append(ExpressionState(ss), LiteralValueState(ss)...)
+	for i, s := range ss {
+		e := element{s.r[len(s.r)-1]}
+		ss[i].r = rAppend(s.r, 1, e)
+	}
+	return ss
+}
+
+type element struct{ r Renderer }
+
+func (e element) Render() []byte { return e.r.Render() }
+
 func ElementList(ts [][]*Token) [][]*Token {
 	ts = KeyedElement(ts)
 	base := ts
@@ -367,6 +380,43 @@ func ElementList(ts [][]*Token) [][]*Token {
 		base = next
 	}
 	return ts
+}
+
+func ElementListState(ss []State) []State {
+	ss = KeyedElementState(ss)
+	for i, s := range ss {
+		el := elementList{s.r[len(s.r)-1]}
+		ss[i].r = rAppend(s.r, 1, el)
+	}
+
+	loop := ss
+	for len(loop) != 0 {
+		loop = tokenReaderState(loop, token.COMMA)
+		loop = KeyedElementState(loop)
+		for i, l := range loop {
+			el := l.r[len(l.r)-2].(elementList)
+			el = append(el, l.r[len(l.r)-1])
+			loop[i].r = rAppend(l.r, 2, el)
+		}
+
+		ss = append(ss, loop...)
+	}
+	return ss
+}
+
+type elementList []Renderer
+
+func (el elementList) Render() []byte {
+	var ret []byte
+	if len(el) == 0 {
+		return nil
+	}
+	ret = el[0].Render()
+	for i := 1; i < len(el); i++ {
+		ret = append(ret, `,`...)
+		ret = append(ret, el[i].Render()...)
+	}
+	return ret
 }
 
 func EllipsisArrayType(ss []State) []State {
@@ -795,16 +845,16 @@ func Key(ts [][]*Token) [][]*Token {
 }
 
 func KeyState(ss []State) []State {
-	fn := tokenParserState(ss, token.IDENT)
-	// expr := Expression(ss)
-	// lv := LiteralValue(ss)
+	// TODO: do we need field name at all?  Currently we use OperandName in Expression
+	expr := ExpressionState(ss)
+	lv := LiteralValueState(ss)
+	ss = append(expr, lv...)
 
-	for i, f := range fn {
-		k := key{f.r[len(f.r)-1]}
-		fn[i].r = rAppend(f.r, 1, k)
+	for i, s := range ss {
+		k := key{s.r[len(s.r)-1]}
+		ss[i].r = rAppend(s.r, 1, k)
 	}
 
-	ss = fn
 	return ss
 }
 
@@ -816,6 +866,35 @@ func KeyedElement(ts [][]*Token) [][]*Token {
 	with := Key(ts)
 	with = tokenReader(with, token.COLON)
 	return append(Element(ts), Element(with)...)
+}
+
+func KeyedElementState(ss []State) []State {
+	with := KeyState(ss)
+	with = tokenReaderState(with, token.COLON)
+	with = ElementState(with)
+	for i, w := range with {
+		ke := keyedElement{key: w.r[len(w.r)-2], element: w.r[len(w.r)-1]}
+		with[i].r = rAppend(w.r, 2, ke)
+	}
+
+	solo := ElementState(ss)
+	for i, s := range solo {
+		ke := keyedElement{element: s.r[len(s.r)-1]}
+		solo[i].r = rAppend(s.r, 1, ke)
+	}
+
+	return append(solo, with...)
+}
+
+type keyedElement struct{ key, element Renderer }
+
+func (ke keyedElement) Render() []byte {
+	var ret []byte
+	if ke.key != nil {
+		ret = append(ret, ke.key.Render()...)
+		ret = append(ret, `:`...)
+	}
+	return append(ret, ke.element.Render()...)
 }
 
 func LabeledStmt(ts [][]*Token) [][]*Token {
@@ -854,6 +933,52 @@ func LiteralValue(ts [][]*Token) [][]*Token {
 	list = append(list, tokenReader(list, token.COMMA)...)
 	ts = append(ts, list...)
 	return tokenReader(ts, token.RBRACE)
+}
+
+func LiteralValueState(ss []State) []State {
+	ss = tokenParserState(ss, token.LBRACE)
+
+	if len(ss) == 0 {
+		return nil
+	}
+
+	list := ElementListState(ss)
+	list = append(list, tokenParserState(list, token.COMMA)...)
+	ss = append(ss, list...)
+	ss = tokenReaderState(ss, token.RBRACE)
+
+	for i, s := range ss {
+		var lv literalValue
+
+		if tok, ok := s.r[len(s.r)-1].(*Token); ok && tok.tok == token.COMMA {
+			lv.comma = true
+			s.r = s.r[:len(s.r)-1]
+		}
+		if tok, ok := s.r[len(s.r)-1].(*Token); ok && tok.tok == token.LBRACE {
+			ss[i].r = rAppend(s.r, 1, lv)
+		} else {
+			lv.elementList = s.r[len(s.r)-1]
+			ss[i].r = rAppend(s.r, 2, lv)
+		}
+	}
+
+	return ss
+}
+
+type literalValue struct {
+	elementList Renderer
+	comma       bool
+}
+
+func (l literalValue) Render() []byte {
+	ret := []byte(`{`)
+	if l.elementList != nil {
+		ret = append(ret, l.elementList.Render()...)
+		if l.comma {
+			ret = append(ret, `,`...)
+		}
+	}
+	return append(ret, `}`...)
 }
 
 func MapType(ss []State) []State {
