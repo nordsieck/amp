@@ -1639,6 +1639,23 @@ func SendStmt(ts [][]*Token) [][]*Token {
 	return Expression(ts)
 }
 
+func SendStmtState(ss []State) []State {
+	ss = ExpressionState(ss)
+	ss = tokenReaderState(ss, token.ARROW)
+	ss = ExpressionState(ss)
+	for i, s := range ss {
+		snd := sendStmt{s.r[len(s.r)-2], s.r[len(s.r)-1]}
+		ss[i].r = rAppend(s.r, 2, snd)
+	}
+	return ss
+}
+
+type sendStmt struct{ channel, expression Renderer }
+
+func (ss sendStmt) Render() []byte {
+	return append(append(ss.channel.Render(), `<-`...), ss.expression.Render()...)
+}
+
 func ShortVarDecl(ts [][]*Token) [][]*Token {
 	ts = fromState(IdentifierList(toState(ts)))
 	ts = tokenReader(ts, token.DEFINE)

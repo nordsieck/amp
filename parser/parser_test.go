@@ -1047,6 +1047,10 @@ func TestSendStmt(t *testing.T) {
 	remaining(t, SendStmt, Tmap{`a <- 1`: {{ret}}})
 }
 
+func TestSendStmtState(t *testing.T) {
+	resultState(t, SendStmtState, map[string][]StateOutput{`a<-1`: {min(`a<-1`)}})
+}
+
 func TestShortVarDecl(t *testing.T) {
 	remaining(t, ShortVarDecl, Tmap{
 		`a := 1`:       {{ret}},
