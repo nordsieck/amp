@@ -334,6 +334,10 @@ func TestEmptyStmt(t *testing.T) {
 	remaining(t, EmptyStmt, Tmap{`1`: {{ret, one}}})
 }
 
+func TestEmptyStmtState(t *testing.T) {
+	resultState(t, EmptyStmtState, map[string][]StateOutput{`1`: {{[]string{``}, []*Token{ret, one}}}})
+}
+
 func TestExprCaseClause(t *testing.T) {
 	remaining(t, ExprCaseClause, Tmap{
 		`default: a()`: {{ret, rparen, lparen, a}, {ret, rparen, lparen}, {ret}, {}},

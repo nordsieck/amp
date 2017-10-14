@@ -456,6 +456,8 @@ func (e ellipsisArrayType) Render() []byte { return append([]byte(`[...]`), e.r.
 
 func EmptyStmt(ts [][]*Token) [][]*Token { return ts }
 
+func EmptyStmtState(ss []State) []State { return ss }
+
 func ExprCaseClause(ts [][]*Token) [][]*Token {
 	ts = ExprSwitchCase(ts)
 	ts = tokenReader(ts, token.COLON)
@@ -926,6 +928,7 @@ func Literal(ts [][]*Token) [][]*Token {
 	return append(append(basicLit, CompositeLit(ts)...), FunctionLit(ts)...)
 }
 
+// TODO: complete
 func LiteralState(ss []State) []State {
 	return BasicLit(ss)
 	// CompositeLit
