@@ -408,9 +408,37 @@ func Expression(ts [][]*Token) [][]*Token {
 }
 
 func ExpressionState(ss []State) []State {
-	ss = UnaryExprState(ss)
-	// Expression binary_op Expression
-	return ss
+	if len(ss) == 0 {
+		return nil
+	}
+
+	base := UnaryExprState(ss)
+	comp := BinaryOp(base)
+	comp = ExpressionState(comp)
+
+	for i, b := range base {
+		expr := expression{b.r[len(b.r)-1]}
+		base[i].r = rAppend(b.r, 1, expr)
+
+	}
+
+	for i, c := range comp {
+		expr := expression{c.r[len(c.r)-3], c.r[len(c.r)-2], c.r[len(c.r)-1]}
+		comp[i].r = rAppend(c.r, 3, expr)
+	}
+
+	return append(base, comp...)
+}
+
+// either 1 or 3 long
+type expression []Renderer
+
+func (e expression) Render() []byte {
+	var ret []byte
+	for _, elem := range e {
+		ret = append(ret, elem.Render()...)
+	}
+	return ret
 }
 
 func ExpressionList(ts [][]*Token) [][]*Token {
@@ -1222,18 +1250,25 @@ func PrimaryExprState(ss []State) []State {
 				// get the root level operand
 				add := false
 				for op.parens {
-					if ue, ok := op.r.(unaryExpr); ok && len(ue) == 1 {
-						if pe, ok := ue[0].(primaryExpr); ok && len(pe) == 1 {
-							if op, ok = pe[0].(operand); !ok {
-								add = true
-								break
-							}
-						} else {
-							add = true
-							break
-						}
+					expr, ok := op.r.(expression)
+					if !ok || len(expr) != 1 {
+						add = true
+						break
+					}
 
-					} else {
+					ue, ok := expr[0].(unaryExpr)
+					if !ok || len(ue) != 1 {
+						add = true
+						break
+					}
+
+					pe, ok := ue[0].(primaryExpr)
+					if !ok || len(pe) != 1 {
+						add = true
+						break
+					}
+
+					if op, ok = pe[0].(operand); !ok {
 						add = true
 						break
 					}

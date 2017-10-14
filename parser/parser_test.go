@@ -320,10 +320,15 @@ func TestExpression(t *testing.T) {
 
 func TestExpressionState(t *testing.T) {
 	resultState(t, ExpressionState, map[string][]StateOutput{
-		`1`: {{[]string{``, `1`}, []*Token{ret}}},
-		// `1+1`
-		// `1+-1`
+		`1`:    {{[]string{``, `1`}, []*Token{ret}}},
+		`1+1`:  {{[]string{``, `1`}, []*Token{ret, one, {tok: token.ADD}}}, min(`1+1`)},
+		`1+-1`: {{[]string{``, `1`}, []*Token{ret, one, {tok: token.SUB}, {tok: token.ADD}}}, min(`1+-1`)},
 	})
+}
+
+func TestExpression_Render(t *testing.T) {
+	defect.Equal(t, string(expression{a}.Render()), `a`)
+	defect.Equal(t, string(expression{a, &Token{tok: token.ADD}, b}.Render()), `a+b`)
 }
 
 func TestExpressionList(t *testing.T) {
