@@ -252,6 +252,21 @@ func CompositeLit(ts [][]*Token) [][]*Token {
 	return LiteralValue(ts)
 }
 
+func CompositeLitState(ss []State) []State {
+	ss = LiteralType(ss)
+	ss = LiteralValueState(ss)
+
+	for i, s := range ss {
+		cl := compositeLit{s.r[len(s.r)-2], s.r[len(s.r)-1]}
+		ss[i].r = rAppend(s.r, 2, cl)
+	}
+	return ss
+}
+
+type compositeLit struct{ typ, val Renderer }
+
+func (cl compositeLit) Render() []byte { return append(cl.typ.Render(), cl.val.Render()...) }
+
 // bad spec
 // "const" ( ConstSpec | "(" [ ConstSpec { ";" ConstSpec } [ ";" ]] ")" )
 func ConstDecl(ts [][]*Token) [][]*Token {

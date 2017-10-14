@@ -190,6 +190,13 @@ func TestCompositeLit(t *testing.T) {
 	})
 }
 
+func TestCompositeLitState(t *testing.T) {
+	resultState(t, CompositeLitState, map[string][]StateOutput{
+		`a{1}`: {min(`a{1}`)},
+		`a{foo:"bar",baz:"quux",}`: {min(`a{foo:"bar",baz:"quux",}`)},
+	})
+}
+
 func TestCommCase(t *testing.T) {
 	remaining(t, CommCase, Tmap{
 		`default`:   {{}},
