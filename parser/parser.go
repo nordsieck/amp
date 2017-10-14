@@ -313,10 +313,26 @@ func ConversionState(ss []State) []State {
 		}
 		c.expr = s.r[len(s.r)-1]
 		c.typ = s.r[len(s.r)-2]
-		ss[i].r = rAppend(s.r, 2, c)
+
+		typ := c.typ.(typ)
+		_, ok := typ.r.(*Token)
+		tok := ok
+		_, ok = typ.r.(qualifiedIdent)
+		qi := ok
+		parens := typ.parens == 0
+
+		if parens && (tok || qi) {
+			ss[i].r = rAppend(s.r, 2, conversionOrArgument{c})
+		} else {
+			ss[i].r = rAppend(s.r, 2, c)
+		}
 	}
 	return ss
 }
+
+type conversionOrArgument struct{ r Renderer }
+
+func (c conversionOrArgument) Render() []byte { return c.r.Render() }
 
 type conversion struct {
 	typ, expr Renderer
