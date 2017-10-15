@@ -32,31 +32,32 @@ type StateOutput struct {
 }
 
 var (
-	empty  = [][]*Token(nil)
-	ret    = &Token{token.SEMICOLON, "\n"}
-	semi   = &Token{token.SEMICOLON, `;`}
-	a      = &Token{token.IDENT, `a`}
-	b      = &Token{token.IDENT, `b`}
-	c      = &Token{token.IDENT, `c`}
-	d      = &Token{token.IDENT, `d`}
+	empty = [][]*Token(nil)
+
+	_else  = &Token{token.ELSE, `else`}
+	_if    = &Token{token.IF, `if`}
 	_int   = &Token{token.IDENT, `int`}
-	zero   = &Token{token.INT, `0`}
-	one    = &Token{token.INT, `1`}
-	two    = &Token{token.INT, `2`}
-	dot    = &Token{tok: token.PERIOD}
-	comma  = &Token{tok: token.COMMA}
-	colon  = &Token{tok: token.COLON}
+	a      = &Token{token.IDENT, `a`}
 	add    = &Token{tok: token.ADD}
 	arrow  = &Token{tok: token.ARROW}
-	_if    = &Token{token.IF, `if`}
-	_else  = &Token{token.ELSE, `else`}
+	b      = &Token{token.IDENT, `b`}
+	c      = &Token{token.IDENT, `c`}
+	colon  = &Token{tok: token.COLON}
+	comma  = &Token{tok: token.COMMA}
+	d      = &Token{token.IDENT, `d`}
+	dot    = &Token{tok: token.PERIOD}
 	inc    = &Token{tok: token.INC}
-	lparen = &Token{tok: token.LPAREN}
-	rparen = &Token{tok: token.RPAREN}
 	lbrace = &Token{tok: token.LBRACE}
-	rbrace = &Token{tok: token.RBRACE}
 	lbrack = &Token{tok: token.LBRACK}
+	lparen = &Token{tok: token.LPAREN}
+	one    = &Token{token.INT, `1`}
+	rbrace = &Token{tok: token.RBRACE}
 	rbrack = &Token{tok: token.RBRACK}
+	ret    = &Token{token.SEMICOLON, "\n"}
+	rparen = &Token{tok: token.RPAREN}
+	semi   = &Token{token.SEMICOLON, `;`}
+	two    = &Token{token.INT, `2`}
+	zero   = &Token{token.INT, `0`}
 )
 
 func TestAddOp(t *testing.T) {
