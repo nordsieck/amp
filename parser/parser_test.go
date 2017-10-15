@@ -305,11 +305,11 @@ func TestElementState(t *testing.T) {
 
 func TestElementList(t *testing.T) {
 	remaining(t, ElementList, Tmap{
-		`1:1`: {{ret, one, {tok: token.COLON}}, {ret}},
+		`1:1`: {{ret, one, colon}, {ret}},
 		`1:1, 1:1`: {
-			{ret, one, {tok: token.COLON}, one, comma, one, {tok: token.COLON}},
-			{ret, one, {tok: token.COLON}, one, comma},
-			{ret, one, {tok: token.COLON}}, {ret}},
+			{ret, one, colon, one, comma, one, colon},
+			{ret, one, colon, one, comma},
+			{ret, one, colon}, {ret}},
 	})
 }
 
@@ -620,7 +620,7 @@ func TestKeyState(t *testing.T) {
 func TestKeyedElement(t *testing.T) {
 	remaining(t, KeyedElement, Tmap{
 		`1`:   {{ret}},
-		`1:1`: {{ret, one, {tok: token.COLON}}, {ret}},
+		`1:1`: {{ret, one, colon}, {ret}},
 	})
 }
 
@@ -912,13 +912,13 @@ func TestPrimaryExpr(t *testing.T) {
 			{ret}, {ret}, {ret}, {ret}},
 		`a.a`:     {{ret, a, dot}, {ret}, {ret}, {ret}},
 		`a[1]`:    {{ret, {tok: token.RBRACK}, one, {tok: token.LBRACK}}, {ret}},
-		`a[:]`:    {{ret, {tok: token.RBRACK}, {tok: token.COLON}, {tok: token.LBRACK}}, {ret}},
+		`a[:]`:    {{ret, {tok: token.RBRACK}, colon, {tok: token.LBRACK}}, {ret}},
 		`a.(int)`: {{ret, rparen, _int, lparen, dot}, {ret}},
 		`a(b...)`: {{ret, rparen, {tok: token.ELLIPSIS}, b, lparen}, {ret}},
 		`a(b...)[:]`: {
-			{ret, {tok: token.RBRACK}, {tok: token.COLON}, {tok: token.LBRACK},
+			{ret, {tok: token.RBRACK}, colon, {tok: token.LBRACK},
 				rparen, {tok: token.ELLIPSIS}, b, lparen},
-			{ret, {tok: token.RBRACK}, {tok: token.COLON}, {tok: token.LBRACK}},
+			{ret, {tok: token.RBRACK}, colon, {tok: token.LBRACK}},
 			{ret}},
 	})
 }
@@ -1155,8 +1155,8 @@ func TestStatement(t *testing.T) {
 		`var a int`: {{ret}, {ret, _int, a, {token.VAR, `var`}}},
 		`a: var b int`: {{ret},
 			{ret, _int, b, {token.VAR, `var`}},
-			{ret, _int, b, {token.VAR, `var`}, {tok: token.COLON}, a},
-			{ret, _int, b, {token.VAR, `var`}, {tok: token.COLON}}},
+			{ret, _int, b, {token.VAR, `var`}, colon, a},
+			{ret, _int, b, {token.VAR, `var`}, colon}},
 		`a := 1`:      {{ret, one, {tok: token.DEFINE}, a}, {ret, one, {tok: token.DEFINE}}, {ret}},
 		`go a()`:      {{ret, rparen, lparen, a, {token.GO, `go`}}, {ret, rparen, lparen}, {ret}},
 		`return 1`:    {{ret, one, {token.RETURN, `return`}}, {ret, one}, {ret}},
