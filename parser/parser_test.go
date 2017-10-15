@@ -46,6 +46,8 @@ var (
 	dot    = &Token{tok: token.PERIOD}
 	comma  = &Token{tok: token.COMMA}
 	colon  = &Token{tok: token.COLON}
+	add    = &Token{tok: token.ADD}
+	arrow  = &Token{tok: token.ARROW}
 	_if    = &Token{token.IF, `if`}
 	_else  = &Token{token.ELSE, `else`}
 	inc    = &Token{tok: token.INC}
@@ -205,7 +207,7 @@ func TestCommCase(t *testing.T) {
 	remaining(t, CommCase, Tmap{
 		`default`:   {{}},
 		`case <-a`:  {{ret}},
-		`case a<-5`: {{ret}, {ret, {token.INT, `5`}, {tok: token.ARROW}}},
+		`case a<-5`: {{ret}, {ret, {token.INT, `5`}, arrow}},
 	})
 }
 
@@ -288,14 +290,14 @@ func TestDeferStmt(t *testing.T) {
 
 func TestElement(t *testing.T) {
 	remaining(t, Element, Tmap{
-		`1+1`:   {{ret, one, {tok: token.ADD}}, {ret}},
+		`1+1`:   {{ret, one, add}, {ret}},
 		`{1+1}`: {{ret}},
 	})
 }
 
 func TestElementState(t *testing.T) {
 	resultState(t, ElementState, map[string][]StateOutput{
-		`1+1`:   {{[]string{``, `1`}, []*Token{ret, one, {tok: token.ADD}}}, min(`1+1`)},
+		`1+1`:   {{[]string{``, `1`}, []*Token{ret, one, add}}, min(`1+1`)},
 		`{1+1}`: {min(`{1+1}`)},
 	})
 }
@@ -351,22 +353,22 @@ func TestExprCaseClause(t *testing.T) {
 func TestExpression(t *testing.T) {
 	remaining(t, Expression, Tmap{
 		`1`:    {{ret}},
-		`1+1`:  {{ret, one, {tok: token.ADD}}, {ret}},
-		`1+-1`: {{ret, one, {tok: token.SUB}, {tok: token.ADD}}, {ret}},
+		`1+1`:  {{ret, one, add}, {ret}},
+		`1+-1`: {{ret, one, {tok: token.SUB}, add}, {ret}},
 	})
 }
 
 func TestExpressionState(t *testing.T) {
 	resultState(t, ExpressionState, map[string][]StateOutput{
 		`1`:    {{[]string{``, `1`}, []*Token{ret}}},
-		`1+1`:  {{[]string{``, `1`}, []*Token{ret, one, {tok: token.ADD}}}, min(`1+1`)},
-		`1+-1`: {{[]string{``, `1`}, []*Token{ret, one, {tok: token.SUB}, {tok: token.ADD}}}, min(`1+-1`)},
+		`1+1`:  {{[]string{``, `1`}, []*Token{ret, one, add}}, min(`1+1`)},
+		`1+-1`: {{[]string{``, `1`}, []*Token{ret, one, {tok: token.SUB}, add}}, min(`1+-1`)},
 	})
 }
 
 func TestExpression_Render(t *testing.T) {
 	defect.Equal(t, string(expression{a}.Render()), `a`)
-	defect.Equal(t, string(expression{a, &Token{tok: token.ADD}, b}.Render()), `a+b`)
+	defect.Equal(t, string(expression{a, add, b}.Render()), `a+b`)
 }
 
 func TestExpressionList(t *testing.T) {
@@ -599,7 +601,7 @@ func TestInterfaceType_Render(t *testing.T) {
 func TestKey(t *testing.T) {
 	remaining(t, Key, Tmap{
 		`a`:     {{ret}, {ret}},
-		`1+a`:   {{ret, a, {tok: token.ADD}}, {ret}},
+		`1+a`:   {{ret, a, add}, {ret}},
 		`"foo"`: {{ret}},
 		`{a}`:   {{ret}},
 	})
@@ -608,7 +610,7 @@ func TestKey(t *testing.T) {
 func TestKeyState(t *testing.T) {
 	resultState(t, KeyState, map[string][]StateOutput{
 		`a`:     {{[]string{``, `a`}, []*Token{ret}}},
-		`1+a`:   {{[]string{``, `1`}, []*Token{ret, a, {tok: token.ADD}}}, min(`1+a`)},
+		`1+a`:   {{[]string{``, `1`}, []*Token{ret, a, add}}, min(`1+a`)},
 		`"foo"`: {min(`"foo"`)},
 		`{a}`:   {min(`{a}`)},
 	})
@@ -995,13 +997,13 @@ func TestReceiverType_Render(t *testing.T) {
 func TestRecvStmt(t *testing.T) {
 	remaining(t, RecvStmt, Tmap{
 		`<-a`: {{ret}},
-		`a[0], b = <-c`: {{ret, c, {tok: token.ARROW}, {tok: token.ASSIGN}, b, comma,
+		`a[0], b = <-c`: {{ret, c, arrow, {tok: token.ASSIGN}, b, comma,
 			{tok: token.RBRACK}, zero, {tok: token.LBRACK}},
-			{ret, c, {tok: token.ARROW}, {tok: token.ASSIGN}, b, comma}, {ret}},
-		`a, b := <-c`: {{ret, c, {tok: token.ARROW}, {tok: token.DEFINE}, b, comma}, {ret}},
-		`a[0], b := <-c`: {{ret, c, {tok: token.ARROW}, {tok: token.DEFINE}, b, comma,
+			{ret, c, arrow, {tok: token.ASSIGN}, b, comma}, {ret}},
+		`a, b := <-c`: {{ret, c, arrow, {tok: token.DEFINE}, b, comma}, {ret}},
+		`a[0], b := <-c`: {{ret, c, arrow, {tok: token.DEFINE}, b, comma,
 			{tok: token.RBRACK}, zero, {tok: token.LBRACK}},
-			{ret, c, {tok: token.ARROW}, {tok: token.DEFINE}, b, comma}},
+			{ret, c, arrow, {tok: token.DEFINE}, b, comma}},
 	})
 }
 
@@ -1095,7 +1097,7 @@ func TestSignature_Render(t *testing.T) {
 func TestSimpleStmt(t *testing.T) {
 	remaining(t, SimpleStmt, Tmap{
 		`1`:      {{ret, one}, {ret}},
-		`a <- 1`: {{ret, one, {tok: token.ARROW}, a}, {ret, one, {tok: token.ARROW}}, {ret}},
+		`a <- 1`: {{ret, one, arrow, a}, {ret, one, arrow}, {ret}},
 		`a++`:    {{ret, inc, a}, {ret, inc}, {ret}},
 		`a = 1`:  {{ret, one, {tok: token.ASSIGN}, a}, {ret, one, {tok: token.ASSIGN}}, {ret}},
 		`a := 1`: {{ret, one, {tok: token.DEFINE}, a}, {ret, one, {tok: token.DEFINE}}, {ret}},
@@ -1342,7 +1344,7 @@ func TestUnaryExprState(t *testing.T) {
 }
 
 func TestUnaryExpr_Render(t *testing.T) {
-	defect.Equal(t, string(unaryExpr{a, &Token{tok: token.ADD}, &Token{tok: token.ARROW}}.Render()), `<-+a`)
+	defect.Equal(t, string(unaryExpr{a, add, arrow}.Render()), `<-+a`)
 }
 
 func TestUnaryOp(t *testing.T) {
