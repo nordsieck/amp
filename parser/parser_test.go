@@ -34,33 +34,34 @@ type StateOutput struct {
 var (
 	empty = [][]*Token(nil)
 
-	_else    = &Token{token.ELSE, `else`}
-	_if      = &Token{token.IF, `if`}
-	_int     = &Token{token.IDENT, `int`}
-	a        = &Token{token.IDENT, `a`}
-	add      = &Token{tok: token.ADD}
-	arrow    = &Token{tok: token.ARROW}
-	assign   = &Token{tok: token.ASSIGN}
-	b        = &Token{token.IDENT, `b`}
-	c        = &Token{token.IDENT, `c`}
-	colon    = &Token{tok: token.COLON}
-	comma    = &Token{tok: token.COMMA}
-	d        = &Token{token.IDENT, `d`}
-	define   = &Token{tok: token.DEFINE}
-	dot      = &Token{tok: token.PERIOD}
-	ellipsis = &Token{tok: token.ELLIPSIS}
-	inc      = &Token{tok: token.INC}
-	lbrace   = &Token{tok: token.LBRACE}
-	lbrack   = &Token{tok: token.LBRACK}
-	lparen   = &Token{tok: token.LPAREN}
-	one      = &Token{token.INT, `1`}
-	rbrace   = &Token{tok: token.RBRACE}
-	rbrack   = &Token{tok: token.RBRACK}
-	ret      = &Token{token.SEMICOLON, "\n"}
-	rparen   = &Token{tok: token.RPAREN}
-	semi     = &Token{token.SEMICOLON, `;`}
-	two      = &Token{token.INT, `2`}
-	zero     = &Token{token.INT, `0`}
+	_else        = &Token{token.ELSE, `else`}
+	_fallthrough = &Token{token.FALLTHROUGH, `fallthrough`}
+	_if          = &Token{token.IF, `if`}
+	_int         = &Token{token.IDENT, `int`}
+	a            = &Token{token.IDENT, `a`}
+	add          = &Token{tok: token.ADD}
+	arrow        = &Token{tok: token.ARROW}
+	assign       = &Token{tok: token.ASSIGN}
+	b            = &Token{token.IDENT, `b`}
+	c            = &Token{token.IDENT, `c`}
+	colon        = &Token{tok: token.COLON}
+	comma        = &Token{tok: token.COMMA}
+	d            = &Token{token.IDENT, `d`}
+	define       = &Token{tok: token.DEFINE}
+	dot          = &Token{tok: token.PERIOD}
+	ellipsis     = &Token{tok: token.ELLIPSIS}
+	inc          = &Token{tok: token.INC}
+	lbrace       = &Token{tok: token.LBRACE}
+	lbrack       = &Token{tok: token.LBRACK}
+	lparen       = &Token{tok: token.LPAREN}
+	one          = &Token{token.INT, `1`}
+	rbrace       = &Token{tok: token.RBRACE}
+	rbrack       = &Token{tok: token.RBRACK}
+	ret          = &Token{token.SEMICOLON, "\n"}
+	rparen       = &Token{tok: token.RPAREN}
+	semi         = &Token{token.SEMICOLON, `;`}
+	two          = &Token{token.INT, `2`}
+	zero         = &Token{token.INT, `0`}
 )
 
 func TestAddOp(t *testing.T) {
@@ -1162,7 +1163,7 @@ func TestStatement(t *testing.T) {
 		`break a`:     {{ret, a, {token.BREAK, `break`}}, {ret, a}, {ret}},
 		`continue a`:  {{ret, a, {token.CONTINUE, `continue`}}, {ret, a}, {ret}},
 		`goto a`:      {{ret, a, {token.GOTO, `goto`}}, {ret}},
-		`fallthrough`: {{ret, {token.FALLTHROUGH, `fallthrough`}}, {ret}},
+		`fallthrough`: {{ret, _fallthrough}, {ret}},
 		`{a()}`:       {{ret, rbrace, rparen, lparen, a, lbrace}, {ret}},
 		`if a {}`:     {{ret, rbrace, lbrace, a, _if}, {ret}},
 		`switch {}`:   {{ret, rbrace, lbrace, {token.SWITCH, `switch`}}, {ret}},
@@ -1174,11 +1175,9 @@ func TestStatement(t *testing.T) {
 
 func TestStatementList(t *testing.T) {
 	remaining(t, StatementList, Tmap{
-		`fallthrough`:  {{ret, {token.FALLTHROUGH, `fallthrough`}}, {ret}, {}},
-		`fallthrough;`: {{semi, {token.FALLTHROUGH, `fallthrough`}}, {semi}, {}},
-		`fallthrough; fallthrough`: {{ret, {token.FALLTHROUGH, `fallthrough`}, semi, {token.FALLTHROUGH, `fallthrough`}},
-			{ret, {token.FALLTHROUGH, `fallthrough`}, semi},
-			{ret, {token.FALLTHROUGH, `fallthrough`}}, {ret}, {}},
+		`fallthrough`:              {{ret, _fallthrough}, {ret}, {}},
+		`fallthrough;`:             {{semi, _fallthrough}, {semi}, {}},
+		`fallthrough; fallthrough`: {{ret, _fallthrough, semi, _fallthrough}, {ret, _fallthrough, semi}, {ret, _fallthrough}, {ret}, {}},
 	})
 }
 
@@ -1196,8 +1195,8 @@ func TestStructType(t *testing.T) {
 }
 
 func TestStructType_Render(t *testing.T) {
-	defect.Equal(t, string(structType{&Token{tok: token.FALLTHROUGH}}.Render()), `struct{fallthrough;}`)
-	defect.Equal(t, string(structType{&Token{tok: token.FALLTHROUGH}, &Token{tok: token.FALLTHROUGH}}.Render()), `struct{fallthrough;fallthrough;}`)
+	defect.Equal(t, string(structType{_fallthrough}.Render()), `struct{fallthrough;}`)
+	defect.Equal(t, string(structType{_fallthrough, _fallthrough}.Render()), `struct{fallthrough;fallthrough;}`)
 }
 
 func TestSwitchStmt(t *testing.T) {
