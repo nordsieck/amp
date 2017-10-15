@@ -40,6 +40,7 @@ var (
 	a      = &Token{token.IDENT, `a`}
 	add    = &Token{tok: token.ADD}
 	arrow  = &Token{tok: token.ARROW}
+	assign = &Token{tok: token.ASSIGN}
 	b      = &Token{token.IDENT, `b`}
 	c      = &Token{token.IDENT, `c`}
 	colon  = &Token{tok: token.COLON}
@@ -996,8 +997,8 @@ func TestReceiverType_Render(t *testing.T) {
 func TestRecvStmt(t *testing.T) {
 	remaining(t, RecvStmt, Tmap{
 		`<-a`: {{ret}},
-		`a[0], b = <-c`: {{ret, c, arrow, {tok: token.ASSIGN}, b, comma, rbrack, zero, lbrack},
-			{ret, c, arrow, {tok: token.ASSIGN}, b, comma}, {ret}},
+		`a[0], b = <-c`: {{ret, c, arrow, assign, b, comma, rbrack, zero, lbrack},
+			{ret, c, arrow, assign, b, comma}, {ret}},
 		`a, b := <-c`: {{ret, c, arrow, {tok: token.DEFINE}, b, comma}, {ret}},
 		`a[0], b := <-c`: {{ret, c, arrow, {tok: token.DEFINE}, b, comma, rbrack, zero, lbrack},
 			{ret, c, arrow, {tok: token.DEFINE}, b, comma}},
@@ -1096,7 +1097,7 @@ func TestSimpleStmt(t *testing.T) {
 		`1`:      {{ret, one}, {ret}},
 		`a <- 1`: {{ret, one, arrow, a}, {ret, one, arrow}, {ret}},
 		`a++`:    {{ret, inc, a}, {ret, inc}, {ret}},
-		`a = 1`:  {{ret, one, {tok: token.ASSIGN}, a}, {ret, one, {tok: token.ASSIGN}}, {ret}},
+		`a = 1`:  {{ret, one, assign, a}, {ret, one, assign}, {ret}},
 		`a := 1`: {{ret, one, {tok: token.DEFINE}, a}, {ret, one, {tok: token.DEFINE}}, {ret}},
 	})
 }
@@ -1370,7 +1371,7 @@ func TestVarDecl(t *testing.T) {
 func TestVarSpec(t *testing.T) {
 	remaining(t, VarSpec, Tmap{
 		`a int`:       {{ret}},
-		`a int = 1`:   {{ret, one, {tok: token.ASSIGN}}, {ret}},
+		`a int = 1`:   {{ret, one, assign}, {ret}},
 		`a = 1`:       {{ret}},
 		`a, b = 1, 2`: {{ret, two, comma}, {ret}},
 	})
