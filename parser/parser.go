@@ -477,6 +477,7 @@ func (e ellipsisArrayType) Render() []byte { return append([]byte(`[...]`), e.r.
 
 func EmptyStmt(ts [][]*Token) [][]*Token { return ts }
 
+// TODO: figure out a way to minimize the use of EmptyStmt
 func EmptyStmtState(ss []State) []State { return ss }
 
 func ExprCaseClause(ts [][]*Token) [][]*Token {
@@ -1759,6 +1760,13 @@ func SimpleStmt(ts [][]*Token) [][]*Token {
 		append(append(EmptyStmt(ts), ExpressionStmt(ts)...),
 			append(SendStmt(ts), IncDecStmt(ts)...)...),
 		append(Assignment(ts), ShortVarDecl(ts)...)...)
+}
+
+func SimpleStmtState(ss []State) []State {
+	return append(
+		append(append(EmptyStmtState(ss), ExpressionStmtState(ss)...),
+			append(SendStmtState(ss), IncDecStmtState(ss)...)...),
+		append(AssignmentState(ss), ShortVarDeclState(ss)...)...)
 }
 
 func Slice(ss []State) []State {
