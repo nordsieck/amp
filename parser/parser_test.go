@@ -911,14 +911,12 @@ func TestPrimaryExpr(t *testing.T) {
 			{ret, rparen, {token.STRING, `"foo"`}, lparen},
 			{ret}, {ret}, {ret}, {ret}},
 		`a.a`:     {{ret, a, dot}, {ret}, {ret}, {ret}},
-		`a[1]`:    {{ret, {tok: token.RBRACK}, one, {tok: token.LBRACK}}, {ret}},
-		`a[:]`:    {{ret, {tok: token.RBRACK}, colon, {tok: token.LBRACK}}, {ret}},
+		`a[1]`:    {{ret, rbrack, one, lbrack}, {ret}},
+		`a[:]`:    {{ret, rbrack, colon, lbrack}, {ret}},
 		`a.(int)`: {{ret, rparen, _int, lparen, dot}, {ret}},
 		`a(b...)`: {{ret, rparen, {tok: token.ELLIPSIS}, b, lparen}, {ret}},
-		`a(b...)[:]`: {
-			{ret, {tok: token.RBRACK}, colon, {tok: token.LBRACK},
-				rparen, {tok: token.ELLIPSIS}, b, lparen},
-			{ret, {tok: token.RBRACK}, colon, {tok: token.LBRACK}},
+		`a(b...)[:]`: {{ret, rbrack, colon, lbrack, rparen, {tok: token.ELLIPSIS}, b, lparen},
+			{ret, rbrack, colon, lbrack},
 			{ret}},
 	})
 }
@@ -998,12 +996,10 @@ func TestReceiverType_Render(t *testing.T) {
 func TestRecvStmt(t *testing.T) {
 	remaining(t, RecvStmt, Tmap{
 		`<-a`: {{ret}},
-		`a[0], b = <-c`: {{ret, c, arrow, {tok: token.ASSIGN}, b, comma,
-			{tok: token.RBRACK}, zero, {tok: token.LBRACK}},
+		`a[0], b = <-c`: {{ret, c, arrow, {tok: token.ASSIGN}, b, comma, rbrack, zero, lbrack},
 			{ret, c, arrow, {tok: token.ASSIGN}, b, comma}, {ret}},
 		`a, b := <-c`: {{ret, c, arrow, {tok: token.DEFINE}, b, comma}, {ret}},
-		`a[0], b := <-c`: {{ret, c, arrow, {tok: token.DEFINE}, b, comma,
-			{tok: token.RBRACK}, zero, {tok: token.LBRACK}},
+		`a[0], b := <-c`: {{ret, c, arrow, {tok: token.DEFINE}, b, comma, rbrack, zero, lbrack},
 			{ret, c, arrow, {tok: token.DEFINE}, b, comma}},
 	})
 }
