@@ -46,6 +46,7 @@ var (
 	colon  = &Token{tok: token.COLON}
 	comma  = &Token{tok: token.COMMA}
 	d      = &Token{token.IDENT, `d`}
+	define = &Token{tok: token.DEFINE}
 	dot    = &Token{tok: token.PERIOD}
 	inc    = &Token{tok: token.INC}
 	lbrace = &Token{tok: token.LBRACE}
@@ -999,9 +1000,9 @@ func TestRecvStmt(t *testing.T) {
 		`<-a`: {{ret}},
 		`a[0], b = <-c`: {{ret, c, arrow, assign, b, comma, rbrack, zero, lbrack},
 			{ret, c, arrow, assign, b, comma}, {ret}},
-		`a, b := <-c`: {{ret, c, arrow, {tok: token.DEFINE}, b, comma}, {ret}},
-		`a[0], b := <-c`: {{ret, c, arrow, {tok: token.DEFINE}, b, comma, rbrack, zero, lbrack},
-			{ret, c, arrow, {tok: token.DEFINE}, b, comma}},
+		`a, b := <-c`: {{ret, c, arrow, define, b, comma}, {ret}},
+		`a[0], b := <-c`: {{ret, c, arrow, define, b, comma, rbrack, zero, lbrack},
+			{ret, c, arrow, define, b, comma}},
 	})
 }
 
@@ -1098,7 +1099,7 @@ func TestSimpleStmt(t *testing.T) {
 		`a <- 1`: {{ret, one, arrow, a}, {ret, one, arrow}, {ret}},
 		`a++`:    {{ret, inc, a}, {ret, inc}, {ret}},
 		`a = 1`:  {{ret, one, assign, a}, {ret, one, assign}, {ret}},
-		`a := 1`: {{ret, one, {tok: token.DEFINE}, a}, {ret, one, {tok: token.DEFINE}}, {ret}},
+		`a := 1`: {{ret, one, define, a}, {ret, one, define}, {ret}},
 	})
 }
 
@@ -1154,7 +1155,7 @@ func TestStatement(t *testing.T) {
 			{ret, _int, b, {token.VAR, `var`}},
 			{ret, _int, b, {token.VAR, `var`}, colon, a},
 			{ret, _int, b, {token.VAR, `var`}, colon}},
-		`a := 1`:      {{ret, one, {tok: token.DEFINE}, a}, {ret, one, {tok: token.DEFINE}}, {ret}},
+		`a := 1`:      {{ret, one, define, a}, {ret, one, define}, {ret}},
 		`go a()`:      {{ret, rparen, lparen, a, {token.GO, `go`}}, {ret, rparen, lparen}, {ret}},
 		`return 1`:    {{ret, one, {token.RETURN, `return`}}, {ret, one}, {ret}},
 		`break a`:     {{ret, a, {token.BREAK, `break`}}, {ret, a}, {ret}},
