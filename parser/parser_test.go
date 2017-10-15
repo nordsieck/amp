@@ -34,32 +34,33 @@ type StateOutput struct {
 var (
 	empty = [][]*Token(nil)
 
-	_else  = &Token{token.ELSE, `else`}
-	_if    = &Token{token.IF, `if`}
-	_int   = &Token{token.IDENT, `int`}
-	a      = &Token{token.IDENT, `a`}
-	add    = &Token{tok: token.ADD}
-	arrow  = &Token{tok: token.ARROW}
-	assign = &Token{tok: token.ASSIGN}
-	b      = &Token{token.IDENT, `b`}
-	c      = &Token{token.IDENT, `c`}
-	colon  = &Token{tok: token.COLON}
-	comma  = &Token{tok: token.COMMA}
-	d      = &Token{token.IDENT, `d`}
-	define = &Token{tok: token.DEFINE}
-	dot    = &Token{tok: token.PERIOD}
-	inc    = &Token{tok: token.INC}
-	lbrace = &Token{tok: token.LBRACE}
-	lbrack = &Token{tok: token.LBRACK}
-	lparen = &Token{tok: token.LPAREN}
-	one    = &Token{token.INT, `1`}
-	rbrace = &Token{tok: token.RBRACE}
-	rbrack = &Token{tok: token.RBRACK}
-	ret    = &Token{token.SEMICOLON, "\n"}
-	rparen = &Token{tok: token.RPAREN}
-	semi   = &Token{token.SEMICOLON, `;`}
-	two    = &Token{token.INT, `2`}
-	zero   = &Token{token.INT, `0`}
+	_else    = &Token{token.ELSE, `else`}
+	_if      = &Token{token.IF, `if`}
+	_int     = &Token{token.IDENT, `int`}
+	a        = &Token{token.IDENT, `a`}
+	add      = &Token{tok: token.ADD}
+	arrow    = &Token{tok: token.ARROW}
+	assign   = &Token{tok: token.ASSIGN}
+	b        = &Token{token.IDENT, `b`}
+	c        = &Token{token.IDENT, `c`}
+	colon    = &Token{tok: token.COLON}
+	comma    = &Token{tok: token.COMMA}
+	d        = &Token{token.IDENT, `d`}
+	define   = &Token{tok: token.DEFINE}
+	dot      = &Token{tok: token.PERIOD}
+	ellipsis = &Token{tok: token.ELLIPSIS}
+	inc      = &Token{tok: token.INC}
+	lbrace   = &Token{tok: token.LBRACE}
+	lbrack   = &Token{tok: token.LBRACK}
+	lparen   = &Token{tok: token.LPAREN}
+	one      = &Token{token.INT, `1`}
+	rbrace   = &Token{tok: token.RBRACE}
+	rbrack   = &Token{tok: token.RBRACK}
+	ret      = &Token{token.SEMICOLON, "\n"}
+	rparen   = &Token{tok: token.RPAREN}
+	semi     = &Token{token.SEMICOLON, `;`}
+	two      = &Token{token.INT, `2`}
+	zero     = &Token{token.INT, `0`}
 )
 
 func TestAddOp(t *testing.T) {
@@ -836,7 +837,7 @@ func TestParameterDeclNoList(t *testing.T) {
 		`int`:      {{[]string{``, `int`}, []*Token{ret}}},
 		`...int`:   {{[]string{``, `... int`}, []*Token{ret}}},
 		`a, b int`: {{[]string{``, `a`}, []*Token{ret, _int, b, comma}}},
-		`b... int`: {{[]string{``, `b`}, []*Token{ret, _int, {tok: token.ELLIPSIS}}}},
+		`b... int`: {{[]string{``, `b`}, []*Token{ret, _int, ellipsis}}},
 		`int, int`: {{[]string{``, `int`}, []*Token{ret, _int, comma}}},
 	})
 }
@@ -854,15 +855,15 @@ func TestParamterList(t *testing.T) {
 		`int, int`:  {{[]string{``, `int`}, []*Token{ret, _int, comma}}, {[]string{``, `int,int`}, []*Token{ret}}},
 		`a, int`:    {{[]string{``, `a`}, []*Token{ret, _int, comma}}, {[]string{``, `a,int`}, []*Token{ret}}},
 		`a int`:     {{[]string{``, `a`}, []*Token{ret, _int}}, {[]string{``, `a int`}, []*Token{ret}}},
-		`a ... int`: {{[]string{``, `a`}, []*Token{ret, _int, {tok: token.ELLIPSIS}}}, {[]string{``, `a ... int`}, []*Token{ret}}},
+		`a ... int`: {{[]string{``, `a`}, []*Token{ret, _int, ellipsis}}, {[]string{``, `a ... int`}, []*Token{ret}}},
 		`a, b int`: {
 			{[]string{``, `a`}, []*Token{ret, _int, b, comma}},
 			{[]string{``, `a,b`}, []*Token{ret, _int}},
 			{[]string{``, `a,b int`}, []*Token{ret}}},
 		`a, b int, c ... int`: {
-			{[]string{``, `a`}, []*Token{ret, _int, {tok: token.ELLIPSIS}, c, comma, _int, b, comma}},
-			{[]string{``, `a,b`}, []*Token{ret, _int, {tok: token.ELLIPSIS}, c, comma, _int}},
-			{[]string{``, `a,b int`}, []*Token{ret, _int, {tok: token.ELLIPSIS}, c, comma}},
+			{[]string{``, `a`}, []*Token{ret, _int, ellipsis, c, comma, _int, b, comma}},
+			{[]string{``, `a,b`}, []*Token{ret, _int, ellipsis, c, comma, _int}},
+			{[]string{``, `a,b int`}, []*Token{ret, _int, ellipsis, c, comma}},
 			{[]string{``, `a,b int,c ... int`}, []*Token{ret}}},
 	})
 }
@@ -916,8 +917,8 @@ func TestPrimaryExpr(t *testing.T) {
 		`a[1]`:    {{ret, rbrack, one, lbrack}, {ret}},
 		`a[:]`:    {{ret, rbrack, colon, lbrack}, {ret}},
 		`a.(int)`: {{ret, rparen, _int, lparen, dot}, {ret}},
-		`a(b...)`: {{ret, rparen, {tok: token.ELLIPSIS}, b, lparen}, {ret}},
-		`a(b...)[:]`: {{ret, rbrack, colon, lbrack, rparen, {tok: token.ELLIPSIS}, b, lparen},
+		`a(b...)`: {{ret, rparen, ellipsis, b, lparen}, {ret}},
+		`a(b...)[:]`: {{ret, rbrack, colon, lbrack, rparen, ellipsis, b, lparen},
 			{ret, rbrack, colon, lbrack},
 			{ret}},
 	})
@@ -936,10 +937,10 @@ func TestPrimaryExprState(t *testing.T) {
 		`a[1]`:         {{[]string{``, `a`}, []*Token{ret, rbrack, one, lbrack}}, min(`a[1]`)},
 		`a[:]`:         {{[]string{``, `a`}, []*Token{ret, rbrack, colon, lbrack}}, min(`a[:]`)},
 		`a.(int)`:      {{[]string{``, `a`}, []*Token{ret, rparen, _int, lparen, dot}}, min(`a.(int)`)},
-		`a(b...)`:      {{[]string{``, `a`}, []*Token{ret, rparen, {tok: token.ELLIPSIS}, b, lparen}}, min(`a(b...)`)},
+		`a(b...)`:      {{[]string{``, `a`}, []*Token{ret, rparen, ellipsis, b, lparen}}, min(`a(b...)`)},
 		`a(b,c)`:       {{[]string{``, `a`}, []*Token{ret, rparen, c, comma, b, lparen}}, min(`a(b,c)`)},
 		`a(b)(c)`:      {{[]string{``, `a`}, []*Token{ret, rparen, c, lparen, rparen, b, lparen}}, {[]string{``, `a(b)`}, []*Token{ret, rparen, c, lparen}}, min(`a(b)(c)`)},
-		`a(b...)[:]`:   {{[]string{``, `a`}, []*Token{ret, rbrack, colon, lbrack, rparen, {tok: token.ELLIPSIS}, b, lparen}}, {[]string{``, `a(b...)`}, []*Token{ret, rbrack, colon, lbrack}}, min(`a(b...)[:]`)},
+		`a(b...)[:]`:   {{[]string{``, `a`}, []*Token{ret, rbrack, colon, lbrack, rparen, ellipsis, b, lparen}}, {[]string{``, `a(b...)`}, []*Token{ret, rbrack, colon, lbrack}}, min(`a(b...)[:]`)},
 	})
 }
 
