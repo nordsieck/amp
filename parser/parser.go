@@ -307,6 +307,77 @@ func ConstDecl(ts [][]*Token) [][]*Token {
 }
 
 // bad spec
+// "const" ( ConstSpec | "(" [ ConstSpec { ";" ConstSpec } [ ";" ]] ")" )
+func ConstDeclState(ss []State) []State {
+	ss = tokenParserState(ss, token.CONST)
+
+	bare := ConstSpecState(ss)
+	for i, b := range bare {
+		cd := constDecl{r: []Renderer{b.r[len(b.r)-1]}}
+		bare[i].r = rAppend(b.r, 2, cd)
+	}
+
+	ss = tokenReaderState(ss, token.LPAREN)
+	loop := ConstSpecState(ss)
+	ss = append(ss, loop...)
+
+	for len(loop) != 0 {
+		loop = tokenReaderState(loop, token.SEMICOLON)
+		loop = ConstSpecState(loop)
+		ss = append(ss, loop...)
+	}
+	ss = append(ss, tokenParserState(ss, token.SEMICOLON)...)
+	ss = tokenReaderState(ss, token.RPAREN)
+
+	for i, s := range ss {
+		cd := constDecl{parens: true}
+		if tok, ok := s.r[len(s.r)-1].(*Token); ok && tok.tok == token.SEMICOLON {
+			cd.trailingSemi = true
+			s.r = s.r[:len(s.r)-1]
+		}
+		for {
+			if tok, ok := s.r[len(s.r)-1].(*Token); ok && tok.tok == token.CONST {
+				break
+			}
+			cd.r = append(cd.r, s.r[len(s.r)-1])
+			s.r = s.r[:len(s.r)-1]
+		}
+
+		for j := 0; j < len(cd.r)/2; j++ {
+			cd.r[j], cd.r[len(cd.r)-j-1] = cd.r[len(cd.r)-j-1], cd.r[j]
+		}
+		ss[i].r = rAppend(s.r, 1, cd)
+	}
+	return append(bare, ss...)
+}
+
+type constDecl struct {
+	r                    []Renderer
+	parens, trailingSemi bool
+}
+
+func (c constDecl) Render() []byte {
+	ret := []byte(`const `)
+	if !c.parens {
+		return append(ret, c.r[0].Render()...)
+	}
+
+	ret = append(ret, `(`...)
+	if len(c.r) == 0 {
+		return append(ret, `)`...)
+	}
+	ret = append(ret, c.r[0].Render()...)
+	for i := 1; i < len(c.r); i++ {
+		ret = append(ret, `;`...)
+		ret = append(ret, c.r[i].Render()...)
+	}
+	if c.trailingSemi {
+		ret = append(ret, `;`...)
+	}
+	return append(ret, `)`...)
+}
+
+// bad spec
 // IdentifierLit [ Type ] "=" ExpressionList
 func ConstSpec(ts [][]*Token) [][]*Token {
 	ts = fromState(IdentifierList(toState(ts)))

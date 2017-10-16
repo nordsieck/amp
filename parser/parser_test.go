@@ -241,6 +241,25 @@ func TestConstDecl(t *testing.T) {
 	})
 }
 
+func TestConstDeclState(t *testing.T) {
+	resultState(t, ConstDeclState, map[string][]StateOutput{
+		`const a=1`:                    {min(`const a=1`)},
+		`const a int=1`:                {min(`const a int=1`)},
+		`const ()`:                     {min(`const ()`)},
+		`const (a=1)`:                  {min(`const (a=1)`)},
+		`const (a=1;)`:                 {min(`const (a=1;)`)},
+		`const (a=1;b=2)`:              {min(`const (a=1;b=2)`)},
+		`const (a,b int=1,2;c int=3;)`: {min(`const (a,b int=1,2;c int=3;)`)},
+	})
+}
+
+func TestConstDecl_Render(t *testing.T) {
+	defect.Equal(t, string(constDecl{[]Renderer{constSpec{a, nil, one}}, false, false}.Render()), `const a=1`)
+	defect.Equal(t, string(constDecl{nil, true, false}.Render()), `const ()`)
+	defect.Equal(t, string(constDecl{[]Renderer{constSpec{a, nil, one}}, true, true}.Render()), `const (a=1;)`)
+	defect.Equal(t, string(constDecl{[]Renderer{constSpec{a, nil, one}, constSpec{b, nil, two}}, true, false}.Render()), `const (a=1;b=2)`)
+}
+
 func TestConstSpec(t *testing.T) {
 	remaining(t, ConstSpec, Tmap{
 		`a = 1`:           {{ret}},
