@@ -41,6 +41,21 @@ func AddOp(ss []State) []State {
 	return result
 }
 
+func AliasDeclState(ss []State) []State {
+	ss = tokenParserState(ss, token.IDENT)
+	ss = tokenReaderState(ss, token.ASSIGN)
+	ss = Type(ss)
+	for i, s := range ss {
+		ad := aliasDecl{s.r[len(s.r)-2], s.r[len(s.r)-1]}
+		ss[i].r = rAppend(s.r, 2, ad)
+	}
+	return ss
+}
+
+type aliasDecl struct{ id, typ Renderer }
+
+func (a aliasDecl) Render() []byte { return append(append(a.id.Render(), `=`...), a.typ.Render()...) }
+
 func AnonymousField(ss []State) []State {
 	ss = append(ss, tokenParserState(ss, token.MUL)...)
 	ss = TypeName(ss)

@@ -74,6 +74,10 @@ func TestAddOp(t *testing.T) {
 	})
 }
 
+func TestAliasDeclState(t *testing.T) {
+	resultState(t, AliasDeclState, map[string][]StateOutput{`a=b`: {min(`a=b`)}})
+}
+
 func TestAnonymousField(t *testing.T) {
 	resultState(t, AnonymousField, map[string][]StateOutput{
 		`a.a`:  {{[]string{``, `a.a`}, []*Token{ret}}, {[]string{``, `a`}, []*Token{ret, a, dot}}},
