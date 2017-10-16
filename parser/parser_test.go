@@ -1308,6 +1308,10 @@ func TestTypeDecl(t *testing.T) {
 	})
 }
 
+func TestTypeDefState(t *testing.T) {
+	resultState(t, TypeDefState, map[string][]StateOutput{`a b`: {min(`a b`)}})
+}
+
 func TestTypeList(t *testing.T) {
 	remaining(t, TypeList, Tmap{
 		`a`:     {{ret}},

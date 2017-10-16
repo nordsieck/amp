@@ -2144,6 +2144,22 @@ func TypeDecl(ts [][]*Token) [][]*Token {
 	return append(TypeSpec(ts), multi...)
 }
 
+func TypeDefState(ss []State) []State {
+	ss = tokenParserState(ss, token.IDENT)
+	ss = Type(ss)
+	for i, s := range ss {
+		td := typeDef{s.r[len(s.r)-2], s.r[len(s.r)-1]}
+		ss[i].r = rAppend(s.r, 2, td)
+	}
+	return ss
+}
+
+type typeDef struct{ id, typ Renderer }
+
+func (t typeDef) Render() []byte {
+	return append(append(t.id.Render(), ` `...), t.typ.Render()...)
+}
+
 func TypeList(ts [][]*Token) [][]*Token {
 	ts = fromState(Type(toState(ts)))
 	next := ts
