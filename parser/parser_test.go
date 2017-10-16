@@ -249,6 +249,19 @@ func TestConstSpec(t *testing.T) {
 	})
 }
 
+func TestConstSpecState(t *testing.T) {
+	resultState(t, ConstSpecState, map[string][]StateOutput{
+		`a=1`:         {min(`a=1`)},
+		`a int=1`:     {min(`a int=1`)},
+		`a,b int=1,2`: {{[]string{``, `a,b int=1`}, []*Token{ret, two, comma}}, min(`a,b int=1,2`)},
+	})
+}
+
+func TestConstSpec_Render(t *testing.T) {
+	defect.Equal(t, string(constSpec{a, _int, one}.Render()), `a int=1`)
+	defect.Equal(t, string(constSpec{a, nil, one}.Render()), `a=1`)
+}
+
 func TestContinueStmt(t *testing.T) {
 	remaining(t, ContinueStmt, Tmap{
 		`continue a`: {{ret, a}, {ret}},

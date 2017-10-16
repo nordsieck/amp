@@ -315,6 +315,41 @@ func ConstSpec(ts [][]*Token) [][]*Token {
 	return ExpressionList(ts)
 }
 
+// bad spec
+// IdentifierLit [ Type ] "=" ExpressionList
+func ConstSpecState(ss []State) []State {
+	ss = IdentifierList(ss)
+
+	typ := Type(ss)
+	typ = tokenReaderState(typ, token.ASSIGN)
+	typ = ExpressionListState(typ)
+	for i, t := range typ {
+		cs := constSpec{t.r[len(t.r)-3], t.r[len(t.r)-2], t.r[len(t.r)-1]}
+		typ[i].r = rAppend(t.r, 3, cs)
+	}
+
+	ss = tokenReaderState(ss, token.ASSIGN)
+	ss = ExpressionListState(ss)
+	for i, s := range ss {
+		cs := constSpec{idList: s.r[len(s.r)-2], exprList: s.r[len(s.r)-1]}
+		ss[i].r = rAppend(s.r, 2, cs)
+	}
+
+	return append(typ, ss...)
+}
+
+type constSpec struct{ idList, typ, exprList Renderer }
+
+func (c constSpec) Render() []byte {
+	ret := c.idList.Render()
+	if c.typ != nil {
+		ret = append(ret, ` `...)
+		ret = append(ret, c.typ.Render()...)
+	}
+	ret = append(ret, `=`...)
+	return append(ret, c.exprList.Render()...)
+}
+
 func ContinueStmt(ts [][]*Token) [][]*Token {
 	ts = tokenReader(ts, token.CONTINUE)
 	return append(ts, tokenReader(ts, token.IDENT)...)
@@ -1863,6 +1898,7 @@ func SourceFile(ts [][]*Token) [][]*Token {
 	return ts
 }
 
+// TODO: currently the medium-term goal
 func Statement(ts [][]*Token) [][]*Token {
 	fallthroughStmt := fromState(FallthroughStmt(toState(ts)))
 	return append(
