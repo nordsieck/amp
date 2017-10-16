@@ -2189,6 +2189,8 @@ func TypeSpec(ts [][]*Token) [][]*Token {
 	return fromState(Type(toState(ts)))
 }
 
+func TypeSpecState(ss []State) []State { return append(AliasDeclState(ss), TypeDefState(ss)...) }
+
 func TypeSwitchCase(ts [][]*Token) [][]*Token {
 	cas := tokenReader(ts, token.CASE)
 	return append(TypeList(cas), tokenReader(ts, token.DEFAULT)...)

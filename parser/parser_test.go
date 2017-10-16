@@ -1349,6 +1349,13 @@ func TestTypeSpec(t *testing.T) {
 	})
 }
 
+func TestTypeSpecState(t *testing.T) {
+	resultState(t, TypeSpecState, map[string][]StateOutput{
+		`a b`: {min(`a b`)},
+		`a=b`: {min(`a=b`)},
+	})
+}
+
 func TestTypeSwitchCase(t *testing.T) {
 	remaining(t, TypeSwitchCase, Tmap{
 		`default`:   {{}},
