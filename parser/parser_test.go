@@ -1308,6 +1308,23 @@ func TestTypeDecl(t *testing.T) {
 	})
 }
 
+func TestTypeDeclState(t *testing.T) {
+	resultState(t, TypeDeclState, map[string][]StateOutput{
+		`type a int`:          {min(`type a int`)},
+		`type ()`:             {min(`type ()`)},
+		`type (a int)`:        {min(`type (a int)`)},
+		`type (a int;)`:       {min(`type (a int;)`)},
+		`type (a int; b int)`: {min(`type (a int;b int)`)},
+	})
+}
+
+func TestTypeDecl_Render(t *testing.T) {
+	defect.Equal(t, string(typeDecl{[]Renderer{typeDef{a, b}}, false, false}.Render()), `type a b`)
+	defect.Equal(t, string(typeDecl{nil, true, false}.Render()), `type ()`)
+	defect.Equal(t, string(typeDecl{[]Renderer{typeDef{a, b}}, true, true}.Render()), `type (a b;)`)
+	defect.Equal(t, string(typeDecl{[]Renderer{typeDef{a, b}, typeDef{c, d}}, true, false}.Render()), `type (a b;c d)`)
+}
+
 func TestTypeDefState(t *testing.T) {
 	resultState(t, TypeDefState, map[string][]StateOutput{`a b`: {min(`a b`)}})
 }

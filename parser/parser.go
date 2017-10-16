@@ -2144,6 +2144,80 @@ func TypeDecl(ts [][]*Token) [][]*Token {
 	return append(TypeSpec(ts), multi...)
 }
 
+// bad spec
+// "type" ( TypeSpec | "(" [ TypeSpec { ";" TypeSpec } [ ";" ]] ")" )
+func TypeDeclState(ss []State) []State {
+	ss = tokenParserState(ss, token.TYPE)
+
+	bare := TypeSpecState(ss)
+	for i, b := range bare {
+		td := typeDecl{r: []Renderer{b.r[len(b.r)-1]}}
+		bare[i].r = rAppend(b.r, 2, td)
+	}
+
+	ss = tokenReaderState(ss, token.LPAREN)
+
+	loop := TypeSpecState(ss)
+	ss = append(ss, loop...)
+
+	for len(loop) != 0 {
+		loop = tokenReaderState(loop, token.SEMICOLON)
+		loop = TypeSpecState(loop)
+		ss = append(ss, loop...)
+	}
+	ss = append(ss, tokenParserState(ss, token.SEMICOLON)...)
+	ss = tokenReaderState(ss, token.RPAREN)
+
+	for i, s := range ss {
+		td := typeDecl{paren: true}
+		if tok, ok := s.r[len(s.r)-1].(*Token); ok && tok.tok == token.SEMICOLON {
+			td.trailingSemi = true
+			s.r = s.r[:len(s.r)-1]
+		}
+
+		for {
+			if tok, ok := s.r[len(s.r)-1].(*Token); ok && tok.tok == token.TYPE {
+				break
+			}
+			td.r = append(td.r, s.r[len(s.r)-1])
+			s.r = s.r[:len(s.r)-1]
+		}
+
+		for i := 0; i < len(td.r)/2; i++ {
+			td.r[i], td.r[len(td.r)-i-1] = td.r[len(td.r)-i-1], td.r[i]
+		}
+
+		ss[i].r = rAppend(s.r, 1, td)
+	}
+	return append(bare, ss...)
+}
+
+type typeDecl struct {
+	r                   []Renderer
+	paren, trailingSemi bool
+}
+
+func (t typeDecl) Render() []byte {
+	ret := []byte(`type `)
+	if !t.paren {
+		return append(ret, t.r[0].Render()...)
+	}
+
+	ret = append(ret, `(`...)
+	if len(t.r) == 0 {
+		return append(ret, `)`...)
+	}
+	ret = append(ret, t.r[0].Render()...)
+	for i := 1; i < len(t.r); i++ {
+		ret = append(ret, `;`...)
+		ret = append(ret, t.r[i].Render()...)
+	}
+	if t.trailingSemi {
+		ret = append(ret, `;`...)
+	}
+	return append(ret, `)`...)
+}
+
 func TypeDefState(ss []State) []State {
 	ss = tokenParserState(ss, token.IDENT)
 	ss = Type(ss)
