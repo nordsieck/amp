@@ -2368,6 +2368,76 @@ func VarDecl(ts [][]*Token) [][]*Token {
 	return append(VarSpec(ts), paren...)
 }
 
+func VarDeclState(ss []State) []State {
+	ss = tokenParserState(ss, token.VAR)
+	bare := VarSpecState(ss)
+	for i, b := range bare {
+		vd := varDecl{[]Renderer{b.r[len(b.r)-1]}, false, false}
+		bare[i].r = rAppend(b.r, 2, vd)
+	}
+
+	ss = tokenReaderState(ss, token.LPAREN)
+	loop := VarSpecState(ss)
+	ss = append(ss, loop...)
+
+	for len(loop) != 0 {
+		loop = tokenReaderState(loop, token.SEMICOLON)
+		loop = VarSpecState(loop)
+		ss = append(ss, loop...)
+	}
+	ss = append(ss, tokenParserState(ss, token.SEMICOLON)...)
+	ss = tokenReaderState(ss, token.RPAREN)
+	for i, s := range ss {
+		vd := varDecl{parens: true}
+
+		if tok, ok := s.r[len(s.r)-1].(*Token); ok && tok.tok == token.SEMICOLON {
+			vd.trailingSemi = true
+			s.r = s.r[:len(s.r)-1]
+		}
+		for {
+			if tok, ok := s.r[len(s.r)-1].(*Token); ok && tok.tok == token.VAR {
+				break
+			}
+			vd.r = append(vd.r, s.r[len(s.r)-1])
+			s.r = s.r[:len(s.r)-1]
+		}
+
+		for i := 0; i < len(vd.r)/2; i++ {
+			vd.r[i], vd.r[len(vd.r)-i-1] = vd.r[len(vd.r)-i-1], vd.r[i]
+		}
+
+		ss[i].r = rAppend(s.r, 1, vd)
+	}
+
+	return append(bare, ss...)
+}
+
+type varDecl struct {
+	r                    []Renderer
+	parens, trailingSemi bool
+}
+
+func (v varDecl) Render() []byte {
+	ret := []byte(`var `)
+	if !v.parens {
+		return append(ret, v.r[0].Render()...)
+	}
+
+	ret = append(ret, `(`...)
+	if len(v.r) == 0 {
+		return append(ret, `)`...)
+	}
+	ret = append(ret, v.r[0].Render()...)
+	for i := 1; i < len(v.r); i++ {
+		ret = append(ret, `;`...)
+		ret = append(ret, v.r[i].Render()...)
+	}
+	if v.trailingSemi {
+		ret = append(ret, `;`...)
+	}
+	return append(ret, `)`...)
+}
+
 func VarSpec(ts [][]*Token) [][]*Token {
 	ts = fromState(IdentifierList(toState(ts)))
 	typ := fromState(Type(toState(ts)))

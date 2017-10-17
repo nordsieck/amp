@@ -1443,6 +1443,23 @@ func TestVarDecl(t *testing.T) {
 	})
 }
 
+func TestVarDeclState(t *testing.T) {
+	resultState(t, VarDeclState, map[string][]StateOutput{
+		`var a int`:           {min(`var a int`)},
+		`var ()`:              {min(`var ()`)},
+		`var (a int)`:         {min(`var (a int)`)},
+		`var (a int;)`:        {min(`var (a int;)`)},
+		`var (a,b=1,2;c int)`: {min(`var (a,b=1,2;c int)`)},
+	})
+}
+
+func TestVarDecl_Render(t *testing.T) {
+	defect.Equal(t, string(varDecl{[]Renderer{varSpec{a, b, nil}}, false, false}.Render()), `var a b`)
+	defect.Equal(t, string(varDecl{nil, true, false}.Render()), `var ()`)
+	defect.Equal(t, string(varDecl{[]Renderer{varSpec{a, b, nil}}, true, true}.Render()), `var (a b;)`)
+	defect.Equal(t, string(varDecl{[]Renderer{varSpec{a, b, nil}, varSpec{c, d, nil}}, true, false}.Render()), `var (a b;c d)`)
+}
+
 func TestVarSpec(t *testing.T) {
 	remaining(t, VarSpec, Tmap{
 		`a int`:       {{ret}},
