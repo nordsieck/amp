@@ -38,6 +38,7 @@ var (
 	_fallthrough = &Token{token.FALLTHROUGH, `fallthrough`}
 	_if          = &Token{token.IF, `if`}
 	_int         = &Token{token.IDENT, `int`}
+	_var         = &Token{token.VAR, `var`}
 	a            = &Token{token.IDENT, `a`}
 	add          = &Token{tok: token.ADD}
 	arrow        = &Token{tok: token.ARROW}
@@ -686,7 +687,13 @@ func TestKeyedElement_Render(t *testing.T) {
 
 func TestLabeledStmt(t *testing.T) {
 	remaining(t, LabeledStmt, Tmap{
-		`a: var b int`: {{ret}, {ret, _int, b, {token.VAR, `var`}}},
+		`a: var b int`: {{ret}, {ret, _int, b, _var}},
+	})
+}
+
+func TestLabeledStmtState(t *testing.T) {
+	resultState(t, LabeledStmtState, map[string][]StateOutput{
+		`a:var b int`: {min(`a:var b int`), {[]string{``, `a:`}, []*Token{ret, _int, b, _var}}},
 	})
 }
 

@@ -1101,6 +1101,35 @@ func LabeledStmt(ts [][]*Token) [][]*Token {
 	return Statement(ts)
 }
 
+func LabeledStmtState(ss []State) []State {
+	ss = tokenParserState(ss, token.IDENT)
+	ss = tokenParserState(ss, token.COLON)
+	ss = StatementState(ss)
+	for i, s := range ss {
+		var ls labeledStmt
+		if tok, ok := s.r[len(s.r)-1].(*Token); ok && tok.tok == token.COLON {
+			ls.label = s.r[len(s.r)-2]
+			s.r = s.r[:len(s.r)-2]
+		} else {
+			ls.label = s.r[len(s.r)-3]
+			ls.stmt = s.r[len(s.r)-1]
+			s.r = s.r[:len(s.r)-3]
+		}
+		ss[i].r = rAppend(s.r, 0, ls)
+	}
+	return ss
+}
+
+type labeledStmt struct{ label, stmt Renderer }
+
+func (l labeledStmt) Render() []byte {
+	ret := append(l.label.Render(), `:`...)
+	if l.stmt != nil {
+		return append(ret, l.stmt.Render()...)
+	}
+	return ret
+}
+
 func Literal(ts [][]*Token) [][]*Token {
 	basicLit := fromState(BasicLit(toState(ts)))
 	return append(append(basicLit, CompositeLit(ts)...), FunctionLit(ts)...)
@@ -1996,6 +2025,13 @@ func Statement(ts [][]*Token) [][]*Token {
 			append(append(ReturnStmt(ts), BreakStmt(ts)...), append(ContinueStmt(ts), GotoStmt(ts)...)...)...),
 		append(append(append(fallthroughStmt, Block(ts)...), append(IfStmt(ts), SwitchStmt(ts)...)...),
 			append(append(SelectStmt(ts), ForStmt(ts)...), DeferStmt(ts)...)...)...)
+}
+
+func StatementState(ss []State) []State {
+	if len(ss) == 0 {
+		return nil
+	}
+	return append(append(DeclarationState(ss), LabeledStmtState(ss)...), SimpleStmtState(ss)...)
 }
 
 // bad spec
