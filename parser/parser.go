@@ -505,6 +505,10 @@ func Declaration(ts [][]*Token) [][]*Token {
 	return append(append(ConstDecl(ts), TypeDecl(ts)...), VarDecl(ts)...)
 }
 
+func DeclarationState(ss []State) []State {
+	return append(append(ConstDeclState(ss), TypeDeclState(ss)...), VarDeclState(ss)...)
+}
+
 func DeferStmt(ts [][]*Token) [][]*Token {
 	ts = tokenReader(ts, token.DEFER)
 	return Expression(ts)

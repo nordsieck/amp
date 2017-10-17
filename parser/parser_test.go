@@ -321,6 +321,14 @@ func TestDeclaration(t *testing.T) {
 	})
 }
 
+func TestDeclarationState(t *testing.T) {
+	resultState(t, DeclarationState, map[string][]StateOutput{
+		`const a=1`:  {min(`const a=1`)},
+		`type a int`: {min(`type a int`)},
+		`var a int`:  {min(`var a int`)},
+	})
+}
+
 func TestDeferStmt(t *testing.T) {
 	remaining(t, DeferStmt, Tmap{
 		`defer a()`: {{ret, rparen, lparen}, {ret}},
