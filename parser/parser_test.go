@@ -1452,6 +1452,21 @@ func TestVarSpec(t *testing.T) {
 	})
 }
 
+func TestVarSpecState(t *testing.T) {
+	resultState(t, VarSpecState, map[string][]StateOutput{
+		`a int`:   {min(`a int`)},
+		`a int=1`: {{[]string{``, `a int`}, []*Token{ret, one, assign}}, min(`a int=1`)},
+		`a=1`:     {min(`a=1`)},
+		`a,b=1,2`: {{[]string{``, `a,b=1`}, []*Token{ret, two, comma}}, min(`a,b=1,2`)},
+	})
+}
+
+func TestVarSpec_Render(t *testing.T) {
+	defect.Equal(t, string(varSpec{identifierList{a}, _int, nil}.Render()), `a int`)
+	defect.Equal(t, string(varSpec{identifierList{a}, nil, expressionList{one}}.Render()), `a=1`)
+	defect.Equal(t, string(varSpec{identifierList{a}, _int, expressionList{one}}.Render()), `a int=1`)
+}
+
 func TestTokenReader(t *testing.T) {
 	toks := [][]*Token{
 		{ret, rparen},

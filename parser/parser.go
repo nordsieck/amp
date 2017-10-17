@@ -2379,6 +2379,45 @@ func VarSpec(ts [][]*Token) [][]*Token {
 	return append(typ, assign...)
 }
 
+func VarSpecState(ss []State) []State {
+	ss = IdentifierList(ss)
+
+	typ := Type(ss)
+	typExpr := tokenReaderState(typ, token.ASSIGN)
+	typExpr = ExpressionListState(typExpr)
+
+	for i, t := range typ {
+		vs := varSpec{idList: t.r[len(t.r)-2], typ: t.r[len(t.r)-1]}
+		typ[i].r = rAppend(t.r, 2, vs)
+	}
+	for i, t := range typExpr {
+		vs := varSpec{t.r[len(t.r)-3], t.r[len(t.r)-2], t.r[len(t.r)-1]}
+		typExpr[i].r = rAppend(t.r, 3, vs)
+	}
+
+	ss = tokenReaderState(ss, token.ASSIGN)
+	ss = ExpressionListState(ss)
+	for i, s := range ss {
+		vs := varSpec{idList: s.r[len(s.r)-2], exprList: s.r[len(s.r)-1]}
+		ss[i].r = rAppend(s.r, 2, vs)
+	}
+
+	return append(append(typ, typExpr...), ss...)
+}
+
+type varSpec struct{ idList, typ, exprList Renderer }
+
+func (v varSpec) Render() []byte {
+	ret := v.idList.Render()
+	if v.typ != nil {
+		ret = append(append(ret, ` `...), v.typ.Render()...)
+	}
+	if v.exprList != nil {
+		ret = append(append(ret, `=`...), v.exprList.Render()...)
+	}
+	return ret
+}
+
 func nonBlankIdent(ss []State) []State {
 	var result []State
 	for _, s := range ss {
