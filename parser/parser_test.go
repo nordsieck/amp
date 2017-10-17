@@ -1242,6 +1242,28 @@ func TestStatementList(t *testing.T) {
 	})
 }
 
+func TestStatementListState(t *testing.T) {
+	resultState(t, StatementListState, map[string][]StateOutput{
+		``:     {{[]string{``, ``}, nil}},
+		`a++`:  {{[]string{``, ``}, []*Token{ret, inc, a}}, {[]string{``, `a`}, []*Token{ret, inc}}, min(`a++`), {[]string{``, `a++;`}, []*Token{}}},
+		`a++;`: {{[]string{``, ``}, []*Token{semi, inc, a}}, {[]string{``, `a`}, []*Token{semi, inc}}, {[]string{``, `a++`}, []*Token{semi}}, {[]string{``, `a++;`}, []*Token{}}},
+		`a++;b++`: {
+			{[]string{``, ``}, []*Token{ret, inc, b, semi, inc, a}},
+			{[]string{``, `a`}, []*Token{ret, inc, b, semi, inc}},
+			{[]string{``, `a++`}, []*Token{ret, inc, b, semi}},
+			{[]string{``, `a++;`}, []*Token{ret, inc, b}},
+			{[]string{``, `a++;b`}, []*Token{ret, inc}},
+			{[]string{``, `a++;b++`}, []*Token{ret}},
+			{[]string{``, `a++;b++;`}, []*Token{}}},
+	})
+}
+
+func TestStatementList_Render(t *testing.T) {
+	defect.Equal(t, string(statementList{}.Render()), ``)
+	defect.Equal(t, string(statementList{incDecStmt{a, true}}.Render()), `a++`)
+	defect.Equal(t, string(statementList{incDecStmt{a, true}, incDecStmt{b, false}}.Render()), `a++;b--`)
+}
+
 func TestStructType(t *testing.T) {
 	resultState(t, StructType, map[string][]StateOutput{
 		`struct{}`:                      {{[]string{``, `struct{}`}, []*Token{ret}}},

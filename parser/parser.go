@@ -2034,6 +2034,7 @@ func StatementState(ss []State) []State {
 	return append(append(DeclarationState(ss), LabeledStmtState(ss)...), SimpleStmtState(ss)...)
 }
 
+// TODO: combine this will other functions as much as possible
 func NonEmptyStatementState(ss []State) []State {
 	return append(
 		append(append(ExpressionStmtState(ss), SendStmtState(ss)...), append(IncDecStmtState(ss), AssignmentState(ss)...)...),
@@ -2056,6 +2057,62 @@ func StatementList(ts [][]*Token) [][]*Token {
 		next = current
 	}
 	return ts
+}
+
+// bad spec
+// Statement { ";" Statement }
+// force empty stmt
+func StatementListState(ss []State) []State {
+
+	// very important that full is processed before empty.
+	// empty stmt interacts strangely with append
+	full := NonEmptyStatementState(ss)
+	for i, f := range full {
+		sl := statementList{f.r[len(f.r)-1]}
+		full[i].r = rAppend(f.r, 1, sl)
+	}
+	empty := EmptyStmtState(ss)
+	for i, em := range empty {
+		sl := statementList{e{}}
+		empty[i].r = rAppend(em.r, 0, sl)
+	}
+
+	loop := append(empty, full...)
+	ss = loop
+	for len(loop) != 0 {
+		loop = tokenReaderState(loop, token.SEMICOLON)
+		full = NonEmptyStatementState(loop)
+		for i, f := range full {
+			sl := f.r[len(f.r)-2].(statementList)
+			sl = append(sl, f.r[len(f.r)-1])
+			full[i].r = rAppend(f.r, 2, sl)
+		}
+
+		empty = EmptyStmtState(loop)
+		for i, em := range empty {
+			sl := em.r[len(em.r)-1].(statementList)
+			sl = append(sl, e{})
+			empty[i].r = rAppend(em.r, 1, sl)
+		}
+
+		loop = append(empty, full...)
+		ss = append(ss, loop...)
+	}
+	return ss
+}
+
+type statementList []Renderer
+
+func (s statementList) Render() []byte {
+	if len(s) == 0 {
+		return nil
+	}
+	ret := s[0].Render()
+	for i := 1; i < len(s); i++ {
+		ret = append(ret, `;`...)
+		ret = append(ret, s[i].Render()...)
+	}
+	return ret
 }
 
 // bad spec
