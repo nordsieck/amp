@@ -2034,6 +2034,12 @@ func StatementState(ss []State) []State {
 	return append(append(DeclarationState(ss), LabeledStmtState(ss)...), SimpleStmtState(ss)...)
 }
 
+func NonEmptyStatementState(ss []State) []State {
+	return append(
+		append(append(ExpressionStmtState(ss), SendStmtState(ss)...), append(IncDecStmtState(ss), AssignmentState(ss)...)...),
+		append(append(ShortVarDeclState(ss), DeclarationState(ss)...), LabeledStmtState(ss)...)...)
+}
+
 // bad spec
 // Statement { ";" Statement }
 // force empty stmt
