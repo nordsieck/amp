@@ -603,6 +603,10 @@ func TestGotoStmt(t *testing.T) {
 	remaining(t, GotoStmt, Tmap{`goto a`: {{ret}}, `goto`: empty, `a`: empty})
 }
 
+func TestGotoStmtState(t *testing.T) {
+	resultState(t, GotoStmtState, map[string][]StateOutput{`goto`: nil, `a`: nil, `goto a`: {min(`goto a`)}})
+}
+
 func TestIdentifierList(t *testing.T) {
 	resultState(t, IdentifierList, map[string][]StateOutput{
 		`a`:   {{[]string{``, `a`}, []*Token{ret}}},
@@ -1308,6 +1312,7 @@ func TestStatementState(t *testing.T) {
 			{[]string{``}, []*Token{ret, one, {tok: token.RETURN, lit: `return`}}}},
 		`break`:    {min(`break`), {[]string{``}, []*Token{ret, {tok: token.BREAK, lit: `break`}}}},
 		`continue`: {min(`continue`), {[]string{``}, []*Token{ret, {tok: token.CONTINUE, lit: `continue`}}}},
+		`goto a`:   {min(`goto a`), {[]string{``}, []*Token{ret, a, {tok: token.GOTO, lit: `goto`}}}},
 	})
 }
 
