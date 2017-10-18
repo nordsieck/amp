@@ -1111,6 +1111,14 @@ func TestReturnStmt(t *testing.T) {
 	})
 }
 
+func TestReturnStmtState(t *testing.T) {
+	resultState(t, ReturnStmtState, map[string][]StateOutput{
+		`return`:     {min(`return`)},
+		`return 1`:   {{[]string{``, `return`}, []*Token{ret, one}}, min(`return 1`)},
+		`return 1,2`: {{[]string{``, `return`}, []*Token{ret, two, comma, one}}, {[]string{``, `return 1`}, []*Token{ret, two, comma}}, min(`return 1,2`)},
+	})
+}
+
 func TestSelector(t *testing.T) {
 	resultState(t, Selector, map[string][]StateOutput{
 		`1`:  nil,
