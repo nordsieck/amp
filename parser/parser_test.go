@@ -730,11 +730,11 @@ func TestLiteral(t *testing.T) {
 
 func TestLiteralState(t *testing.T) {
 	resultState(t, LiteralState, map[string][]StateOutput{
-		`1`: {{[]string{``, `1`}, []*Token{ret}}},
-		// `a{1}`: {{[]string{``, `a{1}`}, []*Token{ret}}},
-		`a`: nil,
-		`_`: nil,
-		// `func(){}`: {{[]string{``, `func(){}`}, []*Token{ret}}},
+		`1`:        {min(`1`)},
+		`a{1}`:     {min(`a{1}`)},
+		`a`:        nil,
+		`_`:        nil,
+		`func(){}`: {min(`func(){}`)},
 	})
 }
 
