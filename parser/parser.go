@@ -1371,7 +1371,7 @@ func nonEmptySimpleStmtState(ss []State) []State {
 }
 
 func nonSimpleStatementState(ss []State) []State {
-	return append(DeclarationState(ss), LabeledStmtState(ss)...)
+	return append(append(DeclarationState(ss), LabeledStmtState(ss)...), ReturnStmtState(ss)...)
 }
 
 func Operand(ts [][]*Token) [][]*Token {
@@ -1875,6 +1875,28 @@ func (r result) Render() []byte {
 func ReturnStmt(ts [][]*Token) [][]*Token {
 	ts = tokenReader(ts, token.RETURN)
 	return append(ts, ExpressionList(ts)...)
+}
+
+func ReturnStmtState(ss []State) []State {
+	ss = tokenReaderState(ss, token.RETURN)
+	list := ExpressionListState(ss)
+	for i, l := range list {
+		rs := returnStmt{l.r[len(l.r)-1]}
+		list[i].r = rAppend(l.r, 1, rs)
+	}
+	for i, s := range ss {
+		ss[i].r = rAppend(s.r, 0, returnStmt{})
+	}
+	return append(ss, list...)
+}
+
+type returnStmt struct{ r Renderer }
+
+func (r returnStmt) Render() []byte {
+	if r.r == nil {
+		return []byte(`return`)
+	}
+	return append([]byte(`return `), r.r.Render()...)
 }
 
 func Selector(ss []State) []State {
