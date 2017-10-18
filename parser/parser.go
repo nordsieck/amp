@@ -858,6 +858,20 @@ func FunctionLit(ts [][]*Token) [][]*Token {
 	return Function(ts)
 }
 
+func FunctionLitState(ss []State) []State {
+	ss = tokenReaderState(ss, token.FUNC)
+	ss = FunctionState(ss)
+	for i, s := range ss {
+		fl := functionLit{s.r[len(s.r)-1]}
+		ss[i].r = rAppend(s.r, 1, fl)
+	}
+	return ss
+}
+
+type functionLit struct{ r Renderer }
+
+func (f functionLit) Render() []byte { return append([]byte(`func`), f.r.Render()...) }
+
 func FunctionType(ss []State) []State {
 	ss = tokenReaderState(ss, token.FUNC)
 	ss = Signature(ss)
