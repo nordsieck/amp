@@ -957,6 +957,20 @@ func GotoStmt(ts [][]*Token) [][]*Token {
 	return tokenReader(ts, token.IDENT)
 }
 
+func GotoStmtState(ss []State) []State {
+	ss = tokenReaderState(ss, token.GOTO)
+	ss = tokenParserState(ss, token.IDENT)
+	for i, s := range ss {
+		gs := gotoStmt{s.r[len(s.r)-1]}
+		ss[i].r = rAppend(s.r, 1, gs)
+	}
+	return ss
+}
+
+type gotoStmt struct{ r Renderer }
+
+func (g gotoStmt) Render() []byte { return append([]byte(`goto `), g.r.Render()...) }
+
 func IdentifierList(ss []State) []State {
 	ss = tokenParserState(ss, token.IDENT)
 
@@ -1433,7 +1447,7 @@ func nonEmptySimpleStmtState(ss []State) []State {
 func nonSimpleStatementState(ss []State) []State {
 	return append(
 		append(append(DeclarationState(ss), LabeledStmtState(ss)...), append(GoStmtState(ss), ReturnStmtState(ss)...)...),
-		append(BreakStmtState(ss), ContinueStmtState(ss)...)...)
+		append(append(BreakStmtState(ss), ContinueStmtState(ss)...), GotoStmtState(ss)...)...)
 }
 
 func Operand(ts [][]*Token) [][]*Token {
