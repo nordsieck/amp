@@ -187,6 +187,11 @@ func TestBlockState(t *testing.T) {
 	})
 }
 
+func TestBlock_Render(t *testing.T) {
+	defect.Equal(t, string(block{}.Render()), `{}`)
+	defect.Equal(t, string(block{incDecStmt{a, true}}.Render()), `{a++}`)
+}
+
 func TestBreakStmt(t *testing.T) {
 	remaining(t, BreakStmt, Tmap{
 		`break a`: {{ret, a}, {ret}},
@@ -630,6 +635,27 @@ func TestIfStmt(t *testing.T) {
 			{ret, rbrace, lbrace, _else}, {ret}},
 		`if a { b() }`: {{ret}},
 	})
+}
+
+func TestIfStmtState(t *testing.T) {
+	resultState(t, IfStmtState, map[string][]StateOutput{
+		`if a{}`:         {min(`if a{}`)},
+		`if a:=1; a{}`:   {min(`if a:=1;a{}`)},
+		`if a{} else {}`: {{[]string{``, `if a{}`}, []*Token{ret, rbrace, lbrace, _else}}, min(`if a{} else {}`)},
+		`if a:=1;a{} else if b{} else {}`: {
+			{[]string{``, `if a:=1;a{}`}, []*Token{ret, rbrace, lbrace, _else, rbrace, lbrace, b, _if, _else}},
+			{[]string{``, `if a:=1;a{} else if b{}`}, []*Token{ret, rbrace, lbrace, _else}},
+			min(`if a:=1;a{} else if b{} else {}`)},
+		`if a{{}}`: {min(`if a{{}}`)},
+	})
+}
+
+func TestIfStmt_Render(t *testing.T) {
+	defect.Equal(t, string(ifStmt{nil, a, block{}, nil}.Render()), `if a{}`)
+	defect.Equal(t, string(ifStmt{nil, a, block{incDecStmt{b, true}}, nil}.Render()), `if a{b++}`)
+	defect.Equal(t, string(ifStmt{shortVarDecl{a, one}, a, block{}, nil}.Render()), `if a:=1;a{}`)
+	defect.Equal(t, string(ifStmt{nil, a, block{}, block{}}.Render()), `if a{} else {}`)
+	defect.Equal(t, string(ifStmt{nil, a, block{}, ifStmt{nil, b, block{}, nil}}.Render()), `if a{} else if b{}`)
 }
 
 func TestImportDecl(t *testing.T) {
@@ -1315,6 +1341,7 @@ func TestStatementState(t *testing.T) {
 		`goto a`:      {min(`goto a`), {[]string{``}, []*Token{ret, a, {tok: token.GOTO, lit: `goto`}}}},
 		`fallthrough`: {min(`fallthrough`), {[]string{``}, []*Token{ret, {tok: token.FALLTHROUGH, lit: `fallthrough`}}}},
 		`{a()}`:       {min(`{a()}`), {[]string{``}, []*Token{ret, rbrace, rparen, lparen, a, lbrace}}},
+		`if a{}`:      {min(`if a{}`), {[]string{``}, []*Token{ret, rbrace, lbrace, a, _if}}},
 	})
 }
 

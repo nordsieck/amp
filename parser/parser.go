@@ -1035,6 +1035,73 @@ func IfStmt(ts [][]*Token) [][]*Token {
 	return append(ts, els...)
 }
 
+func IfStmtState(ss []State) []State {
+	if len(ss) == 0 {
+		return nil
+	}
+	ss = tokenParserState(ss, token.IF)
+	simple := SimpleStmtState(ss)
+	simple = tokenReaderState(simple, token.SEMICOLON)
+	simple = ExpressionState(simple)
+	simple = BlockState(simple)
+	simpleElse := tokenReaderState(simple, token.ELSE)
+	simpleElse = append(IfStmtState(simpleElse), BlockState(simpleElse)...)
+
+	for i, s := range simpleElse {
+		is := ifStmt{nil, s.r[len(s.r)-3], s.r[len(s.r)-2], s.r[len(s.r)-1]}
+		if tok, ok := s.r[len(s.r)-4].(*Token); ok && tok.tok == token.IF {
+			is.simple = e{}
+			simpleElse[i].r = rAppend(s.r, 4, is)
+		} else {
+			is.simple = s.r[len(s.r)-4]
+			simpleElse[i].r = rAppend(s.r, 5, is)
+		}
+	}
+	for i, s := range simple {
+		is := ifStmt{nil, s.r[len(s.r)-2], s.r[len(s.r)-1], nil}
+		if tok, ok := s.r[len(s.r)-3].(*Token); ok && tok.tok == token.IF {
+			is.simple = e{}
+			simple[i].r = rAppend(s.r, 3, is)
+		} else {
+			is.simple = s.r[len(s.r)-3]
+			simple[i].r = rAppend(s.r, 4, is)
+		}
+	}
+
+	ss = ExpressionState(ss)
+	ss = BlockState(ss)
+	ssElse := tokenReaderState(ss, token.ELSE)
+	ssElse = append(IfStmtState(ssElse), BlockState(ssElse)...)
+
+	for i, s := range ssElse {
+		is := ifStmt{nil, s.r[len(s.r)-3], s.r[len(s.r)-2], s.r[len(s.r)-1]}
+		ssElse[i].r = rAppend(s.r, 4, is)
+	}
+	for i, s := range ss {
+		is := ifStmt{nil, s.r[len(s.r)-2], s.r[len(s.r)-1], nil}
+		ss[i].r = rAppend(s.r, 3, is)
+	}
+
+	return append(append(ss, ssElse...), append(simple, simpleElse...)...)
+}
+
+type ifStmt struct{ simple, expr, block, tail Renderer }
+
+func (i ifStmt) Render() []byte {
+	ret := []byte(`if `)
+	if i.simple != nil {
+		ret = append(ret, i.simple.Render()...)
+		ret = append(ret, `;`...)
+	}
+	ret = append(ret, i.expr.Render()...)
+	ret = append(ret, i.block.Render()...)
+	if i.tail != nil {
+		ret = append(ret, ` else `...)
+		ret = append(ret, i.tail.Render()...)
+	}
+	return ret
+}
+
 // bad spec
 // "import" ( ImportSpec | "(" [ ImportSpec { ";" ImportSpec } [ ";" ]] ")" )
 func ImportDecl(ts [][]*Token) [][]*Token {
@@ -1457,7 +1524,7 @@ func nonSimpleStatementState(ss []State) []State {
 	return append(append(
 		append(append(DeclarationState(ss), LabeledStmtState(ss)...), append(GoStmtState(ss), ReturnStmtState(ss)...)...),
 		append(append(BreakStmtState(ss), ContinueStmtState(ss)...), append(GotoStmtState(ss), FallthroughStmt(ss)...)...)...),
-		BlockState(ss)...)
+		append(BlockState(ss), IfStmtState(ss)...)...)
 }
 
 func Operand(ts [][]*Token) [][]*Token {
