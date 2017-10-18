@@ -536,6 +536,15 @@ func TestFunction(t *testing.T) {
 	})
 }
 
+func TestFunctionState(t *testing.T) {
+	resultState(t, FunctionState, map[string][]StateOutput{
+		`(){}`:          {min(`(){}`)},
+		`()(){}`:        {min(`()(){}`)},
+		`(int)int{a++}`: {min(`(int)int{a++}`)}, // TODO: change to return
+		// TODO: test with `(){ a() }`
+	})
+}
+
 func TestFunctionDecl(t *testing.T) {
 	remaining(t, FunctionDecl, Tmap{
 		`func f(){}`:                        {{ret}},
