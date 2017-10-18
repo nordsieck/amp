@@ -1349,6 +1349,31 @@ func MulOp(ss []State) []State {
 	return result
 }
 
+func nonBlankIdent(ss []State) []State {
+	var result []State
+	for _, s := range ss {
+		if p := pop(&s.t); p != nil && p.tok == token.IDENT && p.lit != `_` {
+			result = append(result, State{append(s.r, p), s.t})
+		}
+	}
+	return result
+}
+
+func NonEmptyStatementState(ss []State) []State {
+	return append(nonEmptySimpleStmtState(ss), nonSimpleStatementState(ss)...)
+}
+
+func nonEmptySimpleStmtState(ss []State) []State {
+	return append(
+		append(append(ExpressionStmtState(ss), SendStmtState(ss)...),
+			append(IncDecStmtState(ss), AssignmentState(ss)...)...),
+		ShortVarDeclState(ss)...)
+}
+
+func nonSimpleStatementState(ss []State) []State {
+	return append(DeclarationState(ss), LabeledStmtState(ss)...)
+}
+
 func Operand(ts [][]*Token) [][]*Token {
 	xp := tokenReader(ts, token.LPAREN)
 	if len(xp) != 0 {
@@ -1963,10 +1988,7 @@ func SimpleStmt(ts [][]*Token) [][]*Token {
 }
 
 func SimpleStmtState(ss []State) []State {
-	return append(
-		append(append(EmptyStmtState(ss), ExpressionStmtState(ss)...),
-			append(SendStmtState(ss), IncDecStmtState(ss)...)...),
-		append(AssignmentState(ss), ShortVarDeclState(ss)...)...)
+	return append(EmptyStmtState(ss), nonEmptySimpleStmtState(ss)...)
 }
 
 func Slice(ss []State) []State {
@@ -2077,14 +2099,7 @@ func StatementState(ss []State) []State {
 	if len(ss) == 0 {
 		return nil
 	}
-	return append(append(DeclarationState(ss), LabeledStmtState(ss)...), SimpleStmtState(ss)...)
-}
-
-// TODO: combine this will other functions as much as possible
-func NonEmptyStatementState(ss []State) []State {
-	return append(
-		append(append(ExpressionStmtState(ss), SendStmtState(ss)...), append(IncDecStmtState(ss), AssignmentState(ss)...)...),
-		append(append(ShortVarDeclState(ss), DeclarationState(ss)...), LabeledStmtState(ss)...)...)
+	return append(nonSimpleStatementState(ss), SimpleStmtState(ss)...)
 }
 
 // bad spec
@@ -2635,16 +2650,6 @@ func (v varSpec) Render() []byte {
 		ret = append(append(ret, `=`...), v.exprList.Render()...)
 	}
 	return ret
-}
-
-func nonBlankIdent(ss []State) []State {
-	var result []State
-	for _, s := range ss {
-		if p := pop(&s.t); p != nil && p.tok == token.IDENT && p.lit != `_` {
-			result = append(result, State{append(s.r, p), s.t})
-		}
-	}
-	return result
 }
 
 func tokenReader(ts [][]*Token, tok token.Token) [][]*Token {
