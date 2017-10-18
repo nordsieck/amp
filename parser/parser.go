@@ -831,6 +831,20 @@ func Function(ts [][]*Token) [][]*Token {
 	return Block(ts)
 }
 
+func FunctionState(ss []State) []State {
+	ss = Signature(ss)
+	ss = BlockState(ss)
+	for i, s := range ss {
+		f := function{s.r[len(s.r)-2], s.r[len(s.r)-1]}
+		ss[i].r = rAppend(s.r, 2, f)
+	}
+	return ss
+}
+
+type function struct{ sig, block Renderer }
+
+func (f function) Render() []byte { return append(f.sig.Render(), f.block.Render()...) }
+
 // bad spec
 // "func" FunctionName Function
 func FunctionDecl(ts [][]*Token) [][]*Token {
