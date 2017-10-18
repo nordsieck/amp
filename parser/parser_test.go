@@ -311,6 +311,14 @@ func TestContinueStmt(t *testing.T) {
 	})
 }
 
+func TestContinueStmtState(t *testing.T) {
+	resultState(t, ContinueStmtState, map[string][]StateOutput{
+		`a`:          nil,
+		`continue`:   {min(`continue`)},
+		`continue a`: {{[]string{``, `continue`}, []*Token{ret, a}}, min(`continue a`)},
+	})
+}
+
 func TestConversion(t *testing.T) {
 	remaining(t, Conversion, Tmap{
 		`float(1)`:   {{ret}},
@@ -1298,7 +1306,8 @@ func TestStatementState(t *testing.T) {
 			{[]string{``, `return`}, []*Token{ret, one}},
 			min(`return 1`),
 			{[]string{``}, []*Token{ret, one, {tok: token.RETURN, lit: `return`}}}},
-		`break`: {min(`break`), {[]string{``}, []*Token{ret, {tok: token.BREAK, lit: `break`}}}},
+		`break`:    {min(`break`), {[]string{``}, []*Token{ret, {tok: token.BREAK, lit: `break`}}}},
+		`continue`: {min(`continue`), {[]string{``}, []*Token{ret, {tok: token.CONTINUE, lit: `continue`}}}},
 	})
 }
 
