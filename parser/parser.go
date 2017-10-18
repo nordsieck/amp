@@ -243,6 +243,29 @@ func BreakStmt(ts [][]*Token) [][]*Token {
 	return append(ts, tokenReader(ts, token.IDENT)...)
 }
 
+func BreakStmtState(ss []State) []State {
+	ss = tokenReaderState(ss, token.BREAK)
+	lbl := tokenParserState(ss, token.IDENT)
+
+	for i, l := range lbl {
+		bs := breakStmt{l.r[len(l.r)-1]}
+		lbl[i].r = rAppend(l.r, 1, bs)
+	}
+	for i, s := range ss {
+		ss[i].r = rAppend(s.r, 0, breakStmt{})
+	}
+	return append(ss, lbl...)
+}
+
+type breakStmt struct{ r Renderer }
+
+func (b breakStmt) Render() []byte {
+	if b.r == nil {
+		return []byte(`break`)
+	}
+	return append([]byte(`break `), b.r.Render()...)
+}
+
 func ChannelType(ss []State) []State {
 	plain := tokenReaderState(ss, token.CHAN)
 	after := tokenReaderState(plain, token.ARROW)
@@ -1385,7 +1408,9 @@ func nonEmptySimpleStmtState(ss []State) []State {
 }
 
 func nonSimpleStatementState(ss []State) []State {
-	return append(append(DeclarationState(ss), LabeledStmtState(ss)...), append(GoStmtState(ss), ReturnStmtState(ss)...)...)
+	return append(
+		append(append(DeclarationState(ss), LabeledStmtState(ss)...), append(GoStmtState(ss), ReturnStmtState(ss)...)...),
+		BreakStmtState(ss)...)
 }
 
 func Operand(ts [][]*Token) [][]*Token {

@@ -194,6 +194,14 @@ func TestBreakStmt(t *testing.T) {
 	})
 }
 
+func TestBreakStmtState(t *testing.T) {
+	resultState(t, BreakStmtState, map[string][]StateOutput{
+		`a`:       nil,
+		`break`:   {min(`break`)},
+		`break a`: {{[]string{``, `break`}, []*Token{ret, a}}, min(`break a`)},
+	})
+}
+
 func TestChannelType(t *testing.T) {
 	resultState(t, ChannelType, map[string][]StateOutput{
 		`chan int`:   {{[]string{``, `chan int`}, []*Token{ret}}},
@@ -1290,6 +1298,7 @@ func TestStatementState(t *testing.T) {
 			{[]string{``, `return`}, []*Token{ret, one}},
 			min(`return 1`),
 			{[]string{``}, []*Token{ret, one, {tok: token.RETURN, lit: `return`}}}},
+		`break`: {min(`break`), {[]string{``}, []*Token{ret, {tok: token.BREAK, lit: `break`}}}},
 	})
 }
 
