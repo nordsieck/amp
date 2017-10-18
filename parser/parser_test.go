@@ -554,9 +554,11 @@ func TestFunctionDecl(t *testing.T) {
 }
 
 func TestFunctionLit(t *testing.T) {
-	remaining(t, FunctionLit, Tmap{
-		`func(){}`: {{ret}},
-	})
+	remaining(t, FunctionLit, Tmap{`func(){}`: {{ret}}})
+}
+
+func TestFunctionLitState(t *testing.T) {
+	resultState(t, FunctionLitState, map[string][]StateOutput{`func(){}`: {min(`func(){}`)}})
 }
 
 func TestFunctionType(t *testing.T) {
