@@ -482,6 +482,29 @@ func ContinueStmt(ts [][]*Token) [][]*Token {
 	return append(ts, tokenReader(ts, token.IDENT)...)
 }
 
+func ContinueStmtState(ss []State) []State {
+	ss = tokenReaderState(ss, token.CONTINUE)
+	label := tokenParserState(ss, token.IDENT)
+
+	for i, l := range label {
+		cs := continueStmt{l.r[len(l.r)-1]}
+		label[i].r = rAppend(l.r, 1, cs)
+	}
+	for i, s := range ss {
+		ss[i].r = rAppend(s.r, 0, continueStmt{})
+	}
+	return append(ss, label...)
+}
+
+type continueStmt struct{ r Renderer }
+
+func (c continueStmt) Render() []byte {
+	if c.r == nil {
+		return []byte(`continue`)
+	}
+	return append([]byte(`continue `), c.r.Render()...)
+}
+
 func Conversion(ts [][]*Token) [][]*Token {
 	ts = fromState(Type(toState(ts)))
 	ts = tokenReader(ts, token.LPAREN)
@@ -1410,7 +1433,7 @@ func nonEmptySimpleStmtState(ss []State) []State {
 func nonSimpleStatementState(ss []State) []State {
 	return append(
 		append(append(DeclarationState(ss), LabeledStmtState(ss)...), append(GoStmtState(ss), ReturnStmtState(ss)...)...),
-		BreakStmtState(ss)...)
+		append(BreakStmtState(ss), ContinueStmtState(ss)...)...)
 }
 
 func Operand(ts [][]*Token) [][]*Token {
