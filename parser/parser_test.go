@@ -1314,6 +1314,7 @@ func TestStatementState(t *testing.T) {
 		`continue`:    {min(`continue`), {[]string{``}, []*Token{ret, {tok: token.CONTINUE, lit: `continue`}}}},
 		`goto a`:      {min(`goto a`), {[]string{``}, []*Token{ret, a, {tok: token.GOTO, lit: `goto`}}}},
 		`fallthrough`: {min(`fallthrough`), {[]string{``}, []*Token{ret, {tok: token.FALLTHROUGH, lit: `fallthrough`}}}},
+		`{a()}`:       {min(`{a()}`), {[]string{``}, []*Token{ret, rbrace, rparen, lparen, a, lbrace}}},
 	})
 }
 

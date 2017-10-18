@@ -236,7 +236,13 @@ func BlockState(ss []State) []State {
 
 type block struct{ r Renderer }
 
-func (b block) Render() []byte { return append(append([]byte(`{`), b.r.Render()...), `}`...) }
+func (b block) Render() []byte {
+	ret := []byte(`{`)
+	if b.r != nil {
+		ret = append(ret, b.r.Render()...)
+	}
+	return append(ret, `}`...)
+}
 
 func BreakStmt(ts [][]*Token) [][]*Token {
 	ts = tokenReader(ts, token.BREAK)
@@ -1434,6 +1440,9 @@ func nonBlankIdent(ss []State) []State {
 }
 
 func NonEmptyStatementState(ss []State) []State {
+	if len(ss) == 0 {
+		return nil
+	}
 	return append(nonEmptySimpleStmtState(ss), nonSimpleStatementState(ss)...)
 }
 
@@ -1445,9 +1454,10 @@ func nonEmptySimpleStmtState(ss []State) []State {
 }
 
 func nonSimpleStatementState(ss []State) []State {
-	return append(
+	return append(append(
 		append(append(DeclarationState(ss), LabeledStmtState(ss)...), append(GoStmtState(ss), ReturnStmtState(ss)...)...),
-		append(append(BreakStmtState(ss), ContinueStmtState(ss)...), append(GotoStmtState(ss), FallthroughStmt(ss)...)...)...)
+		append(append(BreakStmtState(ss), ContinueStmtState(ss)...), append(GotoStmtState(ss), FallthroughStmt(ss)...)...)...),
+		BlockState(ss)...)
 }
 
 func Operand(ts [][]*Token) [][]*Token {
