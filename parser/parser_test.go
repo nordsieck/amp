@@ -538,10 +538,10 @@ func TestFunction(t *testing.T) {
 
 func TestFunctionState(t *testing.T) {
 	resultState(t, FunctionState, map[string][]StateOutput{
-		`(){}`:          {min(`(){}`)},
-		`()(){}`:        {min(`()(){}`)},
-		`(int)int{a++}`: {min(`(int)int{a++}`)}, // TODO: change to return
-		// TODO: test with `(){ a() }`
+		`(){}`:             {min(`(){}`)},
+		`()(){}`:           {min(`()(){}`)},
+		`(int)int{return}`: {min(`(int)int{return}`)},
+		`(){a()}`:          {min(`(){a()}`)},
 	})
 }
 
