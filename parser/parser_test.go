@@ -577,6 +577,12 @@ func TestGoStmt(t *testing.T) {
 	remaining(t, GoStmt, Tmap{`go a()`: {{ret, rparen, lparen}, {ret}}})
 }
 
+func TestGoStmtState(t *testing.T) {
+	resultState(t, GoStmtState, map[string][]StateOutput{
+		`go a()`: {{[]string{``, `go a`}, []*Token{ret, rparen, lparen}}, min(`go a()`)},
+	})
+}
+
 func TestGotoStmt(t *testing.T) {
 	remaining(t, GotoStmt, Tmap{`goto a`: {{ret}}, `goto`: empty, `a`: empty})
 }
@@ -1261,6 +1267,29 @@ func TestStatement(t *testing.T) {
 		`select {}`:   {{ret, rbrace, lbrace, {token.SELECT, `select`}}, {ret}},
 		`for {}`:      {{ret, rbrace, lbrace, {token.FOR, `for`}}, {ret}},
 		`defer a()`:   {{ret, rparen, lparen, a, {token.DEFER, `defer`}}, {ret, rparen, lparen}, {ret}},
+	})
+}
+
+func TestStatementState(t *testing.T) {
+	resultState(t, StatementState, map[string][]StateOutput{
+		`var a int`: {min(`var a int`), {[]string{``}, []*Token{ret, _int, a, _var}}},
+		`a: var b int`: {
+			min(`a:var b int`),
+			{[]string{``, `a:`}, []*Token{ret, _int, b, _var}},
+			{[]string{``}, []*Token{ret, _int, b, _var, colon, a}},
+			{[]string{``, `a`}, []*Token{ret, _int, b, _var, colon}}},
+		`a := 1`: {
+			{[]string{``}, []*Token{ret, one, define, a}},
+			{[]string{``, `a`}, []*Token{ret, one, define}},
+			min(`a:=1`)},
+		`go a()`: {
+			{[]string{``, `go a`}, []*Token{ret, rparen, lparen}},
+			min(`go a()`),
+			{[]string{``}, []*Token{ret, rparen, lparen, a, {tok: token.GO, lit: `go`}}}},
+		`return 1`: {
+			{[]string{``, `return`}, []*Token{ret, one}},
+			min(`return 1`),
+			{[]string{``}, []*Token{ret, one, {tok: token.RETURN, lit: `return`}}}},
 	})
 }
 

@@ -892,6 +892,20 @@ func GoStmt(ts [][]*Token) [][]*Token {
 	return Expression(ts)
 }
 
+func GoStmtState(ss []State) []State {
+	ss = tokenReaderState(ss, token.GO)
+	ss = ExpressionState(ss)
+	for i, s := range ss {
+		gs := goStmt{s.r[len(s.r)-1]}
+		ss[i].r = rAppend(s.r, 1, gs)
+	}
+	return ss
+}
+
+type goStmt struct{ r Renderer }
+
+func (g goStmt) Render() []byte { return append([]byte(`go `), g.r.Render()...) }
+
 func GotoStmt(ts [][]*Token) [][]*Token {
 	ts = tokenReader(ts, token.GOTO)
 	return tokenReader(ts, token.IDENT)
@@ -1371,7 +1385,7 @@ func nonEmptySimpleStmtState(ss []State) []State {
 }
 
 func nonSimpleStatementState(ss []State) []State {
-	return append(append(DeclarationState(ss), LabeledStmtState(ss)...), ReturnStmtState(ss)...)
+	return append(append(DeclarationState(ss), LabeledStmtState(ss)...), append(GoStmtState(ss), ReturnStmtState(ss)...)...)
 }
 
 func Operand(ts [][]*Token) [][]*Token {
