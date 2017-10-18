@@ -220,6 +220,24 @@ func Block(ts [][]*Token) [][]*Token {
 	return tokenReader(ts, token.RBRACE)
 }
 
+// bad spec
+// "{" StatementList [ ";" ] "}"
+// omit optional semi because of empty stmt
+func BlockState(ss []State) []State {
+	ss = tokenReaderState(ss, token.LBRACE)
+	ss = StatementListState(ss)
+	ss = tokenReaderState(ss, token.RBRACE)
+	for i, s := range ss {
+		b := block{s.r[len(s.r)-1]}
+		ss[i].r = rAppend(s.r, 1, b)
+	}
+	return ss
+}
+
+type block struct{ r Renderer }
+
+func (b block) Render() []byte { return append(append([]byte(`{`), b.r.Render()...), `}`...) }
+
 func BreakStmt(ts [][]*Token) [][]*Token {
 	ts = tokenReader(ts, token.BREAK)
 	return append(ts, tokenReader(ts, token.IDENT)...)
