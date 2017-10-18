@@ -1181,11 +1181,8 @@ func Literal(ts [][]*Token) [][]*Token {
 	return append(append(basicLit, CompositeLit(ts)...), FunctionLit(ts)...)
 }
 
-// TODO: complete
 func LiteralState(ss []State) []State {
-	return BasicLit(ss)
-	// CompositeLit
-	// FunctionLit
+	return append(append(BasicLit(ss), CompositeLitState(ss)...), FunctionLitState(ss)...)
 }
 
 func LiteralType(ss []State) []State {
