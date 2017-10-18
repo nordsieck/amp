@@ -1310,9 +1310,10 @@ func TestStatementState(t *testing.T) {
 			{[]string{``, `return`}, []*Token{ret, one}},
 			min(`return 1`),
 			{[]string{``}, []*Token{ret, one, {tok: token.RETURN, lit: `return`}}}},
-		`break`:    {min(`break`), {[]string{``}, []*Token{ret, {tok: token.BREAK, lit: `break`}}}},
-		`continue`: {min(`continue`), {[]string{``}, []*Token{ret, {tok: token.CONTINUE, lit: `continue`}}}},
-		`goto a`:   {min(`goto a`), {[]string{``}, []*Token{ret, a, {tok: token.GOTO, lit: `goto`}}}},
+		`break`:       {min(`break`), {[]string{``}, []*Token{ret, {tok: token.BREAK, lit: `break`}}}},
+		`continue`:    {min(`continue`), {[]string{``}, []*Token{ret, {tok: token.CONTINUE, lit: `continue`}}}},
+		`goto a`:      {min(`goto a`), {[]string{``}, []*Token{ret, a, {tok: token.GOTO, lit: `goto`}}}},
+		`fallthrough`: {min(`fallthrough`), {[]string{``}, []*Token{ret, {tok: token.FALLTHROUGH, lit: `fallthrough`}}}},
 	})
 }
 

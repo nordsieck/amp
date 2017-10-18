@@ -1447,7 +1447,7 @@ func nonEmptySimpleStmtState(ss []State) []State {
 func nonSimpleStatementState(ss []State) []State {
 	return append(
 		append(append(DeclarationState(ss), LabeledStmtState(ss)...), append(GoStmtState(ss), ReturnStmtState(ss)...)...),
-		append(append(BreakStmtState(ss), ContinueStmtState(ss)...), GotoStmtState(ss)...)...)
+		append(append(BreakStmtState(ss), ContinueStmtState(ss)...), append(GotoStmtState(ss), FallthroughStmt(ss)...)...)...)
 }
 
 func Operand(ts [][]*Token) [][]*Token {
