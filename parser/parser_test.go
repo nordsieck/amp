@@ -177,6 +177,16 @@ func TestBlock(t *testing.T) {
 	})
 }
 
+func TestBlockState(t *testing.T) {
+	resultState(t, BlockState, map[string][]StateOutput{
+		`{}`:        {min(`{}`)},
+		`{;}`:       {min(`{;}`)},
+		`{a++}`:     {min(`{a++}`)},
+		`{a++;}`:    {min(`{a++;}`)},
+		`{a++;b++}`: {min(`{a++;b++}`)},
+	})
+}
+
 func TestBreakStmt(t *testing.T) {
 	remaining(t, BreakStmt, Tmap{
 		`break a`: {{ret, a}, {ret}},
