@@ -1397,7 +1397,6 @@ func Operand(ts [][]*Token) [][]*Token {
 	return append(append(Literal(ts), OperandName(ts)...), append(MethodExpr(ts), xp...)...)
 }
 
-// TODO: need a way to differentiate between methodExpr and operandName
 func OperandState(ss []State) []State {
 	parens := tokenReaderState(ss, token.LPAREN)
 	if len(parens) != 0 {
