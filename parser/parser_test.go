@@ -1010,6 +1010,7 @@ func TestPrimaryExprState(t *testing.T) {
 		`a[1]`:         {{[]string{``, `a`}, []*Token{ret, rbrack, one, lbrack}}, min(`a[1]`)},
 		`a[:]`:         {{[]string{``, `a`}, []*Token{ret, rbrack, colon, lbrack}}, min(`a[:]`)},
 		`a.(int)`:      {{[]string{``, `a`}, []*Token{ret, rparen, _int, lparen, dot}}, min(`a.(int)`)},
+		`a()`:          {{[]string{``, `a`}, []*Token{ret, rparen, lparen}}, min(`a()`)},
 		`a(b...)`:      {{[]string{``, `a`}, []*Token{ret, rparen, ellipsis, b, lparen}}, min(`a(b...)`)},
 		`a(b,c)`:       {{[]string{``, `a`}, []*Token{ret, rparen, c, comma, b, lparen}}, min(`a(b,c)`)},
 		`a(b)(c)`:      {{[]string{``, `a`}, []*Token{ret, rparen, c, lparen, rparen, b, lparen}}, {[]string{``, `a(b)`}, []*Token{ret, rparen, c, lparen}}, min(`a(b)(c)`)},

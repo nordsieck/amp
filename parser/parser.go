@@ -1634,7 +1634,10 @@ func PrimaryExprState(ss []State) []State {
 				}
 			}
 			if arg, ok := pe[1].(arguments); ok && !arg.ellipsis {
-				el := arg.expressionList.(expressionList)
+				var el expressionList
+				if arg.expressionList != nil {
+					el = arg.expressionList.(expressionList)
+				}
 				if len(el) != 1 {
 					newss = append(newss, s)
 					continue
