@@ -2508,6 +2508,23 @@ func TypeCaseClause(ts [][]*Token) [][]*Token {
 	return StatementList(ts)
 }
 
+func TypeCaseClauseState(ss []State) []State {
+	ss = TypeSwitchCaseState(ss)
+	ss = tokenReaderState(ss, token.COLON)
+	ss = StatementListState(ss)
+	for i, s := range ss {
+		tcc := typeCaseClause{s.r[len(s.r)-2], s.r[len(s.r)-1]}
+		ss[i].r = rAppend(s.r, 2, tcc)
+	}
+	return ss
+}
+
+type typeCaseClause struct{ switchCase, stmtList Renderer }
+
+func (t typeCaseClause) Render() []byte {
+	return append(append(t.switchCase.Render(), `:`...), t.stmtList.Render()...)
+}
+
 func TypeDecl(ts [][]*Token) [][]*Token {
 	ts = tokenReader(ts, token.TYPE)
 	multi := tokenReader(ts, token.LPAREN)
