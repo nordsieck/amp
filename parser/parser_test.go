@@ -1507,6 +1507,14 @@ func TestTypeList(t *testing.T) {
 	})
 }
 
+func TestTypeListState(t *testing.T) {
+	resultState(t, TypeListState, map[string][]StateOutput{
+		`a`:    {min(`a`)},
+		`a,b`:  {{[]string{``, `a`}, []*Token{ret, b, comma}}, min(`a,b`)},
+		`a,b,`: {{[]string{``, `a`}, []*Token{comma, b, comma}}, {[]string{``, `a,b`}, []*Token{comma}}},
+	})
+}
+
 func TestTypeLit(t *testing.T) {
 	resultState(t, TypeLit, map[string][]StateOutput{
 		`[1]int`:      {{[]string{``, `[1]int`}, []*Token{ret}}},
