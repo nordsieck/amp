@@ -524,6 +524,28 @@ func TestExprSwitchStmt(t *testing.T) {
 	})
 }
 
+func TestExprSwitchStmtState(t *testing.T) {
+	resultState(t, ExprSwitchStmtState, map[string][]StateOutput{
+		`switch {}`:                                         {min(`switch {}`)},
+		`switch {default:}`:                                 {min(`switch {default:}`)},
+		`switch {default:;}`:                                {min(`switch {default:;}`)},
+		`switch a:=1; {}`:                                   {min(`switch a:=1;{}`)},
+		`switch a{}`:                                        {min(`switch a{}`)},
+		`switch a:=1;a{}`:                                   {min(`switch a:=1;a{}`)},
+		`switch a:=1;a{default:}`:                           {min(`switch a:=1;a{default:}`)},
+		`switch {case true:}`:                               {min(`switch {case true:}`)},
+		`switch {case true:a()}`:                            {min(`switch {case true:a()}`)},
+		`switch {case true:a();case false:b();default:c()}`: {min(`switch {case true:a();case false:b();default:c()}`)},
+	})
+}
+
+func TestExprSwitchStmt_Render(t *testing.T) {
+	defect.Equal(t, string(exprSwitchStmt{}.Render()), `switch {}`)
+	defect.Equal(t, string(exprSwitchStmt{shortVarDecl{a, b}, nil, nil}.Render()), `switch a:=b;{}`)
+	defect.Equal(t, string(exprSwitchStmt{nil, a, nil}.Render()), `switch a{}`)
+	defect.Equal(t, string(exprSwitchStmt{nil, nil, []Renderer{exprCaseClause{exprSwitchCase{a}, b}, exprCaseClause{exprSwitchCase{}, c}}}.Render()), `switch {case a:b;default:c}`)
+}
+
 func TestFallthroughStmt(t *testing.T) {
 	resultState(t, FallthroughStmt, map[string][]StateOutput{
 		`fallthrough`: {{[]string{``, `fallthrough`}, []*Token{ret}}},

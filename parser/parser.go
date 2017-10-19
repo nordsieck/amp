@@ -857,6 +857,82 @@ func ExprSwitchStmt(ts [][]*Token) [][]*Token {
 	return tokenReader(ts, token.RBRACE)
 }
 
+// bad spec
+// "switch" [ SimpleStmt ";" ] [ Expression ] "{" [ ExprCaseClause { ";" ExprCaseClause } [ ";" ]] "}"
+func ExprSwitchStmtState(ss []State) []State {
+	ss = tokenParserState(ss, token.SWITCH)
+
+	simple := SimpleStmtState(ss)
+	simple = tokenReaderState(simple, token.SEMICOLON)
+	for i, s := range simple {
+		var ess exprSwitchStmt
+		if tok, ok := s.r[len(s.r)-1].(*Token); ok && tok.tok == token.SWITCH {
+			ess.simple = e{}
+		} else {
+			ess.simple = s.r[len(s.r)-1]
+			s.r = s.r[:len(s.r)-1]
+		}
+		simple[i].r = rAppend(s.r, 1, ess)
+	}
+	for i, s := range ss {
+		ss[i].r = rAppend(s.r, 1, exprSwitchStmt{})
+	}
+	ss = append(ss, simple...)
+
+	expr := ExpressionState(ss)
+	for i, e := range expr {
+		ess := e.r[len(e.r)-2].(exprSwitchStmt)
+		ess.expr = e.r[len(e.r)-1]
+		expr[i].r = rAppend(e.r, 2, ess)
+	}
+	ss = append(ss, expr...)
+	ss = tokenReaderState(ss, token.LBRACE)
+	loop := ExprCaseClauseState(ss)
+	for i, l := range loop {
+		ess := l.r[len(l.r)-2].(exprSwitchStmt)
+		ess.clauses = append(ess.clauses, l.r[len(l.r)-1])
+		loop[i].r = rAppend(l.r, 2, ess)
+	}
+	ss = append(ss, loop...)
+	for len(loop) != 0 {
+		loop = tokenReaderState(loop, token.SEMICOLON)
+		loop = ExprCaseClauseState(loop)
+		for i, l := range loop {
+			ess := l.r[len(l.r)-2].(exprSwitchStmt)
+			ess.clauses = append(ess.clauses, l.r[len(l.r)-1])
+			loop[i].r = rAppend(l.r, 2, ess)
+		}
+		ss = append(ss, loop...)
+	}
+	return tokenReaderState(ss, token.RBRACE)
+}
+
+type exprSwitchStmt struct {
+	simple, expr Renderer
+	clauses      []Renderer
+}
+
+func (e exprSwitchStmt) Render() []byte {
+	ret := []byte(`switch `)
+	if e.simple != nil {
+		ret = append(ret, e.simple.Render()...)
+		ret = append(ret, `;`...)
+	}
+	if e.expr != nil {
+		ret = append(ret, e.expr.Render()...)
+	}
+	ret = append(ret, `{`...)
+	if len(e.clauses) == 0 {
+		return append(ret, `}`...)
+	}
+	ret = append(ret, e.clauses[0].Render()...)
+	for i := 1; i < len(e.clauses); i++ {
+		ret = append(ret, `;`...)
+		ret = append(ret, e.clauses[i].Render()...)
+	}
+	return append(ret, `}`...)
+}
+
 func FallthroughStmt(ss []State) []State { return tokenParserState(ss, token.FALLTHROUGH) }
 
 func FieldDecl(ss []State) []State {
@@ -2203,6 +2279,7 @@ func SimpleStmt(ts [][]*Token) [][]*Token {
 		append(Assignment(ts), ShortVarDecl(ts)...)...)
 }
 
+// TODO wrap the return of this function so I don't have to worry about returning nothing.
 func SimpleStmtState(ss []State) []State {
 	return append(EmptyStmtState(ss), nonEmptySimpleStmtState(ss)...)
 }
