@@ -2683,6 +2683,30 @@ func TypeSwitchCase(ts [][]*Token) [][]*Token {
 	return append(TypeList(cas), tokenReader(ts, token.DEFAULT)...)
 }
 
+func TypeSwitchCaseState(ss []State) []State {
+	cas := tokenReaderState(ss, token.CASE)
+	cas = TypeListState(cas)
+	for i, c := range cas {
+		tsc := typeSwitchCase{c.r[len(c.r)-1]}
+		cas[i].r = rAppend(c.r, 1, tsc)
+	}
+
+	ss = tokenReaderState(ss, token.DEFAULT)
+	for i, s := range ss {
+		ss[i].r = rAppend(s.r, 0, typeSwitchCase{})
+	}
+	return append(ss, cas...)
+}
+
+type typeSwitchCase struct{ r Renderer }
+
+func (t typeSwitchCase) Render() []byte {
+	if t.r == nil {
+		return []byte(`default`)
+	}
+	return append([]byte(`case `), t.r.Render()...)
+}
+
 func TypeSwitchGuard(ts [][]*Token) [][]*Token {
 	id := tokenReader(ts, token.IDENT)
 	ts = append(ts, tokenReader(id, token.DEFINE)...)
