@@ -681,6 +681,24 @@ func ExprCaseClause(ts [][]*Token) [][]*Token {
 	return StatementList(ts)
 }
 
+func ExprCaseClauseState(ss []State) []State {
+	ss = ExprSwitchCaseState(ss)
+	ss = tokenParserState(ss, token.COLON)
+	ss = StatementListState(ss)
+	for i, s := range ss {
+		ecc := exprCaseClause{s.r[len(s.r)-3], s.r[len(s.r)-1]}
+		ss[i].r = rAppend(s.r, 3, ecc)
+	}
+	return ss
+}
+
+type exprCaseClause struct{ switchCase, stmtList Renderer }
+
+// expects a stmtList, even if it's empty
+func (e exprCaseClause) Render() []byte {
+	return append(append(e.switchCase.Render(), `:`...), e.stmtList.Render()...)
+}
+
 func Expression(ts [][]*Token) [][]*Token {
 	base := UnaryExpr(ts)
 	comp := fromState(BinaryOp(toState(base)))

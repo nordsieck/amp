@@ -431,6 +431,20 @@ func TestExprCaseClause(t *testing.T) {
 	})
 }
 
+func TestExprCaseClauseState(t *testing.T) {
+	resultState(t, ExprCaseClauseState, map[string][]StateOutput{
+		`default:`: {{[]string{``, `default:`}, []*Token{}}},
+		`default:a;b`: {
+			{[]string{``, `default:`}, []*Token{ret, b, semi, a}},
+			{[]string{``, `default:a`}, []*Token{ret, b, semi}},
+			{[]string{``, `default:a;`}, []*Token{ret, b}},
+			min(`default:a;b`),
+			{[]string{``, `default:a;b;`}, []*Token{}}},
+		`case a:`:  {{[]string{``, `case a:`}, []*Token{}}},
+		`case a:b`: {{[]string{``, `case a:`}, []*Token{ret, b}}, min(`case a:b`), {[]string{``, `case a:b;`}, []*Token{}}},
+	})
+}
+
 func TestExpression(t *testing.T) {
 	remaining(t, Expression, Tmap{
 		`1`:    {{ret}},
