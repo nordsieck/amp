@@ -1559,6 +1559,14 @@ func TestTypeSwitchCase(t *testing.T) {
 	})
 }
 
+func TestTypeSwitchCaseState(t *testing.T) {
+	resultState(t, TypeSwitchCaseState, map[string][]StateOutput{
+		`default`:  {{[]string{``, `default`}, []*Token{}}},
+		`case a`:   {min(`case a`)},
+		`case a,b`: {{[]string{``, `case a`}, []*Token{ret, b, comma}}, min(`case a,b`)},
+	})
+}
+
 func TestTypeSwitchGuard(t *testing.T) {
 	remaining(t, TypeSwitchGuard, Tmap{
 		`a.(type)`:      {{ret}},
