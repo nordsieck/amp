@@ -2626,6 +2626,39 @@ func TypeList(ts [][]*Token) [][]*Token {
 	return ts
 }
 
+func TypeListState(ss []State) []State {
+	ss = Type(ss)
+	for i, s := range ss {
+		tl := typeList{s.r[len(s.r)-1]}
+		ss[i].r = rAppend(s.r, 1, tl)
+	}
+	loop := ss
+	for len(loop) != 0 {
+		loop = tokenReaderState(loop, token.COMMA)
+		loop = Type(loop)
+		for i, l := range loop {
+			tl := append(l.r[len(l.r)-2].(typeList), l.r[len(l.r)-1])
+			loop[i].r = rAppend(l.r, 2, tl)
+		}
+		ss = append(ss, loop...)
+	}
+	return ss
+}
+
+type typeList []Renderer
+
+func (t typeList) Render() []byte {
+	if len(t) == 0 {
+		return nil
+	}
+	ret := t[0].Render()
+	for i := 1; i < len(t); i++ {
+		ret = append(ret, `,`...)
+		ret = append(ret, t[i].Render()...)
+	}
+	return ret
+}
+
 func TypeLit(ss []State) []State {
 	return append(
 		append(append(ArrayType(ss), StructType(ss)...),
