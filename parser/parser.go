@@ -2734,6 +2734,43 @@ func TypeSwitchGuard(ts [][]*Token) [][]*Token {
 	return tokenReader(ts, token.RPAREN)
 }
 
+func TypeSwitchGuardState(ss []State) []State {
+	id := tokenParserState(ss, token.IDENT)
+	id = tokenReaderState(id, token.DEFINE)
+	id = PrimaryExprState(id)
+	id = tokenReaderState(id, token.PERIOD)
+	id = tokenReaderState(id, token.LPAREN)
+	id = tokenReaderState(id, token.TYPE)
+	id = tokenReaderState(id, token.RPAREN)
+	for i, elem := range id {
+		tsg := typeSwitchGuard{elem.r[len(elem.r)-2], elem.r[len(elem.r)-1]}
+		id[i].r = rAppend(elem.r, 2, tsg)
+	}
+
+	ss = PrimaryExprState(ss)
+	ss = tokenReaderState(ss, token.PERIOD)
+	ss = tokenReaderState(ss, token.LPAREN)
+	ss = tokenReaderState(ss, token.TYPE)
+	ss = tokenReaderState(ss, token.RPAREN)
+	for i, s := range ss {
+		tsg := typeSwitchGuard{expr: s.r[len(s.r)-1]}
+		ss[i].r = rAppend(s.r, 1, tsg)
+	}
+
+	return append(ss, id...)
+}
+
+type typeSwitchGuard struct{ id, expr Renderer }
+
+func (t typeSwitchGuard) Render() []byte {
+	var ret []byte
+	if t.id != nil {
+		ret = append(t.id.Render(), `:=`...)
+	}
+	ret = append(ret, t.expr.Render()...)
+	return append(ret, `.(type)`...)
+}
+
 // bad spec
 // "switch" [ SimpleStmt ";" ] TypeSwitchGuard "{" [ TypeCaseClause { ";" TypeCaseClause } [ ";" ]] "}"
 func TypeSwitchStmt(ts [][]*Token) [][]*Token {

@@ -1588,6 +1588,13 @@ func TestTypeSwitchGuard(t *testing.T) {
 	})
 }
 
+func TestTypeSwitchGuardState(t *testing.T) {
+	resultState(t, TypeSwitchGuardState, map[string][]StateOutput{
+		`a.(type)`:    {min(`a.(type)`)},
+		`a:=b.(type)`: {min(`a:=b.(type)`)},
+	})
+}
+
 func TestTypeSwitchStmt(t *testing.T) {
 	remaining(t, TypeSwitchStmt, Tmap{
 		`switch a.(type) {}`:                              {{ret}},
