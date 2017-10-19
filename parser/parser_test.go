@@ -488,6 +488,14 @@ func TestExprSwitchCase(t *testing.T) {
 	})
 }
 
+func TestExprSwitchCaseState(t *testing.T) {
+	resultState(t, ExprSwitchCaseState, map[string][]StateOutput{
+		`case 1`:   {min(`case 1`)},
+		`case 1,2`: {{[]string{``, `case 1`}, []*Token{ret, two, comma}}, min(`case 1,2`)},
+		`default`:  {{[]string{``, `default`}, []*Token{}}},
+	})
+}
+
 func TestExprSwitchStmt(t *testing.T) {
 	remaining(t, ExprSwitchStmt, Tmap{
 		`switch{}`:                                               {{ret}},
