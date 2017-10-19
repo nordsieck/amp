@@ -1468,6 +1468,20 @@ func TestTypeCaseClause(t *testing.T) {
 	})
 }
 
+func TestTypeCaseClauseState(t *testing.T) {
+	resultState(t, TypeCaseClauseState, map[string][]StateOutput{
+		`case a:`:  {{[]string{``, `case a:`}, []*Token{}}},
+		`case a:b`: {{[]string{``, `case a:`}, []*Token{ret, b}}, min(`case a:b`), {[]string{``, `case a:b;`}, []*Token{}}},
+		`default:`: {{[]string{``, `default:`}, []*Token{}}},
+		`case a,b:c;d`: {
+			{[]string{``, `case a,b:`}, []*Token{ret, d, semi, c}},
+			{[]string{``, `case a,b:c`}, []*Token{ret, d, semi}},
+			{[]string{``, `case a,b:c;`}, []*Token{ret, d}},
+			min(`case a,b:c;d`),
+			{[]string{``, `case a,b:c;d;`}, []*Token{}}},
+	})
+}
+
 func TestTypeDecl(t *testing.T) {
 	remaining(t, TypeDecl, Tmap{
 		`type a int`:           {{ret}},
