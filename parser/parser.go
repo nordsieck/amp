@@ -791,6 +791,30 @@ func ExprSwitchCase(ts [][]*Token) [][]*Token {
 	return append(tokenReader(ts, token.DEFAULT), cas...)
 }
 
+func ExprSwitchCaseState(ss []State) []State {
+	cas := tokenReaderState(ss, token.CASE)
+	cas = ExpressionListState(cas)
+	for i, c := range cas {
+		esc := exprSwitchCase{c.r[len(c.r)-1]}
+		cas[i].r = rAppend(c.r, 1, esc)
+	}
+
+	def := tokenReaderState(ss, token.DEFAULT)
+	for i, d := range def {
+		def[i].r = rAppend(d.r, 0, exprSwitchCase{})
+	}
+	return append(def, cas...)
+}
+
+type exprSwitchCase struct{ r Renderer }
+
+func (e exprSwitchCase) Render() []byte {
+	if e.r == nil {
+		return []byte(`default`)
+	}
+	return append([]byte(`case `), e.r.Render()...)
+}
+
 // bad spec
 // "switch" [ SimpleStmt ";" ] [ Expression ] "{" [ ExprCaseClause { ";" ExprCaseClause } [ ";" ]] "}"
 func ExprSwitchStmt(ts [][]*Token) [][]*Token {
