@@ -2101,6 +2101,48 @@ func RecvStmt(ts [][]*Token) [][]*Token {
 	return Expression(append(ts, append(expr, ident...)...))
 }
 
+func RecvStmtState(ss []State) []State {
+	expr := ExpressionListState(ss)
+	expr = tokenReaderState(expr, token.ASSIGN)
+	expr = ExpressionState(expr)
+	for i, e := range expr {
+		rs := recvStmt{e.r[len(e.r)-2], e.r[len(e.r)-1], false}
+		expr[i].r = rAppend(e.r, 2, rs)
+	}
+
+	ids := IdentifierList(ss)
+	ids = tokenReaderState(ids, token.DEFINE)
+	ids = ExpressionState(ids)
+	for i, id := range ids {
+		rs := recvStmt{id.r[len(id.r)-2], id.r[len(id.r)-1], true}
+		ids[i].r = rAppend(id.r, 2, rs)
+	}
+
+	ss = ExpressionState(ss)
+	for i, s := range ss {
+		rs := recvStmt{expr: s.r[len(s.r)-1]}
+		ss[i].r = rAppend(s.r, 1, rs)
+	}
+	return append(append(expr, ids...), ss...)
+}
+
+type recvStmt struct {
+	list, expr Renderer
+	define     bool
+}
+
+func (r recvStmt) Render() []byte {
+	var ret []byte
+	if r.list != nil {
+		if r.define {
+			ret = append(r.list.Render(), `:=`...)
+		} else {
+			ret = append(r.list.Render(), `=`...)
+		}
+	}
+	return append(ret, r.expr.Render()...)
+}
+
 func RelOp(ss []State) []State {
 	var result []State
 	for _, s := range ss {
