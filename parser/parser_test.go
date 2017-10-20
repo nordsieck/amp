@@ -1629,6 +1629,24 @@ func TestTypeSwitchStmt(t *testing.T) {
 	})
 }
 
+func TestTypeSwitchStmtState(t *testing.T) {
+	resultState(t, TypeSwitchStmtState, map[string][]StateOutput{
+		`switch a.(type){}`:                         {min(`switch a.(type){}`)},
+		`switch a:=1;a:=a.(type){}`:                 {min(`switch a:=1;a:=a.(type){}`)},
+		`switch a.(type){case int:}`:                {min(`switch a.(type){case int:}`)},
+		`switch a.(type){case int:;}`:               {min(`switch a.(type){case int:;}`)},
+		`switch a.(type){case int:b()}`:             {min(`switch a.(type){case int:b()}`)},
+		`switch a.(type){case int:b();default:c()}`: {min(`switch a.(type){case int:b();default:c()}`)},
+	})
+}
+
+func TestTypeSwitchStmt_Render(t *testing.T) {
+	defect.Equal(t, string(typeSwitchStmt{nil, typeSwitchGuard{nil, a}, nil}.Render()), `switch a.(type){}`)
+	defect.Equal(t, string(typeSwitchStmt{shortVarDecl{a, one}, typeSwitchGuard{nil, a}, nil}.Render()), `switch a:=1;a.(type){}`)
+	defect.Equal(t, string(typeSwitchStmt{nil, typeSwitchGuard{nil, a},
+		[]Renderer{typeCaseClause{typeSwitchCase{typeList{b, c}}, e{}}, typeCaseClause{typeSwitchCase{}, e{}}}}.Render()), `switch a.(type){case b,c:;default:}`)
+}
+
 func TestUnaryExpr(t *testing.T) {
 	remaining(t, UnaryExpr, Tmap{
 		`1`:  {{ret}},

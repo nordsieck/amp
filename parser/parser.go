@@ -2869,6 +2869,77 @@ func TypeSwitchStmt(ts [][]*Token) [][]*Token {
 	return tokenReader(ts, token.RBRACE)
 }
 
+// bad spec
+// "switch" [ SimpleStmt ";" ] TypeSwitchGuard "{" [ TypeCaseClause { ";" TypeCaseClause } [ ";" ]] "}"
+func TypeSwitchStmtState(ss []State) []State {
+	ss = tokenParserState(ss, token.SWITCH)
+	simple := SimpleStmtState(ss)
+	simple = tokenReaderState(simple, token.SEMICOLON)
+	for i, s := range simple {
+		var tss typeSwitchStmt
+		if tok, ok := s.r[len(s.r)-1].(*Token); ok && tok.tok == token.SWITCH {
+			tss.stmt = e{}
+		} else {
+			tss.stmt = s.r[len(s.r)-1]
+			s.r = s.r[:len(s.r)-1]
+		}
+		simple[i].r = rAppend(s.r, 1, tss)
+	}
+	for i, s := range ss {
+		ss[i].r = rAppend(s.r, 1, typeSwitchStmt{})
+	}
+	ss = append(ss, simple...)
+	ss = TypeSwitchGuardState(ss)
+	for i, s := range ss {
+		tss := s.r[len(s.r)-2].(typeSwitchStmt)
+		tss.guard = s.r[len(s.r)-1]
+		ss[i].r = rAppend(s.r, 2, tss)
+	}
+	ss = tokenReaderState(ss, token.LBRACE)
+	loop := TypeCaseClauseState(ss)
+	for i, l := range loop {
+		tss := l.r[len(l.r)-2].(typeSwitchStmt)
+		tss.clauses = append(tss.clauses, l.r[len(l.r)-1])
+		loop[i].r = rAppend(l.r, 2, tss)
+	}
+	ss = append(ss, loop...)
+	for len(loop) != 0 {
+		loop = tokenReaderState(loop, token.SEMICOLON)
+		loop = TypeCaseClauseState(loop)
+		for i, l := range loop {
+			tss := l.r[len(l.r)-2].(typeSwitchStmt)
+			tss.clauses = append(tss.clauses, l.r[len(l.r)-1])
+			loop[i].r = rAppend(l.r, 2, tss)
+		}
+		ss = append(ss, loop...)
+	}
+	return tokenReaderState(ss, token.RBRACE)
+}
+
+type typeSwitchStmt struct {
+	stmt, guard Renderer
+	clauses     []Renderer
+}
+
+func (t typeSwitchStmt) Render() []byte {
+	ret := []byte(`switch `)
+	if t.stmt != nil {
+		ret = append(ret, t.stmt.Render()...)
+		ret = append(ret, `;`...)
+	}
+	ret = append(ret, t.guard.Render()...)
+	ret = append(ret, `{`...)
+	if len(t.clauses) == 0 {
+		return append(ret, `}`...)
+	}
+	ret = append(ret, t.clauses[0].Render()...)
+	for i := 1; i < len(t.clauses); i++ {
+		ret = append(ret, `;`...)
+		ret = append(ret, t.clauses[i].Render()...)
+	}
+	return append(ret, `}`...)
+}
+
 func UnaryExpr(ts [][]*Token) [][]*Token {
 	uo := fromState(UnaryOp(toState(ts)))
 	if len(uo) == 0 {
