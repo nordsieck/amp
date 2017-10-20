@@ -1270,6 +1270,15 @@ func TestSelectStmt(t *testing.T) {
 	})
 }
 
+func TestSelectStmtState(t *testing.T) {
+	resultState(t, SelectStmtState, map[string][]StateOutput{
+		`select {}`:                                       {min(`select {}`)},
+		`select {default:}`:                               {min(`select {default:}`)},
+		`select {default:a()}`:                            {min(`select {default:a()}`)},
+		`select {case <-a:b();case c<-d:e();default:f()}`: {min(`select {case <-a:b();case c<-d:e();default:f()}`)},
+	})
+}
+
 func TestSendStmt(t *testing.T) {
 	remaining(t, SendStmt, Tmap{`a <- 1`: {{ret}}})
 }
@@ -1423,6 +1432,7 @@ func TestStatementState(t *testing.T) {
 		`{a()}`:       {min(`{a()}`), {[]string{``}, []*Token{ret, rbrace, rparen, lparen, a, lbrace}}},
 		`if a{}`:      {min(`if a{}`), {[]string{``}, []*Token{ret, rbrace, lbrace, a, _if}}},
 		`switch {}`:   {min(`switch {}`), {[]string{``}, []*Token{ret, rbrace, lbrace, {token.SWITCH, `switch`}}}},
+		`select {}`:   {min(`select {}`), {[]string{``}, []*Token{ret, rbrace, lbrace, {token.SELECT, `select`}}}},
 	})
 }
 

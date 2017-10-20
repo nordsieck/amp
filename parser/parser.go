@@ -1691,7 +1691,7 @@ func nonSimpleStatementState(ss []State) []State {
 	return append(append(
 		append(append(DeclarationState(ss), LabeledStmtState(ss)...), append(GoStmtState(ss), ReturnStmtState(ss)...)...),
 		append(append(BreakStmtState(ss), ContinueStmtState(ss)...), append(GotoStmtState(ss), FallthroughStmt(ss)...)...)...),
-		append(append(BlockState(ss), IfStmtState(ss)...), SwitchStmtState(ss)...)...)
+		append(append(BlockState(ss), IfStmtState(ss)...), append(SwitchStmtState(ss), SelectStmtState(ss)...)...)...)
 }
 
 func Operand(ts [][]*Token) [][]*Token {
@@ -2290,6 +2290,50 @@ func SelectStmt(ts [][]*Token) [][]*Token {
 	clause = append(clause, tokenReader(clause, token.SEMICOLON)...)
 	ts = append(ts, clause...)
 	return tokenReader(ts, token.RBRACE)
+}
+
+// bad spec
+// "select" "{" [ CommClause { ";" CommClause } [ ";" ]] "}"
+func SelectStmtState(ss []State) []State {
+	ss = tokenReaderState(ss, token.SELECT)
+	ss = tokenReaderState(ss, token.LBRACE)
+
+	loop := CommClauseState(ss)
+	for i, l := range loop {
+		sel := selectStmt{l.r[len(l.r)-1]}
+		loop[i].r = rAppend(l.r, 1, sel)
+	}
+	for i, s := range ss {
+		ss[i].r = rAppend(s.r, 0, selectStmt{})
+	}
+	ss = append(ss, loop...)
+	for len(loop) != 0 {
+		loop = tokenReaderState(loop, token.SEMICOLON)
+		loop = CommClauseState(loop)
+		for i, l := range loop {
+			sel := l.r[len(l.r)-2].(selectStmt)
+			sel = append(sel, l.r[len(l.r)-1])
+			loop[i].r = rAppend(l.r, 2, sel)
+		}
+		ss = append(ss, loop...)
+	}
+
+	return tokenReaderState(ss, token.RBRACE)
+}
+
+type selectStmt []Renderer
+
+func (s selectStmt) Render() []byte {
+	ret := []byte(`select {`)
+	if len(s) == 0 {
+		return append(ret, `}`...)
+	}
+	ret = append(ret, s[0].Render()...)
+	for i := 1; i < len(s); i++ {
+		ret = append(ret, `;`...)
+		ret = append(ret, s[i].Render()...)
+	}
+	return append(ret, `}`...)
 }
 
 func SendStmt(ts [][]*Token) [][]*Token {
