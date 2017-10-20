@@ -724,6 +724,13 @@ func EmptyStmt(ts [][]*Token) [][]*Token { return ts }
 // TODO: figure out a way to minimize the use of EmptyStmt
 func EmptyStmtState(ss []State) []State { return ss }
 
+func NewEmptyStmtState(ss []State) []State {
+	for i, s := range ss {
+		ss[i].r = rAppend(s.r, 0, e{})
+	}
+	return ss
+}
+
 func ExprCaseClause(ts [][]*Token) [][]*Token {
 	ts = ExprSwitchCase(ts)
 	ts = tokenReader(ts, token.COLON)
