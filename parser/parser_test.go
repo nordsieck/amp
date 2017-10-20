@@ -1345,6 +1345,16 @@ func TestSimpleStmtState(t *testing.T) {
 	})
 }
 
+func TestNewSimpleStmtState(t *testing.T) {
+	resultState(t, NewSimpleStmtState, map[string][]StateOutput{
+		`1`:    {min(`1`), {[]string{``, ``}, []*Token{ret, one}}},
+		`a<-1`: {{[]string{``, `a`}, []*Token{ret, one, arrow}}, min(`a<-1`), {[]string{``, ``}, []*Token{ret, one, arrow, a}}},
+		`a++`:  {{[]string{``, `a`}, []*Token{ret, inc}}, min(`a++`), {[]string{``, ``}, []*Token{ret, inc, a}}},
+		`a=1`:  {{[]string{``, `a`}, []*Token{ret, one, assign}}, min(`a=1`), {[]string{``, ``}, []*Token{ret, one, assign, a}}},
+		`a:=1`: {{[]string{``, `a`}, []*Token{ret, one, define}}, min(`a:=1`), {[]string{``, ``}, []*Token{ret, one, define, a}}},
+	})
+}
+
 func TestSlice(t *testing.T) {
 	resultState(t, Slice, map[string][]StateOutput{
 		`[:]`:     {min(`[:]`)},

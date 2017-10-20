@@ -2490,6 +2490,11 @@ func SimpleStmtState(ss []State) []State {
 	return append(EmptyStmtState(ss), nonEmptySimpleStmtState(ss)...)
 }
 
+// TODO: clean up
+func NewSimpleStmtState(ss []State) []State {
+	return append(nonEmptySimpleStmtState(ss), NewEmptyStmtState(ss)...)
+}
+
 func Slice(ss []State) []State {
 	ss = tokenParserState(ss, token.LBRACK)
 	ss = append(ss, ExpressionState(ss)...)
