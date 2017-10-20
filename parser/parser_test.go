@@ -1386,6 +1386,7 @@ func TestStatementState(t *testing.T) {
 		`fallthrough`: {min(`fallthrough`), {[]string{``}, []*Token{ret, {tok: token.FALLTHROUGH, lit: `fallthrough`}}}},
 		`{a()}`:       {min(`{a()}`), {[]string{``}, []*Token{ret, rbrace, rparen, lparen, a, lbrace}}},
 		`if a{}`:      {min(`if a{}`), {[]string{``}, []*Token{ret, rbrace, lbrace, a, _if}}},
+		`switch {}`:   {min(`switch {}`), {[]string{``}, []*Token{ret, rbrace, lbrace, {token.SWITCH, `switch`}}}},
 	})
 }
 
@@ -1441,6 +1442,13 @@ func TestSwitchStmt(t *testing.T) {
 	remaining(t, SwitchStmt, Tmap{
 		`switch {}`:          {{ret}},
 		`switch a.(type) {}`: {{ret}},
+	})
+}
+
+func TestSwitchStmtState(t *testing.T) {
+	resultState(t, SwitchStmtState, map[string][]StateOutput{
+		`switch {}`:         {min(`switch {}`)},
+		`switch a.(type){}`: {min(`switch a.(type){}`)},
 	})
 }
 

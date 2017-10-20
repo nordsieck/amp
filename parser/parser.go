@@ -1642,7 +1642,7 @@ func nonSimpleStatementState(ss []State) []State {
 	return append(append(
 		append(append(DeclarationState(ss), LabeledStmtState(ss)...), append(GoStmtState(ss), ReturnStmtState(ss)...)...),
 		append(append(BreakStmtState(ss), ContinueStmtState(ss)...), append(GotoStmtState(ss), FallthroughStmt(ss)...)...)...),
-		append(BlockState(ss), IfStmtState(ss)...)...)
+		append(append(BlockState(ss), IfStmtState(ss)...), SwitchStmtState(ss)...)...)
 }
 
 func Operand(ts [][]*Token) [][]*Token {
@@ -2519,6 +2519,10 @@ func (st structType) Render() []byte {
 }
 
 func SwitchStmt(ts [][]*Token) [][]*Token { return append(ExprSwitchStmt(ts), TypeSwitchStmt(ts)...) }
+
+func SwitchStmtState(ss []State) []State {
+	return append(ExprSwitchStmtState(ss), TypeSwitchStmtState(ss)...)
+}
 
 func TopLevelDecl(ts [][]*Token) [][]*Token {
 	return append(append(Declaration(ts), FunctionDecl(ts)...), MethodDecl(ts)...)
