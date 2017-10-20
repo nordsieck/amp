@@ -244,6 +244,14 @@ func TestCommCase(t *testing.T) {
 	})
 }
 
+func TestCommCaseState(t *testing.T) {
+	resultState(t, CommCaseState, map[string][]StateOutput{
+		`default`:   {{[]string{``, `default`}, []*Token{}}},
+		`case <-a`:  {min(`case <-a`)},
+		`case a<-1`: {min(`case a<-1`), {[]string{``, `case a`}, []*Token{ret, one, arrow}}},
+	})
+}
+
 func TestCommClause(t *testing.T) {
 	remaining(t, CommClause, Tmap{
 		`default:`:     {{}},

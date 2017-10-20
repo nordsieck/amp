@@ -324,6 +324,38 @@ func CommCase(ts [][]*Token) [][]*Token {
 	return append(cas, tokenReader(ts, token.DEFAULT)...)
 }
 
+func CommCaseState(ss []State) []State {
+	def := tokenReaderState(ss, token.DEFAULT)
+	for i, d := range def {
+		def[i].r = rAppend(d.r, 0, commCase{})
+	}
+	ss = tokenReaderState(ss, token.CASE)
+	send := SendStmtState(ss)
+	for i, s := range send {
+		cc := commCase{s.r[len(s.r)-1], true}
+		send[i].r = rAppend(s.r, 1, cc)
+	}
+
+	recv := RecvStmtState(ss)
+	for i, r := range recv {
+		cc := commCase{r.r[len(r.r)-1], false}
+		recv[i].r = rAppend(r.r, 1, cc)
+	}
+	return append(append(send, recv...), def...)
+}
+
+type commCase struct {
+	stmt Renderer
+	send bool // here so we can tell what type stmt is
+}
+
+func (c commCase) Render() []byte {
+	if c.stmt == nil {
+		return []byte(`default`)
+	}
+	return append([]byte(`case `), c.stmt.Render()...)
+}
+
 func CommClause(ts [][]*Token) [][]*Token {
 	ts = CommCase(ts)
 	ts = tokenReader(ts, token.COLON)
