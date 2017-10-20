@@ -362,6 +362,23 @@ func CommClause(ts [][]*Token) [][]*Token {
 	return StatementList(ts)
 }
 
+func CommClauseState(ss []State) []State {
+	ss = CommCaseState(ss)
+	ss = tokenReaderState(ss, token.COLON)
+	ss = StatementListState(ss)
+	for i, s := range ss {
+		cc := commClause{s.r[len(s.r)-2], s.r[len(s.r)-1]}
+		ss[i].r = rAppend(s.r, 2, cc)
+	}
+	return ss
+}
+
+type commClause struct{ commCase, stmtList Renderer }
+
+func (c commClause) Render() []byte {
+	return append(append(c.commCase.Render(), `:`...), c.stmtList.Render()...)
+}
+
 func CompositeLit(ts [][]*Token) [][]*Token {
 	ts = fromState(LiteralType(toState(ts)))
 	return LiteralValue(ts)
