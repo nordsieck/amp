@@ -267,6 +267,26 @@ func TestCommClause(t *testing.T) {
 	})
 }
 
+func TestCommClauseState(t *testing.T) {
+	resultState(t, CommClauseState, map[string][]StateOutput{
+		`default:`: {{[]string{``, `default:`}, []*Token{}}},
+		`default:a()`: {
+			{[]string{``, `default:`}, []*Token{ret, rparen, lparen, a}},
+			{[]string{``, `default:a`}, []*Token{ret, rparen, lparen}},
+			min(`default:a()`),
+			{[]string{``, `default:a();`}, []*Token{}}},
+		`case b<-a:b();c();`: {
+			{[]string{``, `case b<-a:`}, []*Token{semi, rparen, lparen, c, semi, rparen, lparen, b}},
+			{[]string{``, `case b<-a:b`}, []*Token{semi, rparen, lparen, c, semi, rparen, lparen}},
+			{[]string{``, `case b<-a:b()`}, []*Token{semi, rparen, lparen, c, semi}},
+			{[]string{``, `case b<-a:b();`}, []*Token{semi, rparen, lparen, c}},
+			{[]string{``, `case b<-a:b();c`}, []*Token{semi, rparen, lparen}},
+			{[]string{``, `case b<-a:b();c()`}, []*Token{semi}},
+			{[]string{``, `case b<-a:b();c();`}, []*Token{}},
+		},
+	})
+}
+
 func TestConstDecl(t *testing.T) {
 	remaining(t, ConstDecl, Tmap{
 		`const a = 1`:                         {{ret}},
