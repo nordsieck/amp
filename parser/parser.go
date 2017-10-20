@@ -1039,6 +1039,24 @@ func ForClause(ts [][]*Token) [][]*Token {
 	return append(ts, SimpleStmt(ts)...)
 }
 
+type forClause struct{ init, cond, post Renderer }
+
+func (f forClause) Render() []byte {
+	var ret []byte
+	if f.init != nil {
+		ret = append(ret, f.init.Render()...)
+	}
+	ret = append(ret, `;`...)
+	if f.cond != nil {
+		ret = append(ret, f.cond.Render()...)
+	}
+	ret = append(ret, `;`...)
+	if f.post != nil {
+		ret = append(ret, f.post.Render()...)
+	}
+	return ret
+}
+
 func ForStmt(ts [][]*Token) [][]*Token {
 	ts = tokenReader(ts, token.FOR)
 	ts = append(append(ts, Expression(ts)...), append(ForClause(ts), RangeClause(ts)...)...)
