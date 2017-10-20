@@ -1177,6 +1177,14 @@ func TestRecvStmt(t *testing.T) {
 	})
 }
 
+func TestRecvStmtState(t *testing.T) {
+	resultState(t, RecvStmtState, map[string][]StateOutput{
+		`<-a`:      {min(`<-a`)},
+		`a,b=<-c`:  {min(`a,b=<-c`), {[]string{``, `a`}, []*Token{ret, c, arrow, assign, b, comma}}},
+		`a,b:=<-c`: {min(`a,b:=<-c`), {[]string{``, `a`}, []*Token{ret, c, arrow, define, b, comma}}},
+	})
+}
+
 func TestRelOp(t *testing.T) {
 	resultState(t, RelOp, map[string][]StateOutput{
 		`==`: {{[]string{``, `==`}, []*Token{}}},
