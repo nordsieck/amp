@@ -2491,6 +2491,8 @@ func SimpleStmtState(ss []State) []State {
 }
 
 // TODO: clean up
+// CURRENT: It seems like the problem is that the Empty Statement code is inserting
+// an extra e{} into everything that gets parsed.  Maybe?
 func NewSimpleStmtState(ss []State) []State {
 	return append(nonEmptySimpleStmtState(ss), NewEmptyStmtState(ss)...)
 }
@@ -3088,9 +3090,12 @@ func TypeSwitchStmt(ts [][]*Token) [][]*Token {
 // "switch" [ SimpleStmt ";" ] TypeSwitchGuard "{" [ TypeCaseClause { ";" TypeCaseClause } [ ";" ]] "}"
 func TypeSwitchStmtState(ss []State) []State {
 	ss = tokenParserState(ss, token.SWITCH)
-	simple := SimpleStmtState(ss)
+	simple := NewSimpleStmtState(ss)
 	simple = tokenReaderState(simple, token.SEMICOLON)
 	for i, s := range simple {
+
+		fmt.Println("simple")
+
 		var tss typeSwitchStmt
 		if tok, ok := s.r[len(s.r)-1].(*Token); ok && tok.tok == token.SWITCH {
 			tss.stmt = e{}
