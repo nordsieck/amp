@@ -1161,6 +1161,14 @@ func TestRangeClause(t *testing.T) {
 	})
 }
 
+func TestRangeClauseState(t *testing.T) {
+	resultState(t, RangeClauseState, map[string][]StateOutput{
+		`range a`:           {min(`range a`)},
+		`a[0],a[1]=range b`: {min(`a[0],a[1]=range b`)},
+		`k,v:=range a`:      {min(`k,v:=range a`)},
+	})
+}
+
 func TestRAppend(t *testing.T) {
 	first := []Renderer{one, two, a, b, c, d}
 	second := rAppend(first, 2, _int)

@@ -2076,6 +2076,52 @@ func RangeClause(ts [][]*Token) [][]*Token {
 	return Expression(ts)
 }
 
+func RangeClauseState(ss []State) []State {
+	expr := ExpressionListState(ss)
+	expr = tokenReaderState(expr, token.ASSIGN)
+	for i, e := range expr {
+		rc := rangeClause{e.r[len(e.r)-1], nil, true}
+		expr[i].r = rAppend(e.r, 1, rc)
+	}
+
+	ids := IdentifierList(ss)
+	ids = tokenReaderState(ids, token.DEFINE)
+	for i, id := range ids {
+		rc := rangeClause{id.r[len(id.r)-1], nil, false}
+		ids[i].r = rAppend(id.r, 1, rc)
+	}
+	for i, s := range ss {
+		ss[i].r = rAppend(s.r, 0, rangeClause{})
+	}
+	ss = append(append(ss, expr...), ids...)
+	ss = tokenReaderState(ss, token.RANGE)
+	ss = ExpressionState(ss)
+	for i, s := range ss {
+		rc := s.r[len(s.r)-2].(rangeClause)
+		rc.expr = s.r[len(s.r)-1]
+		ss[i].r = rAppend(s.r, 2, rc)
+	}
+	return ss
+}
+
+type rangeClause struct {
+	list, expr Renderer
+	assign     bool
+}
+
+func (r rangeClause) Render() []byte {
+	var ret []byte
+	if r.list != nil {
+		if r.assign {
+			ret = append(r.list.Render(), `=`...)
+		} else {
+			ret = append(r.list.Render(), `:=`...)
+		}
+	}
+	ret = append(ret, `range `...)
+	return append(ret, r.expr.Render()...)
+}
+
 func ReceiverType(ts [][]*Token) [][]*Token {
 	ptr := tokenReader(ts, token.LPAREN)
 	ptr = tokenReader(ptr, token.MUL)
